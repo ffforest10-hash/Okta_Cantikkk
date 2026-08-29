@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Untuk Okta Cantikkk</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'rose-light': '#FFE4E6',
+                        'rose-medium': '#FDA4AF',
+                        'rose-dark': '#E11D48',
+                        'blush': '#FFF0F2'
+                    },
+                    fontFamily: {
+                        'script': ['"Dancing Script"', 'cursive'],
+                        'sans': ['Poppins', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            /* Background gradient pastel pink ke lilac */
+            background: linear-gradient(135deg, #fce7f3 0%, #fae8ff 50%, #fdf2f8 100%);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        /* Floating Hearts Style */
+        .heart {
+            position: fixed;
+            font-size: 1.5rem;
+            color: #fb7185;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 0;
+            animation: floatUp 4s ease-in forwards;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 0; transform: translateY(100vh) scale(0.5); }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { opacity: 0; transform: translateY(-10vh) scale(1.2); }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 30px rgba(244, 114, 182, 0.15);
+        }
+
+        /* Polaroid styling */
+        .polaroid {
+            background: white;
+            padding: 10px 10px 25px 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .polaroid:hover {
+            transform: scale(1.05) rotate(0deg) !important;
+            z-index: 10;
+        }
+
+        /* --- ANIMASI SMOOTH (REVEAL) --- */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+
+        /* --- CLOUD SHAPE UNTUK TRANSISI --- */
+        .css-cloud {
+            width: 350px;
+            height: 120px;
+            background: #fff;
+            border-radius: 100px;
+            position: absolute;
+            filter: drop-shadow(0 10px 20px rgba(244, 114, 182, 0.2));
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .css-cloud::before, .css-cloud::after {
+            content: '';
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+        }
+        .css-cloud::before {
+            width: 180px;
+            height: 180px;
+            top: -80px;
+            left: 50px;
+        }
+        .css-cloud::after {
+            width: 120px;
+            height: 120px;
+            top: -50px;
+            left: 180px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="font-sans text-gray-800 antialiased relative overflow-x-hidden">
+
+    <!-- Container Utama -->
+    <div class="relative z-10 w-full overflow-hidden">
+
+        <!-- SLIDE 1: Pembukaan -->
+        <div id="slide1" class="min-h-screen flex flex-col items-center justify-center text-center max-w-md w-full mx-auto p-4">
+            <div class="animate-float mb-8 reveal">
+                <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-xl shadow-pink-200/50 mx-auto">
+                    <span class="text-6xl">💌</span>
+                </div>
+            </div>
+            <h1 class="font-script text-4xl md:text-5xl text-rose-dark mb-4 reveal delay-100">Hai, Perempuan Paling Cantik...</h1>
+            <p class="text-gray-600 mb-10 text-lg reveal delay-200">Ada sesuatu yang spesial buat kamu hari ini.</p>
+            <button onclick="nextSlide('slide1', 'slide2')" class="group relative px-8 py-3 bg-gradient-to-r from-pink-400 to-rose-400 text-white rounded-full font-semibold text-lg shadow-lg hover:shadow-pink-400/50 hover:scale-105 transition-all duration-300 reveal delay-300">
+                Buka Suratnya
+                <span class="absolute right-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300">🌸</span>
+            </button>
+        </div>
+
+        <!-- SLIDE 2: Ucapan Manis -->
+        <div id="slide2" class="min-h-screen flex flex-col items-center justify-center max-w-lg w-full mx-auto p-4">
+            <div class="glass-card rounded-3xl p-8 md:p-10 w-full text-center relative overflow-hidden reveal">
+                <!-- Ornamen dekoratif -->
+                <div class="absolute -top-10 -left-10 text-8xl opacity-10 text-rose-300 reveal delay-200">🌸</div>
+                <div class="absolute -bottom-10 -right-10 text-8xl opacity-10 text-rose-300 reveal delay-300">✨</div>
+                
+                <h2 class="font-script text-5xl text-rose-dark mb-6 reveal delay-100">Selamat Ulang Tahun!</h2>
+                <h3 class="text-xl font-medium text-rose-500 mb-6 reveal delay-200">[Nama Panggilan Kesayangan] ❤️</h3>
+                
+                <div class="text-gray-700 leading-relaxed mb-8 space-y-4 reveal delay-300">
+                    <p>Di hari yang spesial ini, aku cuma mau bilang terima kasih. Terima kasih udah jadi versi terbaik dari diri kamu sendiri.</p>
+                    <p>Kehadiran kamu itu kayak warna pink di langit sore, selalu bikin tenang dan bahagia. Kamu pantes dapetin semua hal manis di dunia ini.</p>
+                </div>
+                
+                <button onclick="nextSlide('slide2', 'slide3')" class="px-8 py-3 bg-white text-rose-500 border border-rose-200 rounded-full font-semibold shadow-sm hover:bg-rose-50 hover:shadow-md transition-all duration-300 reveal delay-300">
+                    Lihat Memori Kita 📸
+                </button>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: Galeri / Memori -->
+        <div id="slide3" class="min-h-screen flex flex-col items-center justify-center max-w-4xl w-full mx-auto p-4">
+            <h2 class="font-script text-4xl text-rose-dark mb-10 text-center reveal">Momen-momen Cantikmu</h2>
+            
+            <div class="flex flex-wrap justify-center gap-6 md:gap-8 mb-10">
+                <!-- Foto 1 -->
+                <div class="polaroid w-48 md:w-56 -rotate-6 reveal delay-100">
+                    <div class="bg-gray-200 w-full h-48 md:h-56 mb-3 rounded flex items-center justify-center overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Bunga" class="w-full h-full object-cover">
+                    </div>
+                    <p class="font-script text-xl text-center text-gray-700">Cantik banget di sini!</p>
+                </div>
+                
+                <!-- Foto 2 -->
+                <div class="polaroid w-48 md:w-56 rotate-3 translate-y-4 reveal delay-200">
+                    <div class="bg-gray-200 w-full h-48 md:h-56 mb-3 rounded flex items-center justify-center overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1520627725997-6a2d9894e138?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Senyum" class="w-full h-full object-cover">
+                    </div>
+                    <p class="font-script text-xl text-center text-gray-700">Senyum favoritku ✨</p>
+                </div>
+                
+                <!-- Foto 3 -->
+                <div class="polaroid w-48 md:w-56 -rotate-3 reveal delay-300">
+                    <div class="bg-gray-200 w-full h-48 md:h-56 mb-3 rounded flex items-center justify-center overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Kencan" class="w-full h-full object-cover">
+                    </div>
+                    <p class="font-script text-xl text-center text-gray-700">Momen lucu kita 💖</p>
+                </div>
+            </div>
+
+            <button onclick="nextSlide('slide3', 'slide4')" class="px-8 py-3 bg-gradient-to-r from-pink-400 to-rose-400 text-white rounded-full font-semibold shadow-lg hover:shadow-pink-400/50 hover:scale-105 transition-all duration-300 reveal delay-200">
+                Terakhir nih... 🎂
+            </button>
+        </div>
+
+        <!-- SLIDE 4: Harapan & Kue -->
+        <div id="slide4" class="min-h-screen flex flex-col items-center justify-center max-w-lg w-full text-center mx-auto p-4">
+            
+            <div class="text-8xl mb-6 animate-pulse-slow reveal">
+                🎂
+            </div>
+            
+            <div class="glass-card rounded-3xl p-8 mb-8 w-full reveal delay-100">
+                <h2 class="font-script text-4xl text-rose-dark mb-4">Make a Wish! ✨</h2>
+                <p class="text-gray-700 mb-4">
+                    Semoga di umur yang baru ini, kamu semakin bersinar, semakin bahagia, dan semua yang kamu semogakan bisa terwujud satu per satu.
+                </p>
+                <p class="font-semibold text-rose-500">I love you, always and forever. 🌸</p>
+            </div>
+
+            <button onclick="createConfetti()" class="px-8 py-3 bg-white text-rose-500 border border-rose-300 rounded-full font-semibold shadow-md hover:bg-rose-50 transition-all duration-300 flex items-center gap-2 reveal delay-200">
+                <span>Klik untuk keajaiban</span> ✨
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Script Interaktif -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const observerOptions = {
+                threshold: 0.1, // Elemen akan muncul saat 10% bagiannya masuk layar
+                rootMargin: "0px 0px -50px 0px"
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.reveal').forEach(el => {
+                observer.observe(el);
+            });
+        });
+
+        function runCloudTransition(callback) {
+            // Buat container awan
+            const overlay = document.createElement('div');
+            overlay.className = 'fixed inset-0 z-50 pointer-events-none overflow-hidden';
+            
+            // Buat beberapa awan
+            const cloudCount = window.innerWidth < 768 ? 4 : 7; 
+            const clouds = [];
+
+            for(let i = 0; i < cloudCount; i++) {
+                const cloud = document.createElement('div');
+                cloud.className = 'css-cloud';
+                
+                // Ukuran acak
+                const scale = Math.random() * 0.8 + 0.5;
+                cloud.style.transform = `scale(${scale})`;
+                
+                // Posisi awal di luar layar (kiri atau kanan)
+                const startLeft = i % 2 === 0 ? -500 : window.innerWidth + 200;
+                cloud.style.left = startLeft + 'px';
+                
+                // Posisi vertikal menyebar
+                cloud.style.top = (Math.random() * 80) + 'vh';
+                
+                overlay.appendChild(cloud);
+                clouds.push({ el: cloud, start: startLeft });
+            }
+            
+            document.body.appendChild(overlay);
+
+            // 1. Animasikan awan masuk ke tengah menutupi layar
+            setTimeout(() => {
+                clouds.forEach((cloud) => {
+                    // Arahkan ke tengah layar dan besarkan ukurannya
+                    cloud.el.style.left = (window.innerWidth / 2 - 175 + (Math.random() * 200 - 100)) + 'px'; 
+                    cloud.el.style.transform = `scale(${Math.random() * 2 + 1.5})`; 
+                });
+            }, 50);
+
+            // 2. Jalankan perpindahan halaman (scroll) saat layar sedang tertutup awan
+            setTimeout(() => {
+                callback();
+            }, 600); // Tunggu 600ms sampai awan menutupi tengah layar
+
+            // 3. Animasikan awan keluar dari layar
+            setTimeout(() => {
+                clouds.forEach((cloud) => {
+                    // Teruskan perjalanan awan ke arah berlawanan
+                    const endLeft = cloud.start < 0 ? window.innerWidth + 200 : -500;
+                    cloud.el.style.left = endLeft + 'px';
+                    cloud.el.style.transform = `scale(${Math.random() * 0.8 + 0.5})`; // Mengecil lagi
+                });
+            }, 1000);
+
+            // 4. Bersihkan elemen dari HTML setelah animasi selesai
+            setTimeout(() => {
+                overlay.remove();
+            }, 2000);
+        }
+
+        function nextSlide(currentId, nextId) {
+            runCloudTransition(() => {
+                const next = document.getElementById(nextId);
+                
+                // Scroll mulus ke elemen tujuan
+                next.scrollIntoView({ behavior: 'smooth' });
+
+                // Tambahkan efek hati bermunculan saat pindah slide
+                burstHearts();
+            });
+        }
+
+        function createFloatingHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            
+            // Emoji random: hati, bunga, pita
+            const emojis = ['💖', '🌸', '✨', '💕', '🌷'];
+            heart.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
+            
+            // Posisi X acak
+            heart.style.left = Math.random() * 100 + 'vw';
+            
+            // Durasi animasi acak (antara 3 - 6 detik)
+            const duration = Math.random() * 3 + 3;
+            heart.style.animationDuration = duration + 's';
+            
+            document.body.appendChild(heart);
+            
+            // Hapus elemen setelah animasi selesai
+            setTimeout(() => {
+                heart.remove();
+            }, duration * 1000);
+        }
+
+        // Jalankan background efek secara berkala
+        setInterval(createFloatingHeart, 800);
+
+        // Fungsi letupan hati saat tombol diklik
+        function burstHearts() {
+            for(let i=0; i<15; i++) {
+                setTimeout(createFloatingHeart, i * 100);
+            }
+        }
+
+        // Efek "Confetti" sederhana untuk slide terakhir
+        function createConfetti() {
+            burstHearts();
+            const btn = document.querySelector('button[onclick="createConfetti()"]');
+            btn.innerHTML = "Yeayyy! Selamat Ulang Tahun! 🎉";
+            btn.classList.add('bg-rose-500', 'text-white');
+            btn.classList.remove('bg-white', 'text-rose-500');
+            
+            // Buat confetti tambahan dengan kecepatan tinggi
+            for(let i=0; i<30; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('heart');
+                    const confettis = ['🎊', '🎉', '🎈', '💖'];
+                    confetti.innerHTML = confettis[Math.floor(Math.random() * confettis.length)];
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 4000);
+                }, i * 50);
+            }
+        }
+    </script>
+</body>
+</html>
