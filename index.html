@@ -38,8 +38,14 @@
     </script>
     
     <style>
+        /* Sembunyikan scrollbar untuk efek film yang imersif */
+        ::-webkit-scrollbar {
+            display: none;
+        }
         body {
-            /* Background gradient pastel pink ke lilac memanjang kebawah */
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+            /* Background tetap */
             background: linear-gradient(180deg, #fce7f3 0%, #fae8ff 35%, #fdf2f8 70%, #fff0f6 100%);
             overflow-x: hidden;
             background-attachment: fixed;
@@ -52,8 +58,9 @@
             color: #fb7185;
             opacity: 0;
             pointer-events: none;
-            z-index: 50;
-            animation: floatUp 4s ease-in forwards;
+            /* Hearts berada di belakang awan (z-10) */
+            z-index: 10;
+            animation: floatUp 5s ease-in forwards;
         }
 
         @keyframes floatUp {
@@ -65,9 +72,9 @@
 
         /* Glassmorphism Elegant */
         .glass-card {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
             box-shadow: 0 15px 35px rgba(244, 114, 182, 0.15);
         }
 
@@ -76,26 +83,26 @@
             background: white;
             padding: 10px 10px 25px 10px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
         }
         .polaroid:hover {
             transform: scale(1.08) rotate(0deg) translateY(-10px) !important;
-            box-shadow: 0 20px 40px rgba(244, 114, 182, 0.2);
-            z-index: 10;
+            box-shadow: 0 20px 40px rgba(244, 114, 182, 0.25);
+            z-index: 30;
         }
 
         /* --- ANIMASI REVEAL SUPER SMOOTH --- */
         .reveal {
             opacity: 0;
             transform: translateY(60px) scale(0.95);
-            /* Kurva transisi super lambat dan elegan */
-            transition: all 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+            /* Kurva transisi super lambat layaknya mengambang */
+            transition: all 1.8s cubic-bezier(0.22, 1, 0.36, 1);
         }
         .reveal.active {
             opacity: 1;
             transform: translateY(0) scale(1);
         }
-        /* Jeda berjenjang untuk efek storytelling */
+        /* Jeda berjenjang */
         .delay-100 { transition-delay: 150ms; }
         .delay-200 { transition-delay: 350ms; }
         .delay-300 { transition-delay: 550ms; }
@@ -104,45 +111,63 @@
 </head>
 <body class="font-sans text-gray-800 antialiased relative">
 
-    <!-- Container Utama -->
-    <div class="relative w-full">
+    <!-- LAPISAN AWAN ATAS (Fixed) -->
+    <div class="fixed top-0 left-0 w-full h-[20vh] z-40 pointer-events-none transform rotate-180">
+        <svg viewBox="0 0 1440 320" class="w-full h-full" preserveAspectRatio="none">
+            <defs>
+                <filter id="cloudBlurTop1" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="35" />
+                </filter>
+                <filter id="cloudBlurTop2" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="15" />
+                </filter>
+            </defs>
+            <path fill="rgba(255,255,255,0.4)" filter="url(#cloudBlurTop1)" d="M0,320 L0,160 Q150,-20 350,100 T750,150 T1150,50 L1440,160 L1440,320 Z"></path>
+            <path fill="rgba(253,242,248,0.7)" filter="url(#cloudBlurTop2)" d="M0,320 L0,200 Q200,60 450,160 T950,180 T1440,120 L1440,320 Z"></path>
+            <path fill="rgba(255,255,255,0.95)" filter="url(#cloudBlurTop2)" d="M0,320 L0,250 Q250,120 600,230 T1200,170 L1440,240 L1440,320 Z"></path>
+        </svg>
+    </div>
+
+    <!-- LAPISAN AWAN BAWAH (Fixed) -->
+    <div class="fixed bottom-0 left-0 w-full h-[25vh] md:h-[30vh] z-40 pointer-events-none">
+        <svg viewBox="0 0 1440 320" class="w-full h-full" preserveAspectRatio="none">
+            <defs>
+                <filter id="cloudBlurBot1" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="40" />
+                </filter>
+                <filter id="cloudBlurBot2" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="20" />
+                </filter>
+            </defs>
+            <path fill="rgba(255,255,255,0.3)" filter="url(#cloudBlurBot1)" d="M0,320 L0,120 Q200,-50 450,80 T950,140 T1440,60 L1440,320 Z"></path>
+            <path fill="rgba(250,232,255,0.6)" filter="url(#cloudBlurBot2)" d="M0,320 L0,180 Q250,40 550,150 T1100,170 T1440,100 L1440,320 Z"></path>
+            <path fill="rgba(255,255,255,0.95)" filter="url(#cloudBlurBot2)" d="M0,320 L0,230 Q300,100 700,220 T1300,160 L1440,210 L1440,320 Z"></path>
+        </svg>
+    </div>
+
+    <!-- Container Utama Konten (z-20 agar di bawah awan yang z-40) -->
+    <div class="relative w-full z-20">
 
         <!-- SLIDE 1: Pembukaan -->
-        <section id="slide1" class="relative min-h-screen flex flex-col items-center justify-center text-center w-full z-10 px-4">
+        <section id="slide1" class="min-h-screen flex flex-col items-center justify-center text-center w-full px-4 pt-10 pb-20">
             <div class="max-w-md w-full mx-auto">
                 <div class="animate-float mb-8 reveal">
                     <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-2xl shadow-pink-200/60 mx-auto border border-pink-50">
                         <span class="text-6xl drop-shadow-md">💌</span>
                     </div>
                 </div>
-                <h1 class="font-script text-5xl md:text-6xl text-rose-dark mb-4 reveal delay-100 tracking-wide">Hai, Cantik...</h1>
+                <h1 class="font-script text-5xl md:text-6xl text-rose-dark mb-4 reveal delay-100 tracking-wide drop-shadow-sm">Hai, Cantik...</h1>
                 <p class="text-gray-600 mb-12 text-lg md:text-xl reveal delay-200 font-light">Ada sesuatu yang spesial buat kamu hari ini.</p>
-                <button onclick="customSmoothScroll('slide2')" class="group relative px-8 py-4 bg-gradient-to-r from-pink-400 to-rose-400 text-white rounded-full font-semibold text-lg shadow-xl hover:shadow-pink-400/60 hover:scale-105 transition-all duration-500 reveal delay-300 overflow-hidden">
+                <button onclick="customSmoothScroll('slide2')" class="group relative px-8 py-4 bg-gradient-to-r from-pink-400 to-rose-400 text-white rounded-full font-semibold text-lg shadow-xl hover:shadow-pink-400/60 hover:scale-105 transition-all duration-500 reveal delay-300 overflow-hidden cursor-pointer">
                     <span class="relative z-10">Buka Suratnya</span>
                     <span class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out z-0"></span>
                     <span class="absolute right-4 opacity-0 group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-300 z-10">🌸</span>
                 </button>
             </div>
-
-            <!-- AWAN PEMBATAS 1 (Bawah Slide 1) -->
-            <div class="absolute -bottom-[10%] md:-bottom-[15%] left-0 w-full z-30 pointer-events-none transform translate-y-1/2">
-                <svg viewBox="0 0 1200 200" class="w-full h-[180px] md:h-[280px]" preserveAspectRatio="none">
-                    <defs>
-                        <!-- Filter untuk efek awan asli yang sangat lembut -->
-                        <filter id="realCloud1" x="-20%" y="-20%" width="140%" height="140%">
-                            <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
-                            <feComponentTransfer in="blur" result="glow"><feFuncA type="linear" slope="1.5" /></feComponentTransfer>
-                            <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
-                        </filter>
-                    </defs>
-                    <path fill="rgba(255, 255, 255, 0.7)" filter="url(#realCloud1)" d="M0,100 Q150,0 300,60 T600,20 T900,50 T1200,10 L1200,200 Q1050,150 900,180 T600,140 T300,170 T0,120 Z"></path>
-                    <path fill="#ffffff" filter="url(#realCloud1)" d="M0,130 Q120,40 250,90 T550,50 T850,80 T1200,40 L1200,200 Q1080,180 950,210 T650,170 T350,200 T0,150 Z"></path>
-                </svg>
-            </div>
         </section>
 
         <!-- SLIDE 2: Ucapan Manis -->
-        <section id="slide2" class="relative min-h-screen flex flex-col items-center justify-center w-full z-10 px-4 py-20">
+        <section id="slide2" class="min-h-screen flex flex-col items-center justify-center w-full px-4 py-24">
             <div class="glass-card rounded-[2.5rem] p-10 md:p-12 max-w-xl w-full text-center relative overflow-hidden reveal">
                 <!-- Ornamen dekoratif -->
                 <div class="absolute -top-12 -left-12 text-9xl opacity-10 text-rose-400 reveal delay-300">🌸</div>
@@ -151,35 +176,20 @@
                 <h2 class="font-script text-5xl md:text-6xl text-rose-dark mb-4 reveal delay-100">Selamat Ulang Tahun!</h2>
                 <h3 class="text-2xl font-medium text-rose-500 mb-8 reveal delay-200">[Nama Panggilan] ❤️</h3>
                 
-                <div class="text-gray-700 leading-relaxed mb-10 space-y-5 reveal delay-300 font-light text-lg">
+                <div class="text-gray-700 leading-relaxed mb-10 space-y-5 reveal delay-300 font-light text-lg relative z-10">
                     <p>Di hari yang sangat spesial ini, aku cuma mau bilang terima kasih. Terima kasih udah selalu jadi versi terbaik dari diri kamu.</p>
                     <p>Kehadiran kamu itu kayak warna senja yang lembut, selalu bikin tenang dan bahagia. Kamu pantas mendapatkan semua hal manis yang ada di dunia ini.</p>
                 </div>
                 
-                <button onclick="customSmoothScroll('slide3')" class="px-8 py-3 bg-white text-rose-500 border border-rose-200 rounded-full font-semibold shadow hover:bg-rose-50 hover:shadow-lg hover:-translate-y-1 transition-all duration-400 reveal delay-400">
+                <button onclick="customSmoothScroll('slide3')" class="relative z-10 px-8 py-3 bg-white text-rose-500 border border-rose-200 rounded-full font-semibold shadow hover:bg-rose-50 hover:shadow-lg hover:-translate-y-1 transition-all duration-400 reveal delay-400 cursor-pointer">
                     Lihat Memori Kita 📸
                 </button>
-            </div>
-
-            <!-- AWAN PEMBATAS 2 (Bawah Slide 2) -->
-            <div class="absolute -bottom-[10%] md:-bottom-[15%] left-0 w-full z-30 pointer-events-none transform translate-y-1/2">
-                <svg viewBox="0 0 1200 200" class="w-full h-[180px] md:h-[280px]" preserveAspectRatio="none">
-                    <defs>
-                        <filter id="realCloud2" x="-20%" y="-20%" width="140%" height="140%">
-                            <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="blur" />
-                            <feComponentTransfer in="blur" result="glow"><feFuncA type="linear" slope="1.6" /></feComponentTransfer>
-                            <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
-                        </filter>
-                    </defs>
-                    <path fill="rgba(255, 255, 255, 0.8)" filter="url(#realCloud2)" d="M0,80 Q200,10 400,90 T800,40 T1200,70 L1200,200 Q1000,130 800,180 T400,150 T0,110 Z"></path>
-                    <path fill="#ffffff" filter="url(#realCloud2)" d="M0,110 Q180,40 380,120 T780,70 T1200,100 L1200,200 Q1020,160 820,210 T420,180 T0,140 Z"></path>
-                </svg>
             </div>
         </section>
 
         <!-- SLIDE 3: Galeri / Memori -->
-        <section id="slide3" class="relative min-h-screen flex flex-col items-center justify-center w-full z-10 px-4 py-20">
-            <h2 class="font-script text-5xl text-rose-dark mb-16 text-center reveal">Momen-momen Cantikmu</h2>
+        <section id="slide3" class="min-h-screen flex flex-col items-center justify-center w-full px-4 py-24">
+            <h2 class="font-script text-5xl md:text-6xl text-rose-dark mb-16 text-center reveal drop-shadow-sm">Momen Cantikmu</h2>
             
             <div class="flex flex-wrap justify-center gap-8 md:gap-12 mb-16 max-w-5xl">
                 <!-- Foto 1 -->
@@ -207,56 +217,41 @@
                 </div>
             </div>
 
-            <button onclick="customSmoothScroll('slide4')" class="px-10 py-4 bg-gradient-to-r from-pink-400 to-rose-400 text-white rounded-full font-semibold shadow-xl hover:shadow-pink-400/50 hover:scale-105 transition-all duration-500 reveal delay-400 text-lg">
+            <button onclick="customSmoothScroll('slide4')" class="px-10 py-4 bg-gradient-to-r from-pink-400 to-rose-400 text-white rounded-full font-semibold shadow-xl hover:shadow-pink-400/50 hover:scale-105 transition-all duration-500 reveal delay-400 text-lg cursor-pointer">
                 Puncak Acaranya nih... 🎂
             </button>
-
-            <!-- AWAN PEMBATAS 3 (Bawah Slide 3) -->
-            <div class="absolute -bottom-[10%] md:-bottom-[15%] left-0 w-full z-30 pointer-events-none transform translate-y-1/2">
-                <svg viewBox="0 0 1200 200" class="w-full h-[180px] md:h-[280px]" preserveAspectRatio="none">
-                    <defs>
-                        <filter id="realCloud3" x="-20%" y="-20%" width="140%" height="140%">
-                            <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
-                            <feComponentTransfer in="blur" result="glow"><feFuncA type="linear" slope="1.4" /></feComponentTransfer>
-                            <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
-                        </filter>
-                    </defs>
-                    <path fill="rgba(255, 255, 255, 0.9)" filter="url(#realCloud3)" d="M0,90 Q150,-10 350,60 T750,20 T1050,70 T1200,30 L1200,200 Q1050,140 750,190 T350,130 T0,160 Z"></path>
-                    <path fill="#ffffff" filter="url(#realCloud3)" d="M0,120 Q130,20 330,90 T730,50 T1030,100 T1200,60 L1200,200 Q1070,170 770,220 T370,160 T0,190 Z"></path>
-                </svg>
-            </div>
         </section>
 
         <!-- SLIDE 4: Harapan & Kue -->
-        <section id="slide4" class="relative min-h-screen flex flex-col items-center justify-center w-full text-center z-10 px-4 py-20 pb-32">
+        <section id="slide4" class="min-h-screen flex flex-col items-center justify-center w-full text-center px-4 py-24">
             
             <div class="text-9xl mb-8 animate-pulse-slow reveal">
                 🎂
             </div>
             
-            <div class="glass-card rounded-3xl p-10 md:p-12 mb-10 max-w-xl w-full reveal delay-100">
-                <h2 class="font-script text-5xl text-rose-dark mb-6">Make a Wish! ✨</h2>
+            <div class="glass-card rounded-3xl p-10 md:p-12 mb-10 max-w-xl w-full reveal delay-100 relative z-10">
+                <h2 class="font-script text-5xl md:text-6xl text-rose-dark mb-6">Make a Wish! ✨</h2>
                 <p class="text-gray-700 mb-6 text-lg font-light leading-relaxed">
                     Semoga di umur yang baru ini, kamu semakin bersinar, semakin bahagia, dan semua yang kamu semogakan bisa terwujud satu per satu di waktu yang paling tepat.
                 </p>
-                <p class="font-medium text-rose-500 text-xl font-script tracking-wide">I love you, always and forever. 🌸</p>
+                <p class="font-medium text-rose-500 text-2xl font-script tracking-wide">I love you, always and forever. 🌸</p>
             </div>
 
-            <button onclick="createConfetti(this)" class="px-10 py-4 bg-white text-rose-500 border border-rose-300 rounded-full font-semibold shadow-lg hover:bg-rose-50 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 reveal delay-200 text-lg w-auto">
+            <button onclick="createConfetti(this)" class="relative z-10 px-10 py-4 bg-white text-rose-500 border border-rose-300 rounded-full font-semibold shadow-lg hover:bg-rose-50 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 reveal delay-200 text-lg w-auto cursor-pointer">
                 <span>Klik untuk keajaiban</span> ✨
             </button>
         </section>
 
     </div>
 
-    <!-- Script Interaktif -->
     <script>
         // --- INTERSECTION OBSERVER ---
-        // Membuat elemen muncul perlahan (reveal) saat di-scroll
+        // Membuat elemen muncul perlahan menembus awan
         document.addEventListener("DOMContentLoaded", () => {
             const observerOptions = {
-                threshold: 0.15, // Mulai animasi ketika 15% elemen terlihat
-                rootMargin: "0px 0px -50px 0px"
+                threshold: 0.15,
+                // Margin diperbesar agar animasi terpicu saat konten masih berada di balik awan
+                rootMargin: "0px 0px -100px 0px"
             };
 
             const observer = new IntersectionObserver((entries) => {
@@ -272,24 +267,25 @@
             });
         });
 
-        // --- CUSTOM SUPER SMOOTH SCROLL ---
-        // Berjalan turun menembus awan dengan sangat lambat dan elegan
+        // --- CUSTOM SUPER SMOOTH SCROLL (DREAMY FALL) ---
+        // Sensasi jatuh menembus awan dengan sangat lambat
         function customSmoothScroll(targetId) {
             const target = document.getElementById(targetId);
+            // Penyesuaian posisi agar jatuh pas di tengah-tengah antar awan atas dan bawah
             const targetPosition = target.getBoundingClientRect().top + window.scrollY;
             const startPosition = window.scrollY;
             const distance = targetPosition - startPosition;
             let startTime = null;
             
-            // Durasi animasi scroll di set 1.8 detik (1800ms) agar terasa mengambang
-            const duration = 1800; 
+            // Durasi di-set menjadi 2.2 Detik! Sangat lambat dan dreamy.
+            const duration = 2200; 
 
             function animation(currentTime) {
                 if (startTime === null) startTime = currentTime;
                 const timeElapsed = currentTime - startTime;
                 const progress = Math.min(timeElapsed / duration, 1);
                 
-                // EaseInOutQuint formula: Super smooth di awal dan akhir
+                // EaseInOutQuint formula: Super halus di tarikan awal dan pendaratan akhir
                 const ease = progress < 0.5 
                     ? 16 * Math.pow(progress, 5) 
                     : 1 - Math.pow(-2 * progress + 2, 5) / 2;
@@ -299,15 +295,15 @@
                 if (timeElapsed < duration) {
                     requestAnimationFrame(animation);
                 } else {
-                    // Setelah sampai bawah, munculkan hati
-                    burstHearts();
+                    // Memicu letupan hati tipis saat mendarat
+                    burstHearts(5);
                 }
             }
 
             requestAnimationFrame(animation);
         }
 
-        // --- EFEK HATI MELAYANG ---
+        // --- EFEK HATI MELAYANG DI BELAKANG AWAN ---
         function createFloatingHeart() {
             const heart = document.createElement('div');
             heart.classList.add('heart');
@@ -317,10 +313,10 @@
             
             heart.style.left = Math.random() * 100 + 'vw';
             
-            const duration = Math.random() * 3 + 4; // Lebih lambat: 4-7 detik
+            // Mengambang dari balik awan bawah menembus awan atas
+            const duration = Math.random() * 4 + 4; 
             heart.style.animationDuration = duration + 's';
             
-            // Ukuran acak untuk variasi
             const scale = Math.random() * 0.5 + 0.8;
             heart.style.transform = `scale(${scale})`;
             
@@ -331,17 +327,17 @@
             }, duration * 1000);
         }
 
-        setInterval(createFloatingHeart, 1200);
+        setInterval(createFloatingHeart, 1500);
 
-        function burstHearts() {
-            for(let i=0; i<15; i++) {
+        function burstHearts(amount = 15) {
+            for(let i=0; i<amount; i++) {
                 setTimeout(createFloatingHeart, i * 150);
             }
         }
 
         // --- EFEK CONFETTI PUNCAK ---
         function createConfetti(btn) {
-            burstHearts();
+            burstHearts(20);
             btn.innerHTML = "Yeayyy! Selamat Ulang Tahun! 🎉";
             btn.classList.add('bg-rose-500', 'text-white');
             btn.classList.remove('bg-white', 'text-rose-500');
@@ -350,6 +346,8 @@
                 setTimeout(() => {
                     const confetti = document.createElement('div');
                     confetti.classList.add('heart');
+                    // Paksa z-index tinggi khusus untuk confetti perayaan
+                    confetti.style.zIndex = "50"; 
                     const confettis = ['🎊', '🎉', '🎈', '💖', '✨'];
                     confetti.innerHTML = confettis[Math.floor(Math.random() * confettis.length)];
                     confetti.style.left = Math.random() * 100 + 'vw';
