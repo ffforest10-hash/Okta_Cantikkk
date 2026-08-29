@@ -107,6 +107,48 @@
         .delay-200 { transition-delay: 350ms; }
         .delay-300 { transition-delay: 550ms; }
         .delay-400 { transition-delay: 750ms; }
+
+        /* --- ANIMASI CUTE PER SLIDE --- */
+        /* Slide 1: Orbiting hearts */
+        .orbit-container { position: absolute; width: 140%; height: 140%; top: -20%; left: -20%; animation: spin 10s linear infinite; }
+        .orbit-heart { position: absolute; animation: counter-spin 10s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes counter-spin { 100% { transform: rotate(-360deg); } }
+
+        /* Slide 2: Peeking Element & Fluttering */
+        .peeking-cute { position: absolute; z-index: -1; animation: peek 4s ease-in-out infinite; }
+        @keyframes peek {
+            0%, 100% { transform: translateY(25px) rotate(10deg); }
+            50% { transform: translateY(-15px) rotate(-10deg); }
+        }
+        .flutter { display: inline-block; animation: flutterFly 3s ease-in-out infinite; }
+        @keyframes flutterFly {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(15deg); }
+        }
+
+        /* Slide 3: Swinging Polaroids & Badges */
+        @keyframes swing {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+        .swing-1 { animation: swing 5s ease-in-out infinite; transform-origin: top center; }
+        .swing-2 { animation: swing 6s ease-in-out infinite reverse; transform-origin: top center; }
+        .swing-3 { animation: swing 5.5s ease-in-out infinite 1s; transform-origin: top center; }
+        .polaroid:hover { animation-play-state: paused !important; }
+        
+        .cute-badge { position: absolute; top: -15px; right: -15px; font-size: 2.2rem; animation: pulse-badge 2s infinite; z-index: 20; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); }
+        @keyframes pulse-badge {
+            0%, 100% { transform: scale(1) rotate(15deg); }
+            50% { transform: scale(1.15) rotate(-15deg); }
+        }
+
+        /* Slide 4: Bouncing Elements */
+        .bouncing-element { position: absolute; animation: bounce-cute 2.5s infinite ease-in-out; }
+        @keyframes bounce-cute {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-25px) scale(1.1); }
+        }
     </style>
 </head>
 <body class="font-sans text-gray-800 antialiased relative">
@@ -151,8 +193,15 @@
         <!-- SLIDE 1: Pembukaan -->
         <section id="slide1" class="min-h-screen flex flex-col items-center justify-center text-center w-full px-4 pt-10 pb-20">
             <div class="max-w-md w-full mx-auto">
-                <div class="animate-float mb-8 reveal">
-                    <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-2xl shadow-pink-200/60 mx-auto border border-pink-50">
+                <div class="animate-float mb-8 reveal relative inline-block">
+                    <!-- Animasi Orbit Lucu -->
+                    <div class="orbit-container pointer-events-none">
+                        <span class="orbit-heart text-3xl" style="top: 0; left: 50%; margin-left: -15px;">💖</span>
+                        <span class="orbit-heart text-2xl" style="bottom: 0; left: 50%; margin-left: -15px;">✨</span>
+                        <span class="orbit-heart text-3xl" style="top: 50%; left: 0; margin-top: -15px;">🌸</span>
+                        <span class="orbit-heart text-2xl" style="top: 50%; right: 0; margin-top: -15px;">🦋</span>
+                    </div>
+                    <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-2xl shadow-pink-200/60 mx-auto border border-pink-50 relative z-10">
                         <span class="text-6xl drop-shadow-md">💌</span>
                     </div>
                 </div>
@@ -168,32 +217,39 @@
 
         <!-- SLIDE 2: Ucapan Manis -->
         <section id="slide2" class="min-h-screen flex flex-col items-center justify-center w-full px-4 py-24">
-            <div class="glass-card rounded-[2.5rem] p-10 md:p-12 max-w-xl w-full text-center relative overflow-hidden reveal">
-                <!-- Ornamen dekoratif -->
-                <div class="absolute -top-12 -left-12 text-9xl opacity-10 text-rose-400 reveal delay-300">🌸</div>
-                <div class="absolute -bottom-10 -right-10 text-8xl opacity-10 text-rose-300 reveal delay-400">✨</div>
-                
-                <h2 class="font-script text-5xl md:text-6xl text-rose-dark mb-4 reveal delay-100">Selamat Ulang Tahun!</h2>
-                <h3 class="text-2xl font-medium text-rose-500 mb-8 reveal delay-200">[Nama Panggilan] ❤️</h3>
-                
-                <div class="text-gray-700 leading-relaxed mb-10 space-y-5 reveal delay-300 font-light text-lg relative z-10">
-                    <p>Di hari yang sangat spesial ini, aku cuma mau bilang terima kasih. Terima kasih udah selalu jadi versi terbaik dari diri kamu.</p>
-                    <p>Kehadiran kamu itu kayak warna senja yang lembut, selalu bikin tenang dan bahagia. Kamu pantas mendapatkan semua hal manis yang ada di dunia ini.</p>
+            <div class="relative max-w-xl w-full mt-10">
+                <!-- Karakter Lucu Mengintip dari balik kartu -->
+                <div class="peeking-cute text-6xl reveal delay-100" style="top: -40px; right: 20px;">🐱</div>
+                <div class="peeking-cute text-6xl reveal delay-300" style="bottom: -35px; left: 20px; animation-delay: -2s;">🧸</div>
+
+                <div class="glass-card rounded-[2.5rem] p-10 md:p-12 w-full text-center relative overflow-hidden reveal">
+                    <!-- Ornamen dekoratif -->
+                    <div class="absolute -top-12 -left-12 text-9xl opacity-10 text-rose-400 reveal delay-300">🌸</div>
+                    <div class="absolute -bottom-10 -right-10 text-8xl opacity-10 text-rose-300 reveal delay-400">✨</div>
+                    
+                    <h2 class="font-script text-5xl md:text-6xl text-rose-dark mb-4 reveal delay-100">Selamat Ulang Tahun! <span class="flutter inline-block text-4xl ml-2">🦋</span></h2>
+                    <h3 class="text-2xl font-medium text-rose-500 mb-8 reveal delay-200">[Nama Panggilan] <span class="flutter inline-block text-2xl" style="animation-delay:-1.5s;">💖</span></h3>
+                    
+                    <div class="text-gray-700 leading-relaxed mb-10 space-y-5 reveal delay-300 font-light text-lg relative z-10">
+                        <p>Di hari yang sangat spesial ini, aku cuma mau bilang terima kasih. Terima kasih udah selalu jadi versi terbaik dari diri kamu.</p>
+                        <p>Kehadiran kamu itu kayak warna senja yang lembut, selalu bikin tenang dan bahagia. Kamu pantas mendapatkan semua hal manis yang ada di dunia ini.</p>
+                    </div>
+                    
+                    <button onclick="customSmoothScroll('slide3')" class="relative z-10 px-8 py-3 bg-white text-rose-500 border border-rose-200 rounded-full font-semibold shadow hover:bg-rose-50 hover:shadow-lg hover:-translate-y-1 transition-all duration-400 reveal delay-400 cursor-pointer">
+                        Lihat Memori Kita 📸
+                    </button>
                 </div>
-                
-                <button onclick="customSmoothScroll('slide3')" class="relative z-10 px-8 py-3 bg-white text-rose-500 border border-rose-200 rounded-full font-semibold shadow hover:bg-rose-50 hover:shadow-lg hover:-translate-y-1 transition-all duration-400 reveal delay-400 cursor-pointer">
-                    Lihat Memori Kita 📸
-                </button>
             </div>
         </section>
 
         <!-- SLIDE 3: Galeri / Memori -->
         <section id="slide3" class="min-h-screen flex flex-col items-center justify-center w-full px-4 py-24">
-            <h2 class="font-script text-5xl md:text-6xl text-rose-dark mb-16 text-center reveal drop-shadow-sm">Momen Cantikmu</h2>
+            <h2 class="font-script text-5xl md:text-6xl text-rose-dark mb-16 text-center reveal drop-shadow-sm"><span class="flutter inline-block mr-3">✨</span>Momen Cantikmu<span class="flutter inline-block ml-3" style="animation-delay:-1s;">✨</span></h2>
             
             <div class="flex flex-wrap justify-center gap-8 md:gap-12 mb-16 max-w-5xl">
                 <!-- Foto 1 -->
-                <div class="polaroid w-52 md:w-64 -rotate-6 reveal delay-100">
+                <div class="polaroid w-52 md:w-64 swing-1 reveal delay-100 relative">
+                    <div class="cute-badge">🎀</div>
                     <div class="bg-rose-50 w-full h-52 md:h-64 mb-4 rounded flex items-center justify-center overflow-hidden">
                         <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Bunga" class="w-full h-full object-cover">
                     </div>
@@ -201,7 +257,8 @@
                 </div>
                 
                 <!-- Foto 2 -->
-                <div class="polaroid w-52 md:w-64 rotate-3 md:translate-y-8 reveal delay-200">
+                <div class="polaroid w-52 md:w-64 md:translate-y-8 swing-2 reveal delay-200 relative">
+                    <div class="cute-badge" style="animation-delay: -0.5s;">🌷</div>
                     <div class="bg-rose-50 w-full h-52 md:h-64 mb-4 rounded flex items-center justify-center overflow-hidden">
                         <img src="https://images.unsplash.com/photo-1520627725997-6a2d9894e138?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Senyum" class="w-full h-full object-cover">
                     </div>
@@ -209,7 +266,8 @@
                 </div>
                 
                 <!-- Foto 3 -->
-                <div class="polaroid w-52 md:w-64 -rotate-3 reveal delay-300">
+                <div class="polaroid w-52 md:w-64 swing-3 reveal delay-300 relative">
+                    <div class="cute-badge" style="animation-delay: -1s;">💕</div>
                     <div class="bg-rose-50 w-full h-52 md:h-64 mb-4 rounded flex items-center justify-center overflow-hidden">
                         <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80" alt="Kencan" class="w-full h-full object-cover">
                     </div>
@@ -225,8 +283,15 @@
         <!-- SLIDE 4: Harapan & Kue -->
         <section id="slide4" class="min-h-screen flex flex-col items-center justify-center w-full text-center px-4 py-24">
             
-            <div class="text-9xl mb-8 animate-pulse-slow reveal">
-                🎂
+            <div class="relative inline-block mb-8 reveal mt-10">
+                <!-- Ornamen Pesta Bouncing -->
+                <div class="bouncing-element text-5xl" style="top: -10px; left: -50px;">🎈</div>
+                <div class="bouncing-element text-5xl" style="top: 30px; right: -60px; animation-delay: -1s;">🎁</div>
+                <div class="bouncing-element text-4xl" style="bottom: 0px; left: -60px; animation-delay: -0.5s;">🎉</div>
+                
+                <div class="text-9xl animate-pulse-slow relative z-10">
+                    🎂
+                </div>
             </div>
             
             <div class="glass-card rounded-3xl p-10 md:p-12 mb-10 max-w-xl w-full reveal delay-100 relative z-10">
