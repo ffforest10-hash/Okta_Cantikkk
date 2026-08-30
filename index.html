@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Selamat Ulang Tahun Cantik!</title>
+    <title>Happy Birthday Okta Cantikkk!</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
@@ -20,16 +20,16 @@
                     animation: {
                         'float': 'float 7s ease-in-out infinite',
                         'float-fast': 'float 5s ease-in-out infinite',
-                        'pulse-slow': 'pulse 5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'swing': 'swing 6s ease-in-out infinite alternate',
-                        'heartbeat': 'heartbeat 2.5s ease-in-out infinite',
+                        'heartbeat': 'heartbeat 2s ease-in-out infinite',
                         'spin-slow': 'spin 15s linear infinite',
                     },
                     keyframes: {
-                        /* Semua animasi disetel menjadi melayang sangat halus (Premium Float) */
-                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-12px)' } },
+                        'float-fast': { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-8px)' } },
                         swing: { '0%': { transform: 'rotate(-2deg)' }, '100%': { transform: 'rotate(2deg)' } },
-                        heartbeat: { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.08)' } }
+                        heartbeat: { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.15)' } }
                     }
                 }
             }
@@ -79,7 +79,7 @@
         .glass-card { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 15px 45px rgba(251, 113, 133, 0.15); }
 
         /* ========================================= */
-        /* ANIMASI SURAT KELUAR & MENJADI BESAR      */
+        /* ANIMASI SURAT KELUAR & JADI HALAMAN BARU  */
         /* ========================================= */
         #circle-bg, #intro-texts { transition: all 0.9s cubic-bezier(0.4, 0, 0.2, 1); }
         .envelope-master { width: 320px; height: 200px; transform: translate(-50%, -50%) scale(0.38); transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -102,7 +102,19 @@
         .envelope-master.is-opening .env-flap-wrapper { transform: rotateX(180deg); z-index: 1; }
         .envelope-master.is-opening .env-flap-seal span { transform: rotateX(180deg); }
 
-        /* KERTAS SURAT (Animasi 4 Tahap) */
+        /* MENGECILKAN DAN MENGHILANGKAN AMPLOP */
+        @keyframes envelopeVanishBase { to { opacity: 0; transform: scale(0.5); visibility: hidden; } }
+        @keyframes envelopeVanishFlap { to { opacity: 0; transform: rotateX(180deg) scale(0.5); visibility: hidden; } }
+        
+        .envelope-master.is-opening .env-back,
+        .envelope-master.is-opening .env-front {
+            animation: envelopeVanishBase 0.8s ease forwards 2.5s;
+        }
+        .envelope-master.is-opening .env-flap-wrapper {
+            animation: envelopeVanishFlap 0.8s ease forwards 2.5s;
+        }
+
+        /* KERTAS SURAT MENGEMBANG JADI HALAMAN BARU */
         .env-letter {
             position: absolute; bottom: 10px; left: 50%; width: 300px; height: 180px; 
             transform: translateX(-50%); background: #fff; border-radius: 12px; z-index: 2;
@@ -110,27 +122,63 @@
         }
         
         .envelope-master.is-opening .env-letter { 
-            /* Animasi dipanggil: Tarik keluar -> Pindah Depan -> Lebarkan */
-            animation: letterExtract 2.2s cubic-bezier(0.4, 0, 0.2, 1) 1.2s forwards;
+            animation: letterFullscreen 2.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1.2s forwards;
         }
 
-        @keyframes letterExtract {
-            0% { transform: translateX(-50%) translateY(0); z-index: 2; height: 180px; width: 300px; }
-            40% { transform: translateX(-50%) translateY(-230px); z-index: 2; height: 180px; width: 300px; }
-            41% { transform: translateX(-50%) translateY(-230px); z-index: 60; height: 180px; width: 300px; }
+        @keyframes letterFullscreen {
+            0% { transform: translateX(-50%) translateY(0); z-index: 2; height: 180px; width: 300px; bottom: 10px; }
+            35% { transform: translateX(-50%) translateY(-250px); z-index: 60; height: 180px; width: 300px; bottom: 10px; }
             100% { 
-                transform: translateX(-50%) translateY(-30px); 
-                z-index: 60; 
-                height: 520px; 
-                width: 380px; 
-                max-width: 90vw; /* Agar tidak melewati layar HP */
+                transform: translateX(-50%) translateY(0); 
+                z-index: 100; 
+                height: 90vh; 
+                width: 92vw; 
+                max-width: 800px; /* Melebar seperti halaman baru */
+                bottom: 5vh; 
+                border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(251, 113, 133, 0.25);
             }
         }
 
-        /* Isi Teks disembunyikan sampai surat selesai membentang */
-        .letter-content { opacity: 0; transition: opacity 0.8s ease 3.2s; overflow: hidden; }
+        .letter-content { 
+            opacity: 0; transition: opacity 0.8s ease 3.2s; 
+            overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
+        }
         .envelope-master.is-opening .letter-content { opacity: 1; }
 
+        /* ========================================= */
+        /* ANIMASI DYNAMIC ISLAND & PAGE SHRINK      */
+        /* ========================================= */
+        .island-shrink {
+            animation: islandShrink 0.8s cubic-bezier(0.5, 0, 0, 1) forwards !important;
+            white-space: nowrap; overflow: hidden; pointer-events: none;
+        }
+        @keyframes islandShrink {
+            0% { width: 300px; border-radius: 999px; }
+            40% { width: 50px; height: 50px; padding: 0; background: black; color: transparent; border-color: black; border-radius: 50px; }
+            100% { width: 0px; height: 0px; padding: 0; margin: 0; opacity: 0; border: none; }
+        }
+
+        .page-shrink {
+            animation: pageShrink 1.2s cubic-bezier(0.5, 0, 0, 1) forwards;
+        }
+        @keyframes pageShrink {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.2); opacity: 0; visibility: hidden; }
+        }
+
+        /* EFEK KEMBANG API CINTA */
+        @keyframes floatUpFast { 
+            0% { opacity: 0; transform: translateY(110vh) scale(0.5) rotate(0deg); } 
+            20% { opacity: 1; } 
+            100% { opacity: 0; transform: translateY(-30vh) scale(1.8) rotate(45deg); } 
+        }
+        .firework-particle {
+            position: fixed; pointer-events: none; z-index: 250;
+            animation: floatUpFast 2.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        /* Polaroid styling */
         .polaroid { background: white; padding: 12px 12px 35px 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: relative; }
         .reveal { opacity: 0; transform: translateY(40px); transition: all 1.2s cubic-bezier(0.5, 0, 0, 1); }
         .reveal.active { opacity: 1; transform: translateY(0); }
@@ -193,7 +241,7 @@
 
     <div class="scroll-container">
         
-        <!-- SLIDE 1: Pembukaan & Surat Raksasa -->
+        <!-- SLIDE 1: Pembukaan & Surat Halaman Baru -->
         <div id="slide1" class="min-h-screen relative w-full overflow-hidden flex items-center justify-center">
             
             <div class="absolute top-1/4 left-1/4 text-2xl animate-float opacity-70">🌸</div>
@@ -220,7 +268,7 @@
                 <div class="env-back"></div>
                 
                 <div class="env-letter flex flex-col items-center justify-center">
-                    <div class="letter-content absolute inset-0 w-full h-full p-6 md:p-10 flex flex-col items-center justify-center text-center">
+                    <div class="letter-content absolute inset-0 w-full h-full p-6 md:p-10 flex flex-col items-center text-center">
                         
                         <!-- PIGURA FOTO DI KANAN ATAS -->
                         <div class="absolute top-5 right-5 w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-rose-100 overflow-hidden shadow-lg transform rotate-3 animate-float-fast z-10">
@@ -228,18 +276,20 @@
                             <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Foto Kita" class="w-full h-full object-cover">
                         </div>
 
-                        <div class="text-4xl mb-3 animate-float mt-2">🌸</div>
-                        <h2 class="font-script text-4xl md:text-5xl text-[#f43f5e] mb-4 drop-shadow-sm">Selamat Ulang Tahun!</h2>
-                        <h3 class="text-xl md:text-2xl font-semibold text-rose-500 mb-6">[Nama Panggilan] ❤️</h3>
+                        <div class="text-4xl mb-2 md:mb-4 animate-float mt-2">🌸</div>
+                        <h2 class="font-script text-4xl md:text-6xl text-[#f43f5e] mb-2 md:mb-4 drop-shadow-sm">Selamat Ulang Tahun!</h2>
+                        <h3 class="text-xl md:text-3xl font-semibold text-rose-500 mb-4 md:mb-8">[Nama Panggilan] ❤️</h3>
                         
-                        <div class="text-[13px] md:text-base text-gray-700 mb-8 leading-relaxed font-light space-y-4 px-2 md:px-6">
+                        <div class="text-[14px] md:text-lg text-gray-700 leading-relaxed font-light space-y-4 px-2 md:px-10">
                             <p>Di hari yang spesial ini, aku cuma mau bilang terima kasih. Terima kasih udah jadi versi terbaik dari diri kamu sendiri.</p>
                             <p>Kehadiran kamu itu kayak warna pink di langit sore, selalu bikin tenang dan bahagia. Kamu pantes dapetin semua hal manis di dunia ini.</p>
                         </div>
                         
-                        <button onclick="customSmoothScroll('slide2')" class="px-8 py-3 bg-gradient-to-r from-rose-400 to-pink-400 text-white rounded-full text-sm font-semibold shadow-lg hover:shadow-pink-400/50 hover:opacity-90 transition-all duration-300 flex items-center gap-2">
-                            <span>Lihat Memori Kita</span><span class="animate-float-fast">☁️</span>
-                        </button>
+                        <!-- TOMBOL LOVE PENGGANTI -->
+                        <div class="mt-auto pt-4 pb-2 flex flex-col items-center justify-center cursor-pointer group" onclick="customSmoothScroll('slide2')">
+                            <div class="text-6xl md:text-7xl animate-pulse-slow drop-shadow-xl group-hover:scale-125 transition-transform duration-300">💖</div>
+                            <p class="text-rose-400 font-bold text-[10px] md:text-xs tracking-[0.2em] mt-3 uppercase animate-float-fast font-sans">Klik Love Untuk Melanjutkan</p>
+                        </div>
                     </div>
                 </div>
                 
@@ -306,24 +356,36 @@
             </button>
         </div>
 
-        <!-- SLIDE 4: Harapan & Kue -->
-        <div id="slide4" class="min-h-screen flex flex-col items-center justify-center max-w-lg w-full text-center mx-auto p-4 py-20 pb-32">
-            <div class="relative mb-12 reveal">
-                <div class="absolute -left-16 bottom-0 text-5xl animate-float-fast drop-shadow-lg">🎁</div>
-                <div class="absolute -right-16 -top-4 text-6xl animate-float drop-shadow-lg">🎈</div>
-                <div class="text-[100px] animate-pulse-slow drop-shadow-2xl">🎂</div>
-            </div>
+        <!-- SLIDE 4: Harapan & Keajaiban (Dynamic Island) -->
+        <div id="slide4" class="min-h-screen flex flex-col items-center justify-center w-full mx-auto p-4 py-20 pb-32 relative">
             
-            <div class="glass-card rounded-3xl p-8 md:p-10 mb-10 w-full reveal relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 text-4xl opacity-20">✨</div>
-                <h2 class="font-script text-5xl text-[#f43f5e] mb-6">Make a Wish! ✨</h2>
-                <p class="text-gray-700 mb-6 text-[16px] leading-relaxed">Semoga di umur yang baru ini, kamu semakin bersinar, semakin bahagia, dan semua yang kamu semogakan bisa terwujud satu per satu.</p>
-                <p class="font-semibold text-rose-500 text-xl font-script">I love you, always. 🌸</p>
+            <!-- KONTEN YANG AKAN MENGECIL (PAGE SHRINK) -->
+            <div id="slide4-content" class="w-full max-w-lg flex flex-col items-center text-center">
+                <div class="relative mb-12 reveal">
+                    <div class="absolute -left-16 bottom-0 text-5xl animate-float-fast drop-shadow-lg">🎁</div>
+                    <div class="absolute -right-16 -top-4 text-6xl animate-float drop-shadow-lg">🎈</div>
+                    <div class="text-[100px] animate-pulse-slow drop-shadow-2xl">🎂</div>
+                </div>
+                
+                <div class="glass-card rounded-3xl p-8 md:p-10 mb-10 w-full reveal relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 text-4xl opacity-20">✨</div>
+                    <h2 class="font-script text-5xl text-[#f43f5e] mb-6">Make a Wish! ✨</h2>
+                    <p class="text-gray-700 mb-6 text-[16px] leading-relaxed">Semoga di umur yang baru ini, kamu semakin bersinar, semakin bahagia, dan semua yang kamu semogakan bisa terwujud satu per satu.</p>
+                </div>
+                
+                <!-- TOMBOL YANG AKAN MENYUSUT (DYNAMIC ISLAND) -->
+                <button id="magic-btn" onclick="createMagic()" class="w-[300px] h-[60px] flex justify-center items-center bg-white text-rose-500 border-2 border-rose-200 rounded-full font-bold shadow-xl hover:bg-rose-50 transition-all duration-300 gap-3 reveal">
+                    <span>Klik untuk keajaiban</span> <span class="animate-spin-slow">✨</span>
+                </button>
             </div>
-            
-            <button onclick="createConfetti()" class="px-10 py-4 bg-white text-rose-500 border-2 border-rose-200 rounded-full font-bold shadow-xl hover:bg-rose-50 transition-all duration-300 flex items-center gap-3 reveal">
-                <span>Klik untuk keajaiban</span> <span class="animate-spin-slow">✨</span>
-            </button>
+
+            <!-- PESAN RAKSASA FINAL (SAMA DENGAN FONT "KLIK LOVE") -->
+            <div id="final-message" class="absolute inset-0 z-[200] hidden flex-col items-center justify-center opacity-0 transition-opacity duration-1000">
+                <h1 class="font-sans font-bold uppercase tracking-[0.2em] text-4xl md:text-5xl lg:text-6xl text-[#f43f5e] drop-shadow-md mb-4 animate-float text-center px-4 leading-relaxed">
+                    LOVE YOU<br>OKTA CANTIKKK <br><span class="text-5xl md:text-7xl mt-8 block drop-shadow-xl tracking-normal">🥰💖🌸✨</span>
+                </h1>
+            </div>
+
         </div>
     </div>
 
@@ -408,7 +470,7 @@
         }
 
         // ==========================================
-        // LOGIKA WEB UTAMA
+        // LOGIKA WEB UTAMA (Surat & Scroll)
         // ==========================================
         function bukaKeajaiban() {
             document.getElementById('circle-bg').style.cssText = 'opacity:0; transform: translate(-50%, -50%) scale(0.5)';
@@ -455,26 +517,51 @@
 
         function burstHearts() { for(let i=0; i<15; i++) setTimeout(createFloatingHeart, i * 150); }
 
-        function createConfetti() {
-            burstHearts();
-            const btn = document.querySelector('button[onclick="createConfetti()"]');
-            btn.innerHTML = "Yeayyy! Selamat Ulang Tahun! 🎉";
-            btn.classList.add('bg-rose-500', 'text-white', 'border-rose-500');
-            btn.classList.remove('bg-white', 'text-rose-500', 'border-rose-200');
+        // ==========================================
+        // LOGIKA SLIDE 4 (Dynamic Island & Kembang Api)
+        // ==========================================
+        function createMagic() {
+            const btn = document.getElementById('magic-btn');
+            const content = document.getElementById('slide4-content');
+            const finalMsg = document.getElementById('final-message');
             
-            for(let i=0; i<50; i++) {
+            // 1. Tombol mengecil ala Dynamic Island
+            btn.classList.add('island-shrink');
+            
+            // 2. Seluruh halaman menyusut dan lenyap
+            setTimeout(() => {
+                content.classList.add('page-shrink');
+            }, 800);
+            
+            // 3. Teks "LOVE YOU OKTA" muncul + Kembang Api Cinta
+            setTimeout(() => {
+                finalMsg.style.display = 'flex';
                 setTimeout(() => {
-                    const confetti = document.createElement('div');
-                    confetti.classList.add('heart-bg');
-                    const confettis = ['🎊', '🎉', '🎈', '💖', '🎁', '✨'];
-                    confetti.innerHTML = confettis[Math.floor(Math.random() * confettis.length)];
-                    confetti.style.left = Math.random() * 100 + 'vw';
-                    confetti.style.animationDuration = (Math.random() * 2 + 3) + 's';
-                    confetti.style.zIndex = "99";
-                    document.body.appendChild(confetti);
-                    setTimeout(() => confetti.remove(), 6000);
-                }, i * 50);
-            }
+                    finalMsg.style.opacity = '1';
+                    fireworkMagic();
+                }, 50);
+            }, 1800);
+        }
+
+        // Kembang Api Love (Melesat Cepat Dari Bawah)
+        function fireworkMagic() {
+            let count = 0;
+            const interval = setInterval(() => {
+                for(let i=0; i<8; i++) {
+                    const heart = document.createElement('div');
+                    heart.classList.add('firework-particle');
+                    const emojis = ['💖', '💕', '💗', '🌸', '✨', '🥰'];
+                    heart.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
+                    heart.style.left = (Math.random() * 100) + 'vw';
+                    const duration = Math.random() * 2 + 2;
+                    heart.style.animationDuration = duration + 's';
+                    heart.style.transform = `scale(${Math.random() * 1 + 1})`;
+                    document.body.appendChild(heart);
+                    setTimeout(() => heart.remove(), duration * 1000);
+                }
+                count++;
+                if(count > 60) clearInterval(interval); // Kembang api menyala selama 3 detik penuh
+            }, 50);
         }
     </script>
 </body>
