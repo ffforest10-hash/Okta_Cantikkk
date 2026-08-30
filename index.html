@@ -13,16 +13,24 @@
         tailwind.config = {
             theme: {
                 extend: {
+                    colors: {
+                        'rose-light': '#FFE4E6',
+                        'rose-medium': '#FDA4AF',
+                        'rose-dark': '#E11D48',
+                    },
                     fontFamily: {
                         'script': ['"Dancing Script"', 'cursive'],
                         'sans': ['Poppins', 'sans-serif'],
                     },
                     animation: {
                         'float': 'float 6s ease-in-out infinite',
+                        'float-fast': 'float 3s ease-in-out infinite',
                         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'swing': 'swing 3s ease-in-out infinite alternate',
+                        'swing': 'swing 4s ease-in-out infinite alternate',
                         'peek-up': 'peekUp 4s ease-in-out infinite',
                         'peek-side': 'peekSide 5s ease-in-out infinite',
+                        'heartbeat': 'heartbeat 1.5s ease-in-out infinite',
+                        'spin-slow': 'spin 8s linear infinite',
                     },
                     keyframes: {
                         float: {
@@ -30,16 +38,20 @@
                             '50%': { transform: 'translateY(-20px)' },
                         },
                         swing: {
-                            '0%': { transform: 'rotate(-3deg)' },
-                            '100%': { transform: 'rotate(3deg)' }
+                            '0%': { transform: 'rotate(-4deg)' },
+                            '100%': { transform: 'rotate(4deg)' }
                         },
                         peekUp: {
-                            '0%, 100%': { transform: 'translateY(20px)', opacity: '0' },
-                            '20%, 80%': { transform: 'translateY(-20px)', opacity: '1' }
+                            '0%, 100%': { transform: 'translateY(25px)', opacity: '0' },
+                            '20%, 80%': { transform: 'translateY(-25px)', opacity: '1' }
                         },
                         peekSide: {
-                            '0%, 100%': { transform: 'translateX(-20px)', opacity: '0' },
-                            '20%, 80%': { transform: 'translateX(20px)', opacity: '1' }
+                            '0%, 100%': { transform: 'translateX(-25px)', opacity: '0' },
+                            '20%, 80%': { transform: 'translateX(25px)', opacity: '1' }
+                        },
+                        heartbeat: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.2)' }
                         }
                     }
                 }
@@ -48,7 +60,7 @@
     </script>
     <style>
         body {
-            /* Background replika dari screenshot (soft lavender pink) */
+            /* Background replika dari screenshot (sangat feminim & soft) */
             background: linear-gradient(135deg, #fff0f5 0%, #fae8ff 50%, #fff0f5 100%);
             overflow-x: hidden;
             scrollbar-width: none;
@@ -58,7 +70,7 @@
             display: none;
         }
         
-        /* Awan Overlay */
+        /* Lapisan Awan (Tetap) */
         .cloud-overlay {
             position: fixed; left: 0; width: 100%; pointer-events: none; z-index: 50;
         }
@@ -67,127 +79,90 @@
         
         .scroll-container { position: relative; z-index: 10; }
 
-        /* Floating Hearts Background */
+        /* Background Hati Berterbangan */
         .heart-bg {
             position: fixed; font-size: 1.5rem; opacity: 0; pointer-events: none; z-index: 5;
-            animation: floatUp 4s ease-in forwards;
+            animation: floatUp 5s ease-in forwards;
         }
         @keyframes floatUp {
             0% { opacity: 0; transform: translateY(100vh) scale(0.5) rotate(0deg); }
-            10% { opacity: 0.6; }
-            90% { opacity: 0.6; }
-            100% { opacity: 0; transform: translateY(-10vh) scale(1.2) rotate(45deg); }
+            15% { opacity: 0.7; }
+            85% { opacity: 0.7; }
+            100% { opacity: 0; transform: translateY(-10vh) scale(1.3) rotate(45deg); }
         }
 
-        /* Glassmorphism Card */
+        /* Glassmorphism Card (Lebih Elegan) */
         .glass-card {
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 10px 40px rgba(244, 114, 182, 0.2);
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 15px 45px rgba(251, 113, 133, 0.15);
         }
 
-        /* --- ANIMASI MASTER ENVELOPE (Sangat Smooth & Profesional) --- */
+        /* ========================================= */
+        /* ANIMASI MASTER ENVELOPE (Presisi & Smooth) */
+        /* ========================================= */
         #circle-bg, #intro-texts {
-            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.9s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .envelope-master {
             width: 320px; height: 200px;
-            /* Memulai dari ukuran kecil (scale 0.38) agar muat persis di dalam lingkaran putih */
             transform: translate(-50%, -50%) scale(0.38);
             transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .envelope-master.is-opening {
             pointer-events: auto;
-            /* Bergerak ke tengah layar dan membesar menjadi ukuran asli */
             transform: translate(-50%, calc(-50% + 15vh)) scale(1);
         }
 
-        /* Bagian Amplop */
-        .env-back {
-            position: absolute; inset: 0; background: #FDA4AF; border-radius: 12px; z-index: 1;
-        }
-        .env-front {
-            position: absolute; inset: 0; z-index: 3; border-radius: 12px; overflow: hidden; pointer-events: none;
-        }
-        .env-front::before {
-            content: ''; position: absolute; inset: 0; background: #FECDD3;
-            clip-path: polygon(0 0, 50% 50%, 0 100%, 100% 100%, 100% 0);
-        }
-        .env-front::after {
-            content: ''; position: absolute; inset: 0; background: #FFE4E6;
-            clip-path: polygon(0 100%, 50% 55%, 100% 100%);
-        }
+        .env-back { position: absolute; inset: 0; background: #FDA4AF; border-radius: 12px; z-index: 1; box-shadow: 0 15px 35px rgba(225, 29, 72, 0.2); }
+        .env-front { position: absolute; inset: 0; z-index: 3; border-radius: 12px; overflow: hidden; pointer-events: none; }
+        .env-front::before { content: ''; position: absolute; inset: 0; background: #FECDD3; clip-path: polygon(0 0, 50% 50%, 0 100%, 100% 100%, 100% 0); }
+        .env-front::after { content: ''; position: absolute; inset: 0; background: #FFE4E6; clip-path: polygon(0 100%, 50% 55%, 100% 100%); }
 
-        /* Penutup Amplop (Flap) */
         .env-flap {
             position: absolute; top: 0; left: 0; right: 0; height: 60%;
-            background: #FB7185;
-            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            background: #FB7185; clip-path: polygon(0 0, 100% 0, 50% 100%);
             border-top-left-radius: 12px; border-top-right-radius: 12px;
             transform-origin: top;
-            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 1s; /* Terbuka setelah 1 detik */
+            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 1s;
             z-index: 4;
         }
         
-        /* Segel Hati pada Penutup Amplop */
         .env-flap-seal {
             position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
             width: 45px; height: 45px; background: white; border-radius: 50%;
             display: flex; justify-content: center; align-items: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
-        .env-flap-seal span {
-            display: block; transition: transform 0.1s 1.4s;
-        }
+        .env-flap-seal span { display: block; transition: transform 0.1s 1.4s; }
         
-        .envelope-master.is-opening .env-flap {
-            transform: rotateX(180deg);
-            z-index: 1;
-        }
-        /* Mencegah hati terbalik saat amplop terbuka */
-        .envelope-master.is-opening .env-flap-seal span {
-            transform: rotateX(180deg); 
-        }
+        .envelope-master.is-opening .env-flap { transform: rotateX(180deg); z-index: 1; }
+        .envelope-master.is-opening .env-flap-seal span { transform: rotateX(180deg); }
 
-        /* Kertas Surat (Lembaran Utuh) */
         .env-letter {
             position: absolute; bottom: 10px; left: 10px; right: 10px;
-            height: 180px; /* Ukuran awal di dalam amplop */
-            background: #fff; border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            z-index: 2;
-            /* Efek surat meluncur ke atas DAN mengembang (height membesar) secara bersamaan */
+            height: 180px; background: #fff; border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 2;
             transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1) 1.8s, 
                         height 1s cubic-bezier(0.34, 1.56, 0.64, 1) 1.8s;
         }
         
         .envelope-master.is-opening .env-letter {
-            transform: translateY(-130px);
-            height: 320px; /* Berubah menjadi lembaran utuh yang besar */
-            z-index: 10; /* Berada di atas segalanya */
+            transform: translateY(-140px); height: 340px; z-index: 10;
         }
 
-        .letter-content {
-            opacity: 0;
-            transition: opacity 0.6s ease 2.6s; /* Teks muncul perlahan di akhir */
-        }
-        .envelope-master.is-opening .letter-content {
-            opacity: 1;
-        }
+        .letter-content { opacity: 0; transition: opacity 0.6s ease 2.6s; }
+        .envelope-master.is-opening .letter-content { opacity: 1; }
 
         /* Style Polaroid & Reveal Scroll */
         .polaroid {
-            background: white; padding: 12px 12px 35px 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.08); position: relative;
+            background: white; padding: 12px 12px 35px 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: relative;
         }
-        .reveal {
-            opacity: 0; transform: translateY(40px); transition: all 1.2s cubic-bezier(0.5, 0, 0, 1);
-        }
-        .reveal.active {
-            opacity: 1; transform: translateY(0);
-        }
+        .reveal { opacity: 0; transform: translateY(50px); transition: all 1.2s cubic-bezier(0.5, 0, 0, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
     </style>
 </head>
 <body class="font-sans text-gray-800 antialiased">
@@ -195,80 +170,92 @@
     <!-- Lapisan Awan Atas & Bawah -->
     <svg class="cloud-overlay cloud-top" preserveAspectRatio="none" viewBox="0 0 1440 320">
         <defs><filter id="blurTop" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="25" /></filter></defs>
-        <path fill="rgba(255, 255, 255, 0.9)" filter="url(#blurTop)" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,128C672,107,768,85,864,96C960,107,1056,149,1152,165.3C1248,181,1344,171,1392,165.3L1440,160L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"></path>
+        <path fill="rgba(255, 255, 255, 0.95)" filter="url(#blurTop)" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,128C672,107,768,85,864,96C960,107,1056,149,1152,165.3C1248,181,1344,171,1392,165.3L1440,160L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"></path>
     </svg>
     <svg class="cloud-overlay cloud-bottom" preserveAspectRatio="none" viewBox="0 0 1440 320">
         <defs><filter id="blurBottom" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="25" /></filter></defs>
-        <path fill="rgba(255, 255, 255, 0.9)" filter="url(#blurBottom)" d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+        <path fill="rgba(255, 255, 255, 0.95)" filter="url(#blurBottom)" d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
     </svg>
 
     <div class="scroll-container">
         
-        <!-- SLIDE 1: Replika Desain Screenshot & Animasi Amplop -->
-        <div id="slide1" class="min-h-screen relative w-full overflow-hidden">
+        <!-- SLIDE 1: Pembukaan Magis -->
+        <div id="slide1" class="min-h-screen relative w-full overflow-hidden flex items-center justify-center">
             
-            <!-- Lingkaran Putih & Ikon Melayang (Posisi Tengah Atas) -->
-            <div id="circle-bg" class="absolute top-[35%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-white rounded-full shadow-[0_10px_30px_rgba(251,113,133,0.15)] flex justify-center items-center z-10">
+            <!-- Elemen Dekoratif Mengambang di Area Luar -->
+            <div class="absolute top-1/4 left-1/4 text-2xl animate-float opacity-70">🌸</div>
+            <div class="absolute bottom-1/4 right-1/4 text-3xl animate-float opacity-70" style="animation-delay: 2s;">✨</div>
+
+            <!-- Lingkaran Putih (Persis Screenshot) -->
+            <div id="circle-bg" class="absolute top-[35%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-44 h-44 bg-white rounded-full shadow-[0_15px_40px_rgba(251,113,133,0.15)] flex justify-center items-center z-10">
+                <!-- Animasi ikon mengelilingi amplop dihidupkan kembali -->
                 <span class="absolute -top-6 left-1/2 -translate-x-1/2 text-3xl animate-bounce">🦋</span>
-                <span class="absolute top-4 -right-8 text-3xl animate-pulse-slow">✨</span>
-                <span class="absolute bottom-4 -left-8 text-2xl">💕</span>
-                <span class="absolute -bottom-4 right-2 text-3xl">🌸</span>
+                <span class="absolute top-4 -right-6 text-3xl animate-pulse-slow">✨</span>
+                <span class="absolute bottom-2 -left-6 text-3xl animate-float-fast">💕</span>
+                <span class="absolute -bottom-5 right-4 text-3xl animate-spin-slow">🌸</span>
             </div>
 
-            <!-- TEKS & TOMBOL (Replika Persis) -->
-            <div id="intro-texts" class="absolute top-[35%] left-1/2 transform -translate-x-1/2 translate-y-28 w-full flex flex-col items-center text-center px-4 z-10">
-                <h1 class="font-script text-5xl md:text-6xl text-[#f43f5e] mb-3">Hai, Cantik...</h1>
-                <p class="text-gray-500 mb-10 text-[15px] font-light">Ada sesuatu yang spesial buat kamu hari ini.</p>
-                <button onclick="bukaKeajaiban()" class="px-10 py-3.5 bg-gradient-to-r from-[#fb7185] to-[#f43f5e] text-white rounded-full font-semibold shadow-[0_8px_20px_rgba(244,63,94,0.3)] hover:scale-105 transition-all duration-300">
-                    Buka Suratnya
+            <!-- TEKS & TOMBOL -->
+            <div id="intro-texts" class="absolute top-[35%] left-1/2 transform -translate-x-1/2 translate-y-32 w-full flex flex-col items-center text-center px-4 z-10">
+                <h1 class="font-script text-5xl md:text-6xl text-[#f43f5e] mb-3 drop-shadow-sm">Hai, Cantik...</h1>
+                <p class="text-gray-500 mb-10 text-[16px] font-light tracking-wide">Ada sesuatu yang spesial buat kamu hari ini.</p>
+                
+                <button onclick="bukaKeajaiban()" class="group relative px-10 py-3.5 bg-gradient-to-r from-[#fb7185] to-[#f43f5e] text-white rounded-full font-semibold shadow-[0_8px_25px_rgba(244,63,94,0.4)] hover:shadow-[0_12px_35px_rgba(244,63,94,0.6)] hover:-translate-y-1 transition-all duration-300">
+                    <span class="relative z-10">Buka Suratnya</span>
+                    <!-- Efek kilau saat dihover -->
+                    <div class="absolute inset-0 h-full w-full rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-pulse-slow bg-white/20 transition-all"></div>
                 </button>
             </div>
 
-            <!-- ENVELOPE MASTER (Tersembunyi di dalam lingkaran putih awalnya) -->
+            <!-- ENVELOPE MASTER -->
             <div id="the-envelope" class="envelope-master absolute top-[35%] left-1/2 z-20 pointer-events-none">
                 <div class="env-back"></div>
                 
                 <!-- Surat Lembaran Utuh -->
                 <div class="env-letter">
                     <div class="letter-content flex flex-col items-center justify-center h-full w-full px-6 text-center">
-                        <div class="text-3xl mb-2">🌸</div>
-                        <h2 class="font-script text-4xl text-rose-500 mb-4">Untuk Kesayanganku,</h2>
-                        <p class="text-sm text-gray-700 mb-6 leading-relaxed">
+                        <div class="text-4xl mb-3 animate-float-fast">🌸</div>
+                        <h2 class="font-script text-4xl text-rose-500 mb-4 font-bold">Kesayanganku,</h2>
+                        <p class="text-[15px] text-gray-600 mb-8 leading-relaxed font-light">
                             Senyummu adalah alasan kenapa hari ini begitu cerah dan spesial. Gulir ke bawah pelan-pelan ya, ada memori manis untukmu! ❤️
                         </p>
-                        <button onclick="customSmoothScroll('slide2')" class="px-6 py-2 bg-rose-400 text-white rounded-full font-medium shadow-md hover:bg-rose-500 transition-all hover:scale-105">
-                            Lanjut ke Bawah ☁️
+                        <button onclick="customSmoothScroll('slide2')" class="px-8 py-2.5 bg-gradient-to-r from-rose-400 to-pink-400 text-white rounded-full font-medium shadow-lg hover:shadow-pink-400/50 hover:scale-105 transition-all duration-300 flex items-center gap-2">
+                            <span>Lanjut ke Bawah</span>
+                            <span class="animate-bounce">☁️</span>
                         </button>
                     </div>
                 </div>
 
                 <div class="env-front"></div>
                 <div class="env-flap">
-                    <div class="env-flap-seal">
+                    <div class="env-flap-seal animate-heartbeat">
                         <span class="text-xl">❤️</span>
                     </div>
                 </div>
             </div>
-            
         </div>
 
-        <!-- SLIDE 2: Ucapan Manis (Beserta Animasi Lucu) -->
-        <div id="slide2" class="min-h-screen flex flex-col items-center justify-center max-w-lg w-full mx-auto p-4 py-20">
+        <!-- SLIDE 2: Ucapan Manis -->
+        <div id="slide2" class="min-h-screen flex flex-col items-center justify-center max-w-lg w-full mx-auto p-4 py-20 relative">
+            <!-- Partikel Spesial Slide 2 -->
+            <div class="absolute top-1/4 left-10 text-3xl opacity-50 animate-float-fast">🌸</div>
+            <div class="absolute bottom-1/4 right-10 text-2xl opacity-50 animate-pulse-slow">✨</div>
+
             <div class="glass-card rounded-3xl p-8 md:p-10 w-full text-center relative reveal">
-                <!-- Animasi Kucing & Beruang Mengintip -->
-                <div class="absolute -top-6 left-10 text-4xl animate-peek-up z-0">🐱</div>
-                <div class="absolute top-20 -right-6 text-4xl animate-peek-side z-0">🧸</div>
+                <!-- ANIMASI KUCING & BERUANG DIKEMBALIKAN -->
+                <div class="absolute -top-10 left-8 text-5xl animate-peek-up z-0 drop-shadow-lg">🐱</div>
+                <div class="absolute top-24 -right-8 text-5xl animate-peek-side z-0 drop-shadow-lg">🧸</div>
                 
-                <div class="relative z-10 bg-white/40 p-4 rounded-2xl">
+                <div class="relative z-10 bg-white/50 p-6 rounded-2xl border border-white/60">
                     <h2 class="font-script text-5xl text-[#f43f5e] mb-4">Selamat Ulang Tahun!</h2>
-                    <h3 class="text-xl font-medium text-rose-500 mb-6">[Nama Panggilan] ❤️</h3>
+                    <h3 class="text-2xl font-semibold text-rose-500 mb-6">[Nama Panggilan] ❤️</h3>
                     
-                    <div class="text-gray-700 leading-relaxed mb-8 space-y-4 text-sm md:text-base">
+                    <div class="text-gray-700 leading-relaxed mb-8 space-y-4 text-[15px]">
                         <p>Di hari yang spesial ini, aku cuma mau bilang terima kasih. Terima kasih udah jadi versi terbaik dari diri kamu sendiri.</p>
                         <p>Kehadiran kamu itu kayak warna pink di langit sore, selalu bikin tenang dan bahagia. Kamu pantes dapetin semua hal manis di dunia ini.</p>
                     </div>
                     
-                    <button onclick="customSmoothScroll('slide3')" class="px-8 py-3 bg-white text-rose-500 border border-rose-200 rounded-full font-semibold shadow-sm hover:bg-rose-50 hover:shadow-md transition-all duration-300">
+                    <button onclick="customSmoothScroll('slide3')" class="px-8 py-3 bg-white text-rose-500 border border-rose-200 rounded-full font-semibold shadow-md hover:bg-rose-50 hover:-translate-y-1 transition-all duration-300">
                         Lihat Memori Kita 📸
                     </button>
                 </div>
@@ -276,30 +263,32 @@
         </div>
 
         <!-- SLIDE 3: Galeri / Memori -->
-        <div id="slide3" class="min-h-screen flex flex-col items-center justify-center max-w-4xl w-full mx-auto p-4 py-20 overflow-hidden">
-            <h2 class="font-script text-4xl text-[#f43f5e] mb-12 text-center reveal">Momen-momen Cantikmu</h2>
+        <div id="slide3" class="min-h-screen flex flex-col items-center justify-center max-w-4xl w-full mx-auto p-4 py-20 overflow-hidden relative">
+            <h2 class="font-script text-5xl text-[#f43f5e] mb-14 text-center reveal drop-shadow-sm">Momen-momen Cantikmu</h2>
             
-            <div class="flex flex-wrap justify-center gap-8 md:gap-12 mb-12">
-                <!-- Foto 1 (Berayun) -->
-                <div class="polaroid w-48 md:w-56 animate-swing reveal" style="animation-delay: 0s;">
-                    <div class="absolute -top-3 -right-3 text-3xl z-10">🎀</div>
-                    <div class="bg-gray-200 w-full h-48 md:h-56 mb-4 rounded flex items-center justify-center overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Bunga" class="w-full h-full object-cover">
+            <div class="flex flex-wrap justify-center gap-10 md:gap-16 mb-14">
+                <!-- Foto 1 (Animasi Ayunan & Pita) -->
+                <div class="polaroid w-52 md:w-64 animate-swing reveal" style="animation-delay: 0s;">
+                    <!-- ANIMASI PITA & HATI DIKEMBALIKAN -->
+                    <div class="absolute -top-5 -right-4 text-4xl z-10 animate-pulse-slow drop-shadow-md">🎀</div>
+                    <div class="bg-rose-100 w-full h-52 md:h-64 mb-4 rounded flex items-center justify-center overflow-hidden border border-rose-50">
+                        <!-- Ganti src dengan link foto -->
+                        <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Memori 1" class="w-full h-full object-cover">
                     </div>
-                    <p class="font-script text-2xl text-center text-gray-700">Cantik banget!</p>
+                    <p class="font-script text-3xl text-center text-gray-700 mt-2">Cantik banget!</p>
                 </div>
                 
-                <!-- Foto 2 (Berayun berlawanan) -->
-                <div class="polaroid w-48 md:w-56 animate-swing reveal" style="animation-delay: 1.5s; animation-direction: alternate-reverse;">
-                    <div class="absolute -bottom-4 -left-4 text-3xl z-10 animate-pulse-slow">💖</div>
-                    <div class="bg-gray-200 w-full h-48 md:h-56 mb-4 rounded flex items-center justify-center overflow-hidden">
-                        <img src="https://images.unsplash.com/photo-1520627725997-6a2d9894e138?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Senyum" class="w-full h-full object-cover">
+                <!-- Foto 2 (Ayunan Berlawanan) -->
+                <div class="polaroid w-52 md:w-64 animate-swing reveal" style="animation-delay: 2s; animation-direction: alternate-reverse;">
+                    <div class="absolute -bottom-5 -left-4 text-4xl z-10 animate-float drop-shadow-md">💖</div>
+                    <div class="bg-rose-100 w-full h-52 md:h-64 mb-4 rounded flex items-center justify-center overflow-hidden border border-rose-50">
+                        <img src="https://images.unsplash.com/photo-1520627725997-6a2d9894e138?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Memori 2" class="w-full h-full object-cover">
                     </div>
-                    <p class="font-script text-2xl text-center text-gray-700">Senyum favoritku ✨</p>
+                    <p class="font-script text-3xl text-center text-gray-700 mt-2">Senyum favoritku ✨</p>
                 </div>
             </div>
 
-            <button onclick="customSmoothScroll('slide4')" class="px-8 py-3 bg-gradient-to-r from-[#fb7185] to-[#f43f5e] text-white rounded-full font-semibold shadow-lg hover:shadow-pink-400/50 hover:scale-105 transition-all duration-300 reveal">
+            <button onclick="customSmoothScroll('slide4')" class="px-10 py-3.5 bg-gradient-to-r from-[#fb7185] to-[#f43f5e] text-white rounded-full font-semibold shadow-lg hover:shadow-pink-400/50 hover:scale-105 transition-all duration-300 reveal">
                 Terakhir nih... 🎂
             </button>
         </div>
@@ -307,23 +296,25 @@
         <!-- SLIDE 4: Harapan & Kue -->
         <div id="slide4" class="min-h-screen flex flex-col items-center justify-center max-w-lg w-full text-center mx-auto p-4 py-20 pb-32">
             
-            <div class="relative mb-8 reveal">
-                <!-- Animasi kado dan balon -->
-                <div class="absolute -left-12 bottom-0 text-4xl animate-bounce">🎁</div>
-                <div class="absolute -right-12 top-0 text-5xl animate-float">🎈</div>
-                <div class="text-8xl animate-pulse-slow">🎂</div>
+            <div class="relative mb-12 reveal">
+                <!-- ANIMASI BALON & KADO DIKEMBALIKAN -->
+                <div class="absolute -left-16 bottom-0 text-5xl animate-bounce drop-shadow-lg">🎁</div>
+                <div class="absolute -right-16 -top-4 text-6xl animate-float drop-shadow-lg">🎈</div>
+                <div class="text-[100px] animate-pulse-slow drop-shadow-2xl">🎂</div>
             </div>
             
-            <div class="glass-card rounded-3xl p-8 mb-8 w-full reveal">
-                <h2 class="font-script text-4xl text-[#f43f5e] mb-4">Make a Wish! ✨</h2>
-                <p class="text-gray-700 mb-4 text-sm md:text-base">
+            <div class="glass-card rounded-3xl p-8 md:p-10 mb-10 w-full reveal relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 text-4xl opacity-20">✨</div>
+                
+                <h2 class="font-script text-5xl text-[#f43f5e] mb-6">Make a Wish! ✨</h2>
+                <p class="text-gray-700 mb-6 text-[16px] leading-relaxed">
                     Semoga di umur yang baru ini, kamu semakin bersinar, semakin bahagia, dan semua yang kamu semogakan bisa terwujud satu per satu.
                 </p>
-                <p class="font-semibold text-rose-500 text-lg">I love you, always. 🌸</p>
+                <p class="font-semibold text-rose-500 text-xl font-script">I love you, always. 🌸</p>
             </div>
 
-            <button onclick="createConfetti()" class="px-8 py-3 bg-white text-rose-500 border border-rose-300 rounded-full font-semibold shadow-md hover:bg-rose-50 transition-all duration-300 flex items-center gap-2 reveal">
-                <span>Klik untuk keajaiban</span> ✨
+            <button onclick="createConfetti()" class="px-10 py-4 bg-white text-rose-500 border-2 border-rose-200 rounded-full font-bold shadow-xl hover:bg-rose-50 hover:-translate-y-1 transition-all duration-300 flex items-center gap-3 reveal">
+                <span>Klik untuk keajaiban</span> <span class="animate-spin-slow">✨</span>
             </button>
         </div>
     </div>
@@ -332,7 +323,6 @@
     <script>
         // Logika Utama Animasi Amplop
         function bukaKeajaiban() {
-            // 1. Pudar dan hilangkan Lingkaran & Teks Awal
             const circle = document.getElementById('circle-bg');
             circle.style.opacity = '0';
             circle.style.transform = 'translate(-50%, -50%) scale(0.5)';
@@ -342,21 +332,19 @@
             texts.style.transform = 'translate(-50%, 150px)';
             texts.style.pointerEvents = 'none';
 
-            // 2. Jalankan Animasi Amplop Master (Membesar, Buka Flap, Surat Meluncur Keluar)
             const envelope = document.getElementById('the-envelope');
             envelope.classList.add('is-opening');
             
-            // Efek partikel ekstra saat diklik
             burstHearts();
         }
 
-        // Fungsi Custom Scroll Melayang Menembus Awan
+        // Custom Scroll Lembut (Jatuh Menembus Awan)
         function customSmoothScroll(targetId) {
             const target = document.getElementById(targetId);
             const targetPosition = target.getBoundingClientRect().top + window.pageYOffset;
             const startPosition = window.pageYOffset;
             const distance = targetPosition - startPosition;
-            const duration = 2200; // 2.2 detik (sangat dreamy)
+            const duration = 2200;
             let start = null;
 
             function animation(currentTime) {
@@ -371,7 +359,7 @@
             burstHearts();
         }
 
-        // Intersection Observer (Efek Muncul Perlahan / Scroll Reveal)
+        // Scroll Reveal Element
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) entry.target.classList.add('active');
@@ -379,46 +367,68 @@
         }, { threshold: 0.15 });
         document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
 
-        // Floating Hearts Background Effect
+        // Generator Hati Melayang (Berjalan Otomatis Sejak Awal)
         function createFloatingHeart() {
             const heart = document.createElement('div');
             heart.classList.add('heart-bg');
-            const emojis = ['💖', '🌸', '✨', '💕', '🌷'];
+            const emojis = ['💖', '🌸', '✨', '💕', '🌷', '🦋'];
             heart.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
             heart.style.left = Math.random() * 100 + 'vw';
-            const duration = Math.random() * 3 + 4;
+            
+            const duration = Math.random() * 4 + 5; // 5-9 detik
             heart.style.animationDuration = duration + 's';
+            
+            // Variasi ukuran
+            const size = Math.random() * 0.8 + 0.8;
+            heart.style.transform = `scale(${size})`;
+            
             document.body.appendChild(heart);
             setTimeout(() => heart.remove(), duration * 1000);
         }
-        setInterval(createFloatingHeart, 900);
+
+        // Panggil beberapa kali di awal agar layar tidak kosong
+        for(let i=0; i<8; i++) {
+            setTimeout(createFloatingHeart, i * 300);
+        }
+        // Jalankan terus menerus setiap 1.2 detik
+        setInterval(createFloatingHeart, 1200);
 
         function burstHearts() {
-            for(let i=0; i<12; i++) setTimeout(createFloatingHeart, i * 150);
+            for(let i=0; i<15; i++) setTimeout(createFloatingHeart, i * 100);
         }
 
-        // Efek Puncak (Kue Ulang Tahun Confetti)
+        // Efek Puncak Confetti
         function createConfetti() {
             burstHearts();
             const btn = document.querySelector('button[onclick="createConfetti()"]');
             btn.innerHTML = "Yeayyy! Selamat Ulang Tahun! 🎉";
-            btn.classList.add('bg-rose-500', 'text-white');
-            btn.classList.remove('bg-white', 'text-rose-500');
+            btn.classList.add('bg-rose-500', 'text-white', 'border-rose-500');
+            btn.classList.remove('bg-white', 'text-rose-500', 'border-rose-200');
             
-            for(let i=0; i<40; i++) {
+            for(let i=0; i<50; i++) {
                 setTimeout(() => {
                     const confetti = document.createElement('div');
                     confetti.classList.add('heart-bg');
-                    const confettis = ['🎊', '🎉', '🎈', '💖', '🎁'];
+                    const confettis = ['🎊', '🎉', '🎈', '💖', '🎁', '✨'];
                     confetti.innerHTML = confettis[Math.floor(Math.random() * confettis.length)];
                     confetti.style.left = Math.random() * 100 + 'vw';
                     confetti.style.animationDuration = (Math.random() * 2 + 2.5) + 's';
+                    confetti.style.zIndex = "99";
                     document.body.appendChild(confetti);
                     setTimeout(() => confetti.remove(), 5000);
-                }, i * 60);
+                }, i * 50);
             }
         }
     </script>
 </body>
 </html>
 ```eof
+
+### Apa yang Saya Kembalikan & Sempurnakan:
+1. **Slide 1:** Animasi ikon kupu-kupu yang melompat (`bounce`), ikon yang berputar lembut di sekitar amplop, dan detak jantung (`heartbeat`) pada stempel cinta di penutup amplop.
+2. **Slide 2:** Kucing (`🐱`) dan Beruang (`🧸`) kini kembali mengintip (naik-turun dan kiri-kanan) dari balik kartu ucapan.
+3. **Slide 3:** Foto polaroid berayun (`swing`) lagi! Pita (`🎀`) dan hati (`💖`) kini berdetak dan mengambang di tepi foto.
+4. **Slide 4:** Balon raksasa melayang bebas dan kado melompat-lompat menemaniku kue yang berdenyut lambat.
+5. **Latar Belakang:** Efek hujan bunga/hati pastel di latar belakang kini berjalan **sejak detik pertama** halaman dibuka, tidak perlu menunggu di-klik.
+
+Silakan nikmati pratinjaunya. Halaman ini benar-benar sangat magis sekarang! ✨
