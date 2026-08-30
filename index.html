@@ -19,20 +19,23 @@
                     },
                     animation: {
                         'float': 'float 6s ease-in-out infinite',
-                        'float-fast': 'float 3s ease-in-out infinite',
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'swing': 'swing 4s ease-in-out infinite alternate',
-                        'peek-up': 'peekUp 4s ease-in-out infinite',
-                        'peek-side': 'peekSide 5s ease-in-out infinite',
-                        'heartbeat': 'heartbeat 1.5s ease-in-out infinite',
-                        'spin-slow': 'spin 8s linear infinite',
+                        'float-fast': 'float 3.5s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'swing': 'swing 5s ease-in-out infinite alternate',
+                        'peek-up': 'peekUp 5s ease-in-out infinite',
+                        'peek-side': 'peekSide 5.5s ease-in-out infinite',
+                        'heartbeat': 'heartbeat 2s ease-in-out infinite',
+                        'spin-slow': 'spin 12s linear infinite',
                     },
                     keyframes: {
-                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } },
-                        swing: { '0%': { transform: 'rotate(-4deg)' }, '100%': { transform: 'rotate(4deg)' } },
-                        peekUp: { '0%, 100%': { transform: 'translateY(25px)', opacity: '0' }, '20%, 80%': { transform: 'translateY(-25px)', opacity: '1' } },
-                        peekSide: { '0%, 100%': { transform: 'translateX(-25px)', opacity: '0' }, '20%, 80%': { transform: 'translateX(25px)', opacity: '1' } },
-                        heartbeat: { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.15)' } }
+                        /* Semua animasi diubah menjadi "Melayang" (Floating) Lembut */
+                        float: { '0%, 100%': { transform: 'translate(0, 0)' }, '50%': { transform: 'translate(0, -12px)' } },
+                        'float-fast': { '0%, 100%': { transform: 'translate(0, 0)' }, '50%': { transform: 'translate(0, -8px)' } },
+                        swing: { '0%': { transform: 'rotate(-3deg)' }, '100%': { transform: 'rotate(3deg)' } },
+                        /* Kucing & Beruang kini melayang lembut di tempat, tidak naik turun kasar */
+                        peekUp: { '0%, 100%': { transform: 'translate(0, 0) rotate(0deg)' }, '50%': { transform: 'translate(0, -8px) rotate(3deg)' } },
+                        peekSide: { '0%, 100%': { transform: 'translate(0, 0) rotate(0deg)' }, '50%': { transform: 'translate(8px, -4px) rotate(-3deg)' } },
+                        heartbeat: { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.1)' } }
                     }
                 }
             }
@@ -51,30 +54,20 @@
         /* IPHONE LOCK SCREEN & LIQUID GLASS         */
         /* ========================================= */
         #lock-screen {
-            /* GANTI URL BACKGROUND INI DENGAN FOTO PILIHANMU */
             background-image: url('https://images.unsplash.com/photo-1557672172-298e090bd0f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1080&q=80');
         }
+        #lock-bg-blur { transition: backdrop-filter 0.8s ease, background-color 0.8s ease; }
         
-        #lock-bg-blur {
-            transition: backdrop-filter 0.8s ease, background-color 0.8s ease;
-        }
-
         .liquid-btn {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), inset 0 0 10px rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), inset 0 0 10px rgba(255,255,255,0.2);
             transition: all 0.2s ease;
         }
         .liquid-btn:active { background: rgba(255, 255, 255, 0.4); transform: scale(0.92); }
-        
         .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-8px, 0, 0); } 40%, 60% { transform: translate3d(8px, 0, 0); } }
 
-        #view-initial, #view-pin {
-            transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
+        #view-initial, #view-pin { transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
         /* ========================================= */
         /* EFEK MAGIS WEB UTAMA                      */
@@ -86,18 +79,18 @@
 
         .heart-bg {
             position: fixed; font-size: 1.5rem; opacity: 0; pointer-events: none; z-index: 5;
-            animation: floatUp 5s ease-in forwards;
+            animation: floatUp 6s ease-in forwards;
         }
-        @keyframes floatUp { 0% { opacity: 0; transform: translateY(100vh) scale(0.5) rotate(0deg); } 15% { opacity: 0.7; } 85% { opacity: 0.7; } 100% { opacity: 0; transform: translateY(-10vh) scale(1.3) rotate(45deg); } }
+        @keyframes floatUp { 0% { opacity: 0; transform: translateY(100vh) scale(0.5) rotate(0deg); } 15% { opacity: 0.6; } 85% { opacity: 0.6; } 100% { opacity: 0; transform: translateY(-10vh) scale(1.2) rotate(30deg); } }
 
         .glass-card { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 15px 45px rgba(251, 113, 133, 0.15); }
 
         /* ========================================= */
-        /* ANIMASI AMPLOP & PERBAIKAN STAMP HATI     */
+        /* ANIMASI AMPLOP & SURAT MENGEMBANG BESAR   */
         /* ========================================= */
         #circle-bg, #intro-texts { transition: all 0.9s cubic-bezier(0.4, 0, 0.2, 1); }
         .envelope-master { width: 320px; height: 200px; transform: translate(-50%, -50%) scale(0.38); transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); }
-        .envelope-master.is-opening { pointer-events: auto; transform: translate(-50%, calc(-50% + 15vh)) scale(1); }
+        .envelope-master.is-opening { pointer-events: auto; transform: translate(-50%, calc(-50% + 10vh)) scale(1); }
 
         .env-back { position: absolute; inset: 0; background: #FDA4AF; border-radius: 12px; z-index: 1; box-shadow: 0 15px 35px rgba(225, 29, 72, 0.2); }
         .env-front { position: absolute; inset: 0; z-index: 3; border-radius: 12px; overflow: hidden; pointer-events: none; }
@@ -110,36 +103,36 @@
         }
         .env-flap-shape {
             width: 100%; height: 100%; background: #FB7185;
-            clip-path: polygon(0 0, 100% 0, 50% 100%);
-            border-top-left-radius: 12px; border-top-right-radius: 12px;
+            clip-path: polygon(0 0, 100% 0, 50% 100%); border-top-left-radius: 12px; border-top-right-radius: 12px;
         }
-        
-        /* FIX: Posisi hati 100% akurat di tengah, animasi scale aman */
         .env-flap-seal {
-            position: absolute; 
-            bottom: -22px; 
-            left: calc(50% - 22px); /* Menghindari bentrok dengan transform */
-            width: 44px; height: 44px; 
-            background: white; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            position: absolute; bottom: -22px; left: calc(50% - 22px);
+            width: 44px; height: 44px; background: white; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15);
         }
         .env-flap-seal span { display: block; transition: transform 0.1s 1.4s; }
         
         .envelope-master.is-opening .env-flap-wrapper { transform: rotateX(180deg); z-index: 1; }
         .envelope-master.is-opening .env-flap-seal span { transform: rotateX(180deg); }
 
+        /* KERTAS SURAT: Akan melebar dan memanjang seperti gambar referensi */
         .env-letter {
             position: absolute; bottom: 10px; left: 10px; right: 10px; height: 180px;
-            background: #fff; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); z-index: 2;
-            transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1) 1.8s, height 1s cubic-bezier(0.34, 1.56, 0.64, 1) 1.8s;
+            background: #fff; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); z-index: 2;
+            transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 1.6s, 
+                        height 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 1.6s;
         }
-        .envelope-master.is-opening .env-letter { transform: translateY(-140px); height: 340px; z-index: 10; }
-        .letter-content { opacity: 0; transition: opacity 0.6s ease 2.6s; }
+        .envelope-master.is-opening .env-letter { 
+            /* Meluncur ke atas dan membesar secara proporsional */
+            transform: translateY(-160px) scale(1.15); 
+            height: 420px; 
+            z-index: 10; 
+        }
+        .letter-content { opacity: 0; transition: opacity 0.8s ease 2.6s; }
         .envelope-master.is-opening .letter-content { opacity: 1; }
 
         .polaroid { background: white; padding: 12px 12px 35px 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: relative; }
-        .reveal { opacity: 0; transform: translateY(50px); transition: all 1.2s cubic-bezier(0.5, 0, 0, 1); }
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 1.2s cubic-bezier(0.5, 0, 0, 1); }
         .reveal.active { opacity: 1; transform: translateY(0); }
     </style>
 </head>
@@ -149,11 +142,8 @@
     <!-- IPHONE LOCK SCREEN (LIQUID GLASS)         -->
     <!-- ========================================= -->
     <div id="lock-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-start bg-cover bg-center transition-all duration-1000 ease-in-out">
-        
-        <!-- Efek Blur/Kaca Dinamis -->
         <div id="lock-bg-blur" class="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
         
-        <!-- TAHAP 1: TAMPILAN AWAL (JAM) -->
         <div id="view-initial" class="absolute inset-0 flex flex-col items-center justify-between pt-24 pb-12 z-20 cursor-pointer" onclick="showPinView()">
             <div class="flex flex-col items-center">
                 <div class="mb-2 text-white text-xl">🔒</div>
@@ -163,15 +153,12 @@
             
             <div class="flex flex-col items-center animate-pulse-slow">
                 <p class="text-white text-sm tracking-widest font-medium drop-shadow-md mb-2">KLIK UNTUK MEMBUKA</p>
-                <span class="text-white text-xl opacity-80 animate-bounce">👆</span>
+                <span class="text-white text-xl opacity-80 animate-float-fast">👆</span>
             </div>
         </div>
 
-        <!-- TAHAP 2: TAMPILAN LOGIN PIN -->
         <div id="view-pin" class="absolute inset-0 flex flex-col items-center justify-center pt-10 z-10 opacity-0 pointer-events-none transform translate-y-12">
             <h2 class="text-white mb-6 text-sm tracking-widest font-medium drop-shadow-md">MASUKKAN PIN</h2>
-            
-            <!-- Indikator Dots -->
             <div class="flex gap-5 mb-14" id="pin-dots">
                 <div class="w-3.5 h-3.5 rounded-full border-2 border-white transition-all duration-200 shadow-sm"></div>
                 <div class="w-3.5 h-3.5 rounded-full border-2 border-white transition-all duration-200 shadow-sm"></div>
@@ -180,22 +167,16 @@
                 <div class="w-3.5 h-3.5 rounded-full border-2 border-white transition-all duration-200 shadow-sm"></div>
                 <div class="w-3.5 h-3.5 rounded-full border-2 border-white transition-all duration-200 shadow-sm"></div>
             </div>
-
-            <!-- Numpad -->
             <div class="grid grid-cols-3 gap-x-8 gap-y-6">
-                <!-- Baris 1 -->
                 <button onclick="pressPin('1')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">1</button>
                 <button onclick="pressPin('2')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">2</button>
                 <button onclick="pressPin('3')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">3</button>
-                <!-- Baris 2 -->
                 <button onclick="pressPin('4')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">4</button>
                 <button onclick="pressPin('5')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">5</button>
                 <button onclick="pressPin('6')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">6</button>
-                <!-- Baris 3 -->
                 <button onclick="pressPin('7')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">7</button>
                 <button onclick="pressPin('8')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">8</button>
                 <button onclick="pressPin('9')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">9</button>
-                <!-- Baris 4 -->
                 <div></div>
                 <button onclick="pressPin('0')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">0</button>
                 <button onclick="pressPin('del')" class="w-[75px] h-[75px] rounded-full text-white text-lg font-medium flex justify-center items-center active:bg-white/20 transition-all">Hapus</button>
@@ -205,19 +186,21 @@
     </div>
 
     <!-- ========================================= -->
-    <!-- KONTEN WEB UTAMA (TAMPIL SETELAH UNLOCK)-->
+    <!-- KONTEN WEB UTAMA                          -->
     <!-- ========================================= -->
     <svg class="cloud-overlay cloud-top" preserveAspectRatio="none" viewBox="0 0 1440 320"><defs><filter id="blurTop" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="25" /></filter></defs><path fill="rgba(255, 255, 255, 0.95)" filter="url(#blurTop)" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,128C672,107,768,85,864,96C960,107,1056,149,1152,165.3C1248,181,1344,171,1392,165.3L1440,160L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"></path></svg>
     <svg class="cloud-overlay cloud-bottom" preserveAspectRatio="none" viewBox="0 0 1440 320"><defs><filter id="blurBottom" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="25" /></filter></defs><path fill="rgba(255, 255, 255, 0.95)" filter="url(#blurBottom)" d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>
 
     <div class="scroll-container">
-        <!-- SLIDE 1 -->
+        
+        <!-- SLIDE 1: Pembukaan & Surat Kejutan Besar -->
         <div id="slide1" class="min-h-screen relative w-full overflow-hidden flex items-center justify-center">
+            <!-- Ikon melayang lembut -->
             <div class="absolute top-1/4 left-1/4 text-2xl animate-float opacity-70">🌸</div>
             <div class="absolute bottom-1/4 right-1/4 text-3xl animate-float opacity-70" style="animation-delay: 2s;">✨</div>
 
             <div id="circle-bg" class="absolute top-[35%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-44 h-44 bg-white rounded-full shadow-[0_15px_40px_rgba(251,113,133,0.15)] flex justify-center items-center z-10">
-                <span class="absolute -top-6 left-1/2 -translate-x-1/2 text-3xl animate-bounce">🦋</span>
+                <span class="absolute -top-6 left-1/2 -translate-x-1/2 text-3xl animate-float-fast">🦋</span>
                 <span class="absolute top-4 -right-6 text-3xl animate-pulse-slow">✨</span>
                 <span class="absolute bottom-2 -left-6 text-3xl animate-float-fast">💕</span>
                 <span class="absolute -bottom-5 right-4 text-3xl animate-spin-slow">🌸</span>
@@ -232,20 +215,27 @@
                 </button>
             </div>
 
+            <!-- ENVELOPE MASTER & SURAT BESAR -->
             <div id="the-envelope" class="envelope-master absolute top-[35%] left-1/2 z-20 pointer-events-none">
                 <div class="env-back"></div>
-                <div class="env-letter">
-                    <div class="letter-content flex flex-col items-center justify-center h-full w-full px-6 text-center">
-                        <div class="text-4xl mb-3 animate-float-fast">🌸</div>
-                        <h2 class="font-script text-4xl text-rose-500 mb-4 font-bold">Kesayanganku,</h2>
-                        <p class="text-[15px] text-gray-600 mb-8 leading-relaxed font-light">Senyummu adalah alasan kenapa hari ini begitu cerah dan spesial. Gulir ke bawah pelan-pelan ya! ❤️</p>
-                        <button onclick="customSmoothScroll('slide2')" class="px-8 py-2.5 bg-gradient-to-r from-rose-400 to-pink-400 text-white rounded-full font-medium shadow-lg hover:shadow-pink-400/50 hover:scale-105 transition-all duration-300 flex items-center gap-2">
-                            <span>Lanjut ke Bawah</span><span class="animate-bounce">☁️</span>
+                
+                <div class="env-letter flex items-center justify-center">
+                    <div class="letter-content w-full px-6 py-4 flex flex-col items-center justify-center text-center">
+                        <h2 class="font-script text-4xl text-[#f43f5e] mb-3">Selamat Ulang Tahun!</h2>
+                        <h3 class="text-xl font-semibold text-rose-500 mb-5">[Nama Panggilan] ❤️</h3>
+                        
+                        <div class="text-[12px] text-gray-600 mb-6 leading-relaxed font-light space-y-3 px-2">
+                            <p>Di hari yang spesial ini, aku cuma mau bilang terima kasih. Terima kasih udah jadi versi terbaik dari diri kamu sendiri.</p>
+                            <p>Kehadiran kamu itu kayak warna pink di langit sore, selalu bikin tenang dan bahagia. Kamu pantes dapetin semua hal manis di dunia ini.</p>
+                        </div>
+                        
+                        <button onclick="customSmoothScroll('slide2')" class="px-6 py-2 bg-gradient-to-r from-rose-400 to-pink-400 text-white rounded-full text-sm font-medium shadow-md hover:shadow-pink-400/50 hover:scale-105 transition-all duration-300 flex items-center gap-2">
+                            <span>Lihat Memori Kita</span><span class="animate-float-fast">☁️</span>
                         </button>
                     </div>
                 </div>
-                <div class="env-front"></div>
                 
+                <div class="env-front"></div>
                 <div class="env-flap-wrapper">
                     <div class="env-flap-shape"></div>
                     <div class="env-flap-seal animate-heartbeat">
@@ -255,30 +245,36 @@
             </div>
         </div>
 
-        <!-- SLIDE 2 -->
+        <!-- SLIDE 2: Ucapan Pendek yang Ditukar -->
         <div id="slide2" class="min-h-screen flex flex-col items-center justify-center max-w-lg w-full mx-auto p-4 py-20 relative">
             <div class="absolute top-1/4 left-10 text-3xl opacity-50 animate-float-fast">🌸</div>
             <div class="absolute bottom-1/4 right-10 text-2xl opacity-50 animate-pulse-slow">✨</div>
+            
             <div class="glass-card rounded-3xl p-8 md:p-10 w-full text-center relative reveal">
+                <!-- Kucing & Beruang melayang lembut -->
                 <div class="absolute -top-10 left-8 text-5xl animate-peek-up z-0 drop-shadow-lg">🐱</div>
                 <div class="absolute top-24 -right-8 text-5xl animate-peek-side z-0 drop-shadow-lg">🧸</div>
+                
                 <div class="relative z-10 bg-white/50 p-6 rounded-2xl border border-white/60">
-                    <h2 class="font-script text-5xl text-[#f43f5e] mb-4">Selamat Ulang Tahun!</h2>
-                    <h3 class="text-2xl font-semibold text-rose-500 mb-6">[Nama Panggilan] ❤️</h3>
-                    <div class="text-gray-700 leading-relaxed mb-8 space-y-4 text-[15px]">
-                        <p>Di hari yang spesial ini, aku cuma mau bilang terima kasih. Terima kasih udah jadi versi terbaik dari diri kamu sendiri.</p>
-                        <p>Kehadiran kamu itu kayak warna pink di langit sore, selalu bikin tenang dan bahagia. Kamu pantes dapetin semua hal manis di dunia ini.</p>
+                    <div class="text-4xl mb-4 animate-float">🌸</div>
+                    <h2 class="font-script text-5xl text-[#f43f5e] mb-6">Kesayanganku,</h2>
+                    
+                    <div class="text-gray-700 leading-relaxed mb-8 space-y-4 text-[16px]">
+                        <p>Senyummu adalah alasan kenapa hari ini begitu cerah dan spesial.</p>
+                        <p>Gulir ke bawah pelan-pelan ya, ada memori manis untukmu! ❤️</p>
                     </div>
+                    
                     <button onclick="customSmoothScroll('slide3')" class="px-8 py-3 bg-white text-rose-500 border border-rose-200 rounded-full font-semibold shadow-md hover:bg-rose-50 hover:-translate-y-1 transition-all duration-300">
-                        Lihat Memori Kita 📸
+                        Galeri Foto 📸
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- SLIDE 3 -->
+        <!-- SLIDE 3: Galeri Memori -->
         <div id="slide3" class="min-h-screen flex flex-col items-center justify-center max-w-4xl w-full mx-auto p-4 py-20 overflow-hidden relative">
             <h2 class="font-script text-5xl text-[#f43f5e] mb-14 text-center reveal drop-shadow-sm">Momen-momen Cantikmu</h2>
+            
             <div class="flex flex-wrap justify-center gap-10 md:gap-16 mb-14">
                 <div class="polaroid w-52 md:w-64 animate-swing reveal" style="animation-delay: 0s;">
                     <div class="absolute -top-5 -right-4 text-4xl z-10 animate-pulse-slow drop-shadow-md">🎀</div>
@@ -287,6 +283,7 @@
                     </div>
                     <p class="font-script text-3xl text-center text-gray-700 mt-2">Cantik banget!</p>
                 </div>
+                
                 <div class="polaroid w-52 md:w-64 animate-swing reveal" style="animation-delay: 2s; animation-direction: alternate-reverse;">
                     <div class="absolute -bottom-5 -left-4 text-4xl z-10 animate-float drop-shadow-md">💖</div>
                     <div class="bg-rose-100 w-full h-52 md:h-64 mb-4 rounded flex items-center justify-center overflow-hidden border border-rose-50">
@@ -295,24 +292,27 @@
                     <p class="font-script text-3xl text-center text-gray-700 mt-2">Senyum favoritku ✨</p>
                 </div>
             </div>
+            
             <button onclick="customSmoothScroll('slide4')" class="px-10 py-3.5 bg-gradient-to-r from-[#fb7185] to-[#f43f5e] text-white rounded-full font-semibold shadow-lg hover:shadow-pink-400/50 hover:scale-105 transition-all duration-300 reveal">
                 Terakhir nih... 🎂
             </button>
         </div>
 
-        <!-- SLIDE 4 -->
+        <!-- SLIDE 4: Harapan & Kue -->
         <div id="slide4" class="min-h-screen flex flex-col items-center justify-center max-w-lg w-full text-center mx-auto p-4 py-20 pb-32">
             <div class="relative mb-12 reveal">
-                <div class="absolute -left-16 bottom-0 text-5xl animate-bounce drop-shadow-lg">🎁</div>
+                <div class="absolute -left-16 bottom-0 text-5xl animate-float-fast drop-shadow-lg">🎁</div>
                 <div class="absolute -right-16 -top-4 text-6xl animate-float drop-shadow-lg">🎈</div>
                 <div class="text-[100px] animate-pulse-slow drop-shadow-2xl">🎂</div>
             </div>
+            
             <div class="glass-card rounded-3xl p-8 md:p-10 mb-10 w-full reveal relative overflow-hidden">
                 <div class="absolute top-0 right-0 p-4 text-4xl opacity-20">✨</div>
                 <h2 class="font-script text-5xl text-[#f43f5e] mb-6">Make a Wish! ✨</h2>
                 <p class="text-gray-700 mb-6 text-[16px] leading-relaxed">Semoga di umur yang baru ini, kamu semakin bersinar, semakin bahagia, dan semua yang kamu semogakan bisa terwujud satu per satu.</p>
                 <p class="font-semibold text-rose-500 text-xl font-script">I love you, always. 🌸</p>
             </div>
+            
             <button onclick="createConfetti()" class="px-10 py-4 bg-white text-rose-500 border-2 border-rose-200 rounded-full font-bold shadow-xl hover:bg-rose-50 hover:-translate-y-1 transition-all duration-300 flex items-center gap-3 reveal">
                 <span>Klik untuk keajaiban</span> <span class="animate-spin-slow">✨</span>
             </button>
@@ -327,28 +327,23 @@
         let currentPin = '';
         const correctPin = '121212'; // GANTI PIN RAHASIAMU DI SINI
 
-        // Transisi dari Layar Awal ke Layar PIN
         function showPinView() {
             const initial = document.getElementById('view-initial');
             const pin = document.getElementById('view-pin');
             const bgBlur = document.getElementById('lock-bg-blur');
             
-            // Sembunyikan jam
             initial.style.opacity = '0';
             initial.style.transform = 'translateY(-40px)';
             initial.style.pointerEvents = 'none';
             
-            // Munculkan PIN pad
             pin.style.opacity = '1';
             pin.style.transform = 'translateY(0)';
             pin.style.pointerEvents = 'auto';
 
-            // Ganti background jadi Liquid Glass pekat
             bgBlur.classList.remove('bg-black/20', 'backdrop-blur-sm');
             bgBlur.classList.add('bg-black/40', 'backdrop-blur-xl');
         }
 
-        // Update Waktu di Layar Kunci
         function updateTime() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
@@ -368,48 +363,38 @@
                 currentPin += num;
             }
             updateDots();
-            
-            if (currentPin.length === 6) {
-                setTimeout(checkPin, 100);
-            }
+            if (currentPin.length === 6) setTimeout(checkPin, 100);
         }
 
         function updateDots() {
             const dots = document.querySelectorAll('#pin-dots div');
             dots.forEach((dot, index) => {
                 if(index < currentPin.length) {
-                    dot.classList.add('bg-white');
-                    dot.classList.remove('border-2');
+                    dot.classList.add('bg-white'); dot.classList.remove('border-2');
                 } else {
-                    dot.classList.remove('bg-white');
-                    dot.classList.add('border-2');
+                    dot.classList.remove('bg-white'); dot.classList.add('border-2');
                 }
             });
         }
 
         function checkPin() {
             if (currentPin === correctPin) {
-                // PIN Benar -> Buka Kunci!
                 const lockScreen = document.getElementById('lock-screen');
                 lockScreen.style.opacity = '0';
-                lockScreen.style.transform = 'scale(1.1)'; // Efek zoom out
+                lockScreen.style.transform = 'scale(1.1)'; 
                 
                 setTimeout(() => {
                     lockScreen.style.display = 'none';
-                    document.body.classList.remove('locked'); // Buka scroll
-                    
-                    // Mulai efek hati setelah terbuka
+                    document.body.classList.remove('locked'); 
                     for(let i=0; i<8; i++) setTimeout(createFloatingHeart, i * 300);
                     setInterval(createFloatingHeart, 1200);
                 }, 1000);
             } else {
-                // PIN Salah -> Guncang!
                 const dotsContainer = document.getElementById('pin-dots');
                 dotsContainer.classList.add('shake');
                 setTimeout(() => {
                     dotsContainer.classList.remove('shake');
-                    currentPin = '';
-                    updateDots();
+                    currentPin = ''; updateDots();
                 }, 400);
             }
         }
@@ -453,14 +438,14 @@
             const emojis = ['💖', '🌸', '✨', '💕', '🌷', '🦋'];
             heart.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
             heart.style.left = Math.random() * 100 + 'vw';
-            const duration = Math.random() * 4 + 5;
+            const duration = Math.random() * 4 + 6;
             heart.style.animationDuration = duration + 's';
             heart.style.transform = `scale(${Math.random() * 0.8 + 0.8})`;
             document.body.appendChild(heart);
             setTimeout(() => heart.remove(), duration * 1000);
         }
 
-        function burstHearts() { for(let i=0; i<15; i++) setTimeout(createFloatingHeart, i * 100); }
+        function burstHearts() { for(let i=0; i<15; i++) setTimeout(createFloatingHeart, i * 150); }
 
         function createConfetti() {
             burstHearts();
@@ -476,14 +461,13 @@
                     const confettis = ['🎊', '🎉', '🎈', '💖', '🎁', '✨'];
                     confetti.innerHTML = confettis[Math.floor(Math.random() * confettis.length)];
                     confetti.style.left = Math.random() * 100 + 'vw';
-                    confetti.style.animationDuration = (Math.random() * 2 + 2.5) + 's';
+                    confetti.style.animationDuration = (Math.random() * 2 + 3) + 's';
                     confetti.style.zIndex = "99";
                     document.body.appendChild(confetti);
-                    setTimeout(() => confetti.remove(), 5000);
+                    setTimeout(() => confetti.remove(), 6000);
                 }, i * 50);
             }
         }
     </script>
 </body>
 </html>
-```eof
