@@ -44,12 +44,14 @@
         body::-webkit-scrollbar { display: none; }
         
         /* ========================================= */
-        /* IPHONE LOCK SCREEN & LIQUID GLASS         */
+        /* IPHONE LOCK SCREEN (SOLID BACKGROUND)     */
         /* ========================================= */
         #lock-screen {
+            /* GANTI URL BACKGROUND INI DENGAN FOTO PILIHANMU */
             background-image: url('https://images.unsplash.com/photo-1607519961601-52319f390025?ixlib=rb-4.0.3&auto=format&fit=crop&w=1080&q=80');
+            background-color: #1a1a1a; /* Backup color */
+            z-index: 9999;
         }
-        #lock-bg-blur { transition: backdrop-filter 0.8s ease, background-color 0.8s ease; }
         
         .liquid-widget {
             background: rgba(25, 25, 25, 0.4); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
@@ -69,7 +71,7 @@
 
         .ios-time {
             font-size: 110px; font-weight: 700; letter-spacing: -0.05em; line-height: 0.9;
-            color: rgba(255, 255, 255, 0.85); mix-blend-mode: overlay;
+            color: rgba(255, 255, 255, 0.9); mix-blend-mode: normal; text-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
 
         /* ========================================= */
@@ -89,7 +91,7 @@
         .glass-card { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 15px 45px rgba(251, 113, 133, 0.15); }
 
         /* ========================================= */
-        /* ANIMASI SURAT (FULL 1 HALAMAN PENUH)      */
+        /* ANIMASI SURAT (FULL 100% HALAMAN PENUH)   */
         /* ========================================= */
         #circle-bg, #intro-texts { transition: all 0.9s cubic-bezier(0.4, 0, 0.2, 1); }
         .envelope-master { width: 320px; height: 200px; transform: translate(-50%, -50%) scale(0.38); transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -119,7 +121,7 @@
         .envelope-master.is-opening .env-back, .envelope-master.is-opening .env-front { animation: envelopeVanishBase 0.8s ease forwards 2.5s; }
         .envelope-master.is-opening .env-flap-wrapper { animation: envelopeVanishFlap 0.8s ease forwards 2.5s; }
 
-        /* SURAT 100% FULLSCREEN (TIDAK TERPOTONG) */
+        /* SURAT 100% FULLSCREEN (Benar-benar penuh) */
         .env-letter {
             position: absolute; bottom: 10px; left: 50%; width: 300px; height: 180px; 
             transform: translateX(-50%); background: #fff; border-radius: 12px; z-index: 2;
@@ -134,12 +136,14 @@
             0% { transform: translateX(-50%) translateY(0); z-index: 2; height: 180px; width: 300px; bottom: 10px; }
             35% { transform: translateX(-50%) translateY(-250px); z-index: 60; height: 180px; width: 300px; bottom: 10px; }
             100% { 
+                /* Fixed Fullscreen untuk menutupi pink background sepenuhnya */
                 transform: translateX(-50%) translateY(0); 
                 z-index: 100; 
-                height: 100vh; /* FULL TINGGI LAYAR */
-                width: 100vw; /* FULL LEBAR LAYAR */
-                bottom: 0; 
-                border-radius: 0; /* TANPA SUDUT MELENGKUNG */
+                height: 100vh; 
+                width: 100vw; 
+                top: -15vh; /* Menyeimbangkan posisi translateY dari .envelope-master */
+                left: 50%;
+                border-radius: 0; 
                 box-shadow: none;
             }
         }
@@ -170,7 +174,7 @@
         }
 
         /* ========================================= */
-        /* EFEK KEMBANG API CINTA (MELEDAK)          */
+        /* EFEK KEMBANG API CINTA (SATU KALI LEDAKAN)*/
         /* ========================================= */
         .firework-particle {
             position: fixed; bottom: -10vh; left: 50%;
@@ -178,7 +182,7 @@
         }
         @keyframes explodeFirework { 
             0% { transform: translate(-50%, 0) scale(0.2) rotate(0deg); opacity: 1; } 
-            70% { opacity: 1; } 
+            80% { opacity: 1; } 
             100% { transform: translate(calc(-50% + var(--tx)), var(--ty)) scale(var(--scale)) rotate(var(--rot)); opacity: 0; } 
         }
 
@@ -191,15 +195,15 @@
 <body class="font-sans text-gray-800 antialiased locked">
 
     <!-- ========================================= -->
-    <!-- IPHONE LOCK SCREEN (LIQUID GLASS)         -->
+    <!-- IPHONE LOCK SCREEN (SOLID FULL SCREEN)    -->
     <!-- ========================================= -->
-    <div id="lock-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-start bg-cover bg-center transition-all duration-1000 ease-in-out">
-        <div id="lock-bg-blur" class="absolute inset-0 bg-black/10 transition-all duration-700"></div>
+    <div id="lock-screen" class="fixed inset-0 flex flex-col items-center justify-start bg-cover bg-center transition-opacity duration-1000 ease-in-out">
+        <div id="lock-bg-blur" class="absolute inset-0 bg-black/20 transition-all duration-700"></div>
         
         <div id="view-initial" class="absolute inset-0 flex flex-col justify-between pt-16 pb-6 z-20 cursor-pointer" onclick="showPinView()">
             <div class="flex flex-col items-center w-full px-4">
                 <p id="lock-date-main" class="text-white text-lg font-semibold drop-shadow-md tracking-wide mb-1">Mon Nov 3</p>
-                <h1 id="lock-time-main" class="ios-time drop-shadow-2xl">11:19</h1>
+                <h1 id="lock-time-main" class="ios-time">11:19</h1>
             </div>
             
             <div class="w-full flex flex-col items-center px-5 gap-3 mt-auto mb-10">
@@ -318,27 +322,27 @@
                 
                 <div class="env-letter flex flex-col items-center justify-center">
                     <!-- KONTEN SURAT FULLSCREEN (Rapi dan tidak terpotong) -->
-                    <div class="letter-content absolute inset-0 w-full h-full flex flex-col items-center justify-center text-center max-w-4xl mx-auto px-4 md:px-10">
+                    <div class="letter-content absolute inset-0 w-full h-full flex flex-col items-center justify-center text-center px-4 md:px-20 max-w-[1000px] mx-auto">
                         
                         <!-- PIGURA FOTO DI KANAN ATAS SURAT -->
-                        <div class="absolute top-6 right-6 w-16 h-16 md:w-24 md:h-24 rounded-full border-4 border-rose-100 overflow-hidden shadow-lg transform rotate-3 animate-float-fast z-10">
+                        <div class="absolute top-10 right-10 w-24 h-24 md:w-32 md:h-32 rounded-full border-[6px] border-rose-100 overflow-hidden shadow-xl transform rotate-3 animate-float-fast z-10">
                             <!-- GANTI URL FOTO INI -->
                             <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Foto Kita" class="w-full h-full object-cover">
                         </div>
 
-                        <div class="text-4xl mb-2 md:mb-6 animate-float">🌸</div>
-                        <h2 class="font-script text-4xl md:text-6xl text-[#f43f5e] mb-2 md:mb-4 drop-shadow-sm">Selamat Ulang Tahun!</h2>
-                        <h3 class="text-xl md:text-3xl font-semibold text-rose-500 mb-6 md:mb-10">[Nama Panggilan] ❤️</h3>
+                        <div class="text-5xl mb-6 animate-float">🌸</div>
+                        <h2 class="font-script text-5xl md:text-7xl text-[#f43f5e] mb-4 drop-shadow-sm">Selamat Ulang Tahun!</h2>
+                        <h3 class="text-2xl md:text-4xl font-semibold text-rose-500 mb-10">[Nama Panggilan] ❤️</h3>
                         
-                        <div class="text-[14px] md:text-xl text-gray-700 leading-relaxed font-light space-y-4 md:space-y-6 px-4 md:px-12">
+                        <div class="text-[16px] md:text-xl text-gray-700 leading-relaxed font-light space-y-6 px-6">
                             <p>Di hari yang spesial ini, aku cuma mau bilang terima kasih. Terima kasih udah jadi versi terbaik dari diri kamu sendiri.</p>
                             <p>Kehadiran kamu itu kayak warna pink di langit sore, selalu bikin tenang dan bahagia. Kamu pantes dapetin semua hal manis di dunia ini.</p>
                         </div>
                         
                         <!-- TOMBOL LOVE PENGGANTI -->
-                        <div class="mt-8 md:mt-12 pt-4 pb-2 flex flex-col items-center justify-center cursor-pointer group" onclick="customSmoothScroll('slide2')">
-                            <div class="text-6xl md:text-7xl animate-pulse-slow drop-shadow-xl group-hover:scale-125 transition-transform duration-300">💖</div>
-                            <p class="text-rose-400 font-bold text-[10px] md:text-xs tracking-[0.2em] mt-3 uppercase animate-float-fast font-sans">Klik Love Untuk Melanjutkan</p>
+                        <div class="mt-14 pt-4 pb-2 flex flex-col items-center justify-center cursor-pointer group" onclick="customSmoothScroll('slide2')">
+                            <div class="text-7xl md:text-8xl animate-pulse-slow drop-shadow-xl group-hover:scale-125 transition-transform duration-300">💖</div>
+                            <p class="text-rose-400 font-bold text-[12px] md:text-sm tracking-[0.2em] mt-5 uppercase animate-float-fast font-sans">Klik Love Untuk Melanjutkan</p>
                         </div>
                     </div>
                 </div>
@@ -457,8 +461,8 @@
             pin.style.transform = 'translateY(0)';
             pin.style.pointerEvents = 'auto';
 
-            bgBlur.classList.add('bg-black/50', 'backdrop-blur-2xl');
-            bgBlur.classList.remove('bg-black/10');
+            bgBlur.classList.add('bg-black/60', 'backdrop-blur-3xl');
+            bgBlur.classList.remove('bg-black/20');
         }
 
         function updateTime() {
@@ -586,46 +590,45 @@
         }
 
         // ==========================================
-        // KEMBANG API RAKSASA (MELEDAK DARI BAWAH)
+        // KEMBANG API SATU KALI LEDAKAN (ELEGAN)
         // ==========================================
         function fireworkParticle() {
             const heart = document.createElement('div');
             heart.classList.add('firework-particle');
-            const emojis = ['💖', '💕', '💗', '🌸', '✨', '🥰', '🎇'];
+            
+            // HANYA EMOJI BUNGA DAN HATI YANG FEMINIM
+            const emojis = ['💖', '💕', '💗', '🌸', '✨', '🌷'];
             heart.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
             
-            // Menyebar di sepanjang layar bawah
-            heart.style.left = (Math.random() * 100) + 'vw';
+            heart.style.left = '50%'; // Semua melesat dari titik tengah bawah
             heart.style.fontSize = (Math.random() * 2 + 1.5) + 'rem';
 
-            // Lintasan Kembang Api (Meledak Menyebar ke Atas)
-            const tx = (Math.random() * 40 - 20) + 'vw';
-            const ty = -(Math.random() * 80 + 20) + 'vh';
+            // Menyebar seperti mangkok ke atas
+            const tx = (Math.random() * 100 - 50) + 'vw'; 
+            const ty = -(Math.random() * 70 + 30) + 'vh'; 
             const rot = (Math.random() * 360) + 'deg';
-            const scale = (Math.random() * 1.5 + 1);
+            const scale = (Math.random() * 1.5 + 0.8);
 
             heart.style.setProperty('--tx', tx);
             heart.style.setProperty('--ty', ty);
             heart.style.setProperty('--rot', rot);
             heart.style.setProperty('--scale', scale);
 
-            const duration = Math.random() * 2 + 1.5;
-            heart.style.animation = `explodeFirework ${duration}s cubic-bezier(0.25, 1, 0.5, 1) forwards`;
+            // Durasi ledakan seragam namun smooth
+            const duration = Math.random() * 2.5 + 2; 
+            heart.style.animation = `explodeFirework ${duration}s cubic-bezier(0.1, 0.8, 0.3, 1) forwards`;
 
             document.body.appendChild(heart);
             setTimeout(() => heart.remove(), duration * 1000);
         }
 
         function fireworkMagic() {
-            let count = 0;
-            const interval = setInterval(() => {
-                // Keluarkan 12 partikel setiap 50 milidetik (Total ratusan partikel!)
-                for(let i=0; i<12; i++) fireworkParticle();
-                count++;
-                if(count > 60) clearInterval(interval); // Kembang api menyala heboh selama 3 detik
-            }, 50);
+            // LEDAKAN TUNGGAL: Mengeluarkan 100 partikel sekaligus
+            for(let i=0; i<100; i++) {
+                // Sedikit delay agar terlihat bervolume (0-150ms)
+                setTimeout(fireworkParticle, Math.random() * 150); 
+            }
         }
     </script>
 </body>
 </html>
-```eof
