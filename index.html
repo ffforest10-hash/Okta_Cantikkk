@@ -19,13 +19,14 @@
                     },
                     animation: {
                         'float': 'float 7s ease-in-out infinite',
-                        'float-fast': 'float 5s ease-in-out infinite',
+                        'float-fast': 'float 4s ease-in-out infinite',
                         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'swing': 'swing 6s ease-in-out infinite alternate',
                         'heartbeat': 'heartbeat 2s ease-in-out infinite',
                         'spin-slow': 'spin 15s linear infinite',
                     },
                     keyframes: {
+                        /* Semua animasi melayang mulus (Anti-kasar) */
                         float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-12px)' } },
                         'float-fast': { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-8px)' } },
                         swing: { '0%': { transform: 'rotate(-2deg)' }, '100%': { transform: 'rotate(2deg)' } },
@@ -47,7 +48,11 @@
         /* IPHONE LOCK SCREEN & LIQUID GLASS         */
         /* ========================================= */
         #lock-screen {
+            /* Background hitam pekat di-fallback agar amplop tidak bocor */
+            background-color: #1a1a1a;
+            /* GANTI URL BACKGROUND INI DENGAN FOTO PILIHANMU */
             background-image: url('https://images.unsplash.com/photo-1607519961601-52319f390025?ixlib=rb-4.0.3&auto=format&fit=crop&w=1080&q=80');
+            z-index: 1000; /* Paling atas */
         }
         #lock-bg-blur { transition: backdrop-filter 0.8s ease, background-color 0.8s ease; }
         
@@ -89,12 +94,22 @@
         .glass-card { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 15px 45px rgba(251, 113, 133, 0.15); }
 
         /* ========================================= */
-        /* ANIMASI SURAT (FULL 100% HALAMAN PENUH)   */
+        /* ANIMASI SURAT PRESISI (FULL 100% LAYAR)   */
         /* ========================================= */
         #circle-bg, #intro-texts { transition: all 0.9s cubic-bezier(0.4, 0, 0.2, 1); }
-        .envelope-master { width: 320px; height: 200px; transform: translate(-50%, -50%) scale(0.38); transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        .envelope-master.is-opening { pointer-events: auto; transform: translate(-50%, calc(-50% + 15vh)) scale(1); }
+        .envelope-master { 
+            position: absolute;
+            top: 35vh; left: 50vw; /* Menggunakan VW/VH agar presisi di tengah */
+            width: 320px; height: 200px; 
+            transform: translate(-50%, -50%) scale(0.38); /* Skala kecil awal */
+            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); 
+            z-index: 20;
+        }
+        .envelope-master.is-opening { 
+            pointer-events: auto; 
+            transform: translate(-50%, -50%) scale(1); /* Kembali ukuran asli di tengah persis */
+        }
 
         .env-back { position: absolute; inset: 0; background: #FDA4AF; border-radius: 12px; z-index: 1; box-shadow: 0 15px 35px rgba(225, 29, 72, 0.2); }
         .env-front { position: absolute; inset: 0; z-index: 3; border-radius: 12px; overflow: hidden; pointer-events: none; }
@@ -112,47 +127,48 @@
         .envelope-master.is-opening .env-flap-wrapper { transform: rotateX(180deg); z-index: 1; }
         .envelope-master.is-opening .env-flap-seal span { transform: rotateX(180deg); }
 
-        /* Amplop Lenyap */
+        /* Amplop Lenyap Setelah Dibuka */
         @keyframes envelopeVanishBase { to { opacity: 0; transform: scale(0.5); visibility: hidden; } }
         @keyframes envelopeVanishFlap { to { opacity: 0; transform: rotateX(180deg) scale(0.5); visibility: hidden; } }
-        
         .envelope-master.is-opening .env-back, .envelope-master.is-opening .env-front { animation: envelopeVanishBase 0.8s ease forwards 2.5s; }
         .envelope-master.is-opening .env-flap-wrapper { animation: envelopeVanishFlap 0.8s ease forwards 2.5s; }
 
-        /* SURAT 100% FULLSCREEN (Benar-benar penuh, Fix Terpotong) */
+        /* SURAT RAKSASA (ANTI MIRING, ANTI TERPOTONG) */
         .env-letter {
-            position: absolute; bottom: 10px; left: 50%; width: 300px; height: 180px; 
-            transform: translateX(-50%); background: #fff; border-radius: 12px; z-index: 2;
+            position: absolute; bottom: 10px; left: 10px; right: 10px; height: 180px; 
+            background: #fff; border-radius: 12px; z-index: 2;
             box-shadow: 0 8px 30px rgba(0,0,0,0.15);
         }
         
         .envelope-master.is-opening .env-letter { 
-            animation: letterFullscreen 2.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1.2s forwards;
+            animation: letterFullscreen 2s cubic-bezier(0.34, 1.56, 0.64, 1) 1.2s forwards;
         }
 
+        /* KALKULASI ABSOLUT AGAR PRESISI 100% LAYAR */
         @keyframes letterFullscreen {
-            0% { transform: translateX(-50%) translateY(0); z-index: 2; height: 180px; width: 300px; bottom: 10px; }
-            35% { transform: translateX(-50%) translateY(-250px); z-index: 60; height: 180px; width: 300px; bottom: 10px; }
+            0% { 
+                bottom: 10px; left: 10px; right: 10px; height: 180px; z-index: 2; border-radius: 12px;
+            }
+            30% { 
+                bottom: 240px; left: 10px; right: 10px; height: 180px; z-index: 60; border-radius: 12px;
+            }
             100% { 
-                /* FIXED: Posisi absolut penuh menutupi segalanya */
-                position: fixed;
-                transform: translateX(0) translateY(0); 
-                z-index: 100; 
-                height: 100vh; 
+                /* Mengambil alih 100% layar menggunakan kalkulasi jarak dari tengah amplop */
+                bottom: calc(-65vh + 100px); 
+                left: calc(-50vw + 160px); 
+                right: auto;
                 width: 100vw; 
-                top: 0;
-                left: 0;
+                height: 100vh; 
+                z-index: 100; 
                 border-radius: 0; 
                 box-shadow: none;
-                bottom: auto;
             }
         }
 
         .letter-content { 
             opacity: 0; transition: opacity 0.8s ease 3.2s; 
+            /* Scroll internal agar tidak terpotong di HP kecil */
             overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
-            /* Pastikan konten bisa di-scroll jika layar kecil */
-            height: 100%;
         }
         .envelope-master.is-opening .letter-content { opacity: 1; }
 
@@ -175,15 +191,15 @@
             100% { transform: scale(0.2); opacity: 0; visibility: hidden; }
         }
 
-        /* EFEK KEMBANG API CINTA */
-        @keyframes floatUpFast { 
-            0% { opacity: 0; transform: translateY(110vh) scale(0.5) rotate(0deg); } 
-            20% { opacity: 1; } 
-            100% { opacity: 0; transform: translateY(-30vh) scale(1.8) rotate(45deg); } 
-        }
+        /* EFEK KEMBANG API LEMBUT (1x Ledakan) */
         .firework-particle {
-            position: fixed; pointer-events: none; z-index: 250;
-            animation: floatUpFast 2.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            position: fixed; bottom: -10vh; left: 50%;
+            z-index: 9999; pointer-events: none;
+        }
+        @keyframes explodeFirework { 
+            0% { transform: translate(-50%, 0) scale(0.2) rotate(0deg); opacity: 1; } 
+            70% { opacity: 1; } 
+            100% { transform: translate(calc(-50% + var(--tx)), var(--ty)) scale(var(--scale)) rotate(var(--rot)); opacity: 0; } 
         }
 
         /* Polaroid styling */
@@ -194,9 +210,9 @@
 </head>
 <body class="font-sans text-gray-800 antialiased locked">
 
-    <!-- AUDIO ELEMENT (GANTI URL DENGAN LAGU KESUKAANMU) -->
+    <!-- AUDIO ELEMENT: DIPUTAR OTOMATIS SAAT LAYAR DIKLIK -->
+    <!-- Ganti URL ini dengan lagu pilihanmu -->
     <audio id="bg-music" loop>
-        <!-- Soft romantic piano instrumental from Pixabay -->
         <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=a-soft-piano-and-strings-111322.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
@@ -207,7 +223,6 @@
     <div id="lock-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-start bg-cover bg-center transition-all duration-1000 ease-in-out">
         <div id="lock-bg-blur" class="absolute inset-0 bg-black/10 transition-all duration-700"></div>
         
-        <!-- INITIAL VIEW: MUSIC STARTS ON CLICK HERE -->
         <div id="view-initial" class="absolute inset-0 flex flex-col justify-between pt-16 pb-6 z-20 cursor-pointer" onclick="showPinView()">
             <div class="flex flex-col items-center w-full px-4">
                 <p id="lock-date-main" class="text-white text-lg font-semibold drop-shadow-md tracking-wide mb-1">Mon Nov 3</p>
@@ -324,33 +339,32 @@
             </div>
 
             <!-- ENVELOPE MASTER -->
-            <div id="the-envelope" class="envelope-master absolute top-[35%] left-1/2 z-20 pointer-events-none">
+            <div id="the-envelope" class="envelope-master z-20 pointer-events-none">
                 <div class="env-back"></div>
                 
                 <div class="env-letter flex flex-col items-center justify-center">
                     <!-- KONTEN SURAT FULLSCREEN (Rapi dan tidak terpotong) -->
-                    <!-- FIX: Menghapus batas lebar (max-w) agar benar-benar penuh -->
-                    <div class="letter-content absolute inset-0 w-full h-full flex flex-col items-center justify-center text-center px-4 md:px-20">
+                    <div class="letter-content absolute inset-0 w-full h-full flex flex-col items-center text-center px-4 pt-12 md:pt-20">
                         
                         <!-- PIGURA FOTO DI KANAN ATAS (SEKARANG KOTAK/POLAROID STYLE) -->
-                        <div class="absolute top-10 right-10 w-24 h-24 md:w-32 md:h-32 rounded-lg md:rounded-xl border-[6px] border-rose-100 overflow-hidden shadow-xl transform rotate-3 animate-float-fast z-10">
+                        <div class="absolute top-8 right-8 w-20 h-20 md:w-28 md:h-28 rounded-xl border-[6px] border-rose-100 overflow-hidden shadow-xl transform rotate-3 animate-float-fast z-10">
                             <!-- GANTI URL FOTO INI -->
                             <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Foto Kita" class="w-full h-full object-cover">
                         </div>
 
-                        <div class="text-5xl mb-6 animate-float">🌸</div>
+                        <div class="text-4xl md:text-5xl mb-4 animate-float mt-10 md:mt-6">🌸</div>
                         <h2 class="font-script text-5xl md:text-7xl text-[#f43f5e] mb-4 drop-shadow-sm">Selamat Ulang Tahun!</h2>
-                        <h3 class="text-2xl md:text-4xl font-semibold text-rose-500 mb-10">[Nama Panggilan] ❤️</h3>
+                        <h3 class="text-2xl md:text-4xl font-semibold text-rose-500 mb-8 md:mb-12">[Nama Panggilan] ❤️</h3>
                         
-                        <div class="text-[16px] md:text-xl text-gray-700 leading-relaxed font-light space-y-6 px-6 max-w-4xl mx-auto">
+                        <div class="text-[15px] md:text-xl text-gray-700 leading-relaxed font-light space-y-4 md:space-y-6 px-4 md:px-20 max-w-4xl">
                             <p>Di hari yang spesial ini, aku cuma mau bilang terima kasih. Terima kasih udah jadi versi terbaik dari diri kamu sendiri.</p>
                             <p>Kehadiran kamu itu kayak warna pink di langit sore, selalu bikin tenang dan bahagia. Kamu pantes dapetin semua hal manis di dunia ini.</p>
                         </div>
                         
-                        <!-- TOMBOL LOVE DI NAIKKAN KE ATAS (MT DIPERKECIL) -->
-                        <div class="mt-14 pt-4 pb-2 flex flex-col items-center justify-center cursor-pointer group" onclick="customSmoothScroll('slide2')">
+                        <!-- TOMBOL LOVE NAIK KE ATAS AMAN DARI POTONGAN BAWAH -->
+                        <div class="mt-14 md:mt-20 flex flex-col items-center justify-center cursor-pointer group" onclick="customSmoothScroll('slide2')">
                             <div class="text-7xl md:text-8xl animate-pulse-slow drop-shadow-xl group-hover:scale-125 transition-transform duration-300">💖</div>
-                            <p class="text-rose-400 font-bold text-[12px] md:text-sm tracking-[0.2em] mt-5 uppercase animate-float-fast font-sans">Klik Love Untuk Melanjutkan</p>
+                            <p class="font-sans font-bold uppercase tracking-[0.2em] text-rose-400 text-[11px] md:text-sm mt-5 animate-float-fast">Klik Love Untuk Melanjutkan</p>
                         </div>
                     </div>
                 </div>
@@ -451,7 +465,7 @@
     <!-- SCRIPT INTERAKTIF -->
     <script>
         // ==========================================
-        // AUDIO & LOCK SCREEN (TRANSISI & PIN)
+        // LOGIKA LOCK SCREEN (MUSIC, TRANSISI & PIN)
         // ==========================================
         let currentPin = '';
         const correctPin = '121212'; 
@@ -538,6 +552,9 @@
             }
         }
 
+        // ==========================================
+        // LOGIKA WEB UTAMA (Surat & Scroll)
+        // ==========================================
         function bukaKeajaiban() {
             document.getElementById('circle-bg').style.cssText = 'opacity:0; transform: translate(-50%, -50%) scale(0.5)';
             document.getElementById('intro-texts').style.cssText = 'opacity:0; transform: translate(-50%, 150px); pointer-events:none';
@@ -583,6 +600,9 @@
 
         function burstHearts() { for(let i=0; i<15; i++) setTimeout(createFloatingHeart, i * 150); }
 
+        // ==========================================
+        // LOGIKA SLIDE 4 (Dynamic Island & Kembang Api 1x)
+        // ==========================================
         function createMagic() {
             const btn = document.getElementById('magic-btn');
             const content = document.getElementById('slide4-content');
@@ -603,24 +623,38 @@
             }, 1800);
         }
 
+        function fireworkParticle() {
+            const heart = document.createElement('div');
+            heart.classList.add('firework-particle');
+            // HANYA EMOJI BUNGA DAN LOVE (Sesuai Permintaan)
+            const emojis = ['💖', '💕', '💗', '🌸', '✨'];
+            heart.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
+            
+            heart.style.left = (Math.random() * 100) + 'vw';
+            heart.style.fontSize = (Math.random() * 2 + 1.5) + 'rem';
+
+            const tx = (Math.random() * 40 - 20) + 'vw';
+            const ty = -(Math.random() * 80 + 20) + 'vh';
+            const rot = (Math.random() * 360) + 'deg';
+            const scale = (Math.random() * 1.5 + 1);
+
+            heart.style.setProperty('--tx', tx);
+            heart.style.setProperty('--ty', ty);
+            heart.style.setProperty('--rot', rot);
+            heart.style.setProperty('--scale', scale);
+
+            const duration = Math.random() * 2 + 1.5;
+            heart.style.animation = `explodeFirework ${duration}s cubic-bezier(0.25, 1, 0.5, 1) forwards`;
+
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), duration * 1000);
+        }
+
         function fireworkMagic() {
-            let count = 0;
-            const interval = setInterval(() => {
-                for(let i=0; i<8; i++) {
-                    const heart = document.createElement('div');
-                    heart.classList.add('firework-particle');
-                    const emojis = ['💖', '💕', '💗', '🌸', '✨', '🥰'];
-                    heart.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
-                    heart.style.left = (Math.random() * 100) + 'vw';
-                    const duration = Math.random() * 2 + 2;
-                    heart.style.animationDuration = duration + 's';
-                    heart.style.transform = `scale(${Math.random() * 1 + 1})`;
-                    document.body.appendChild(heart);
-                    setTimeout(() => heart.remove(), duration * 1000);
-                }
-                count++;
-                if(count > 60) clearInterval(interval);
-            }, 50);
+            // HANYA 1X LEDAKAN SERENTAK (35 partikel bunga/love)
+            for(let i=0; i<35; i++) {
+                setTimeout(fireworkParticle, i * 20); // Meledak cepat dalam waktu 0.7 detik
+            }
         }
     </script>
 </body>
