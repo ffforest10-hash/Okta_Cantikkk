@@ -47,16 +47,13 @@
         /* IPHONE LOCK SCREEN & LIQUID GLASS         */
         /* ========================================= */
         #lock-screen {
-            /* GANTI URL BACKGROUND INI DENGAN FOTO PILIHANMU */
             background-image: url('https://images.unsplash.com/photo-1607519961601-52319f390025?ixlib=rb-4.0.3&auto=format&fit=crop&w=1080&q=80');
         }
         #lock-bg-blur { transition: backdrop-filter 0.8s ease, background-color 0.8s ease; }
         
         .liquid-widget {
-            background: rgba(25, 25, 25, 0.4);
-            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            background: rgba(25, 25, 25, 0.4); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
         }
 
         .liquid-btn {
@@ -70,14 +67,9 @@
 
         #view-initial, #view-pin { transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
-        /* Waktu Besar ala iOS 16 */
         .ios-time {
-            font-size: 110px;
-            font-weight: 700;
-            letter-spacing: -0.05em;
-            line-height: 0.9;
-            color: rgba(255, 255, 255, 0.85);
-            mix-blend-mode: overlay; /* Membuat efek kaca menyatu dengan background */
+            font-size: 110px; font-weight: 700; letter-spacing: -0.05em; line-height: 0.9;
+            color: rgba(255, 255, 255, 0.85); mix-blend-mode: overlay;
         }
 
         /* ========================================= */
@@ -97,7 +89,7 @@
         .glass-card { background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.9); box-shadow: 0 15px 45px rgba(251, 113, 133, 0.15); }
 
         /* ========================================= */
-        /* ANIMASI SURAT KELUAR & JADI HALAMAN BARU  */
+        /* ANIMASI SURAT (FULL 1 HALAMAN PENUH)      */
         /* ========================================= */
         #circle-bg, #intro-texts { transition: all 0.9s cubic-bezier(0.4, 0, 0.2, 1); }
         .envelope-master { width: 320px; height: 200px; transform: translate(-50%, -50%) scale(0.38); transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -120,15 +112,14 @@
         .envelope-master.is-opening .env-flap-wrapper { transform: rotateX(180deg); z-index: 1; }
         .envelope-master.is-opening .env-flap-seal span { transform: rotateX(180deg); }
 
-        /* MENGECILKAN DAN MENGHILANGKAN AMPLOP */
+        /* Amplop Lenyap */
         @keyframes envelopeVanishBase { to { opacity: 0; transform: scale(0.5); visibility: hidden; } }
         @keyframes envelopeVanishFlap { to { opacity: 0; transform: rotateX(180deg) scale(0.5); visibility: hidden; } }
         
-        .envelope-master.is-opening .env-back,
-        .envelope-master.is-opening .env-front { animation: envelopeVanishBase 0.8s ease forwards 2.5s; }
+        .envelope-master.is-opening .env-back, .envelope-master.is-opening .env-front { animation: envelopeVanishBase 0.8s ease forwards 2.5s; }
         .envelope-master.is-opening .env-flap-wrapper { animation: envelopeVanishFlap 0.8s ease forwards 2.5s; }
 
-        /* KERTAS SURAT MENGEMBANG JADI HALAMAN BARU */
+        /* SURAT 100% FULLSCREEN (TIDAK TERPOTONG) */
         .env-letter {
             position: absolute; bottom: 10px; left: 50%; width: 300px; height: 180px; 
             transform: translateX(-50%); background: #fff; border-radius: 12px; z-index: 2;
@@ -145,12 +136,11 @@
             100% { 
                 transform: translateX(-50%) translateY(0); 
                 z-index: 100; 
-                height: 90vh; 
-                width: 92vw; 
-                max-width: 800px; 
-                bottom: 5vh; 
-                border-radius: 20px;
-                box-shadow: 0 20px 60px rgba(251, 113, 133, 0.25);
+                height: 100vh; /* FULL TINGGI LAYAR */
+                width: 100vw; /* FULL LEBAR LAYAR */
+                bottom: 0; 
+                border-radius: 0; /* TANPA SUDUT MELENGKUNG */
+                box-shadow: none;
             }
         }
 
@@ -173,23 +163,23 @@
             100% { width: 0px; height: 0px; padding: 0; margin: 0; opacity: 0; border: none; }
         }
 
-        .page-shrink {
-            animation: pageShrink 1.2s cubic-bezier(0.5, 0, 0, 1) forwards;
-        }
+        .page-shrink { animation: pageShrink 1.2s cubic-bezier(0.5, 0, 0, 1) forwards; }
         @keyframes pageShrink {
             0% { transform: scale(1); opacity: 1; }
             100% { transform: scale(0.2); opacity: 0; visibility: hidden; }
         }
 
-        /* EFEK KEMBANG API CINTA */
-        @keyframes floatUpFast { 
-            0% { opacity: 0; transform: translateY(110vh) scale(0.5) rotate(0deg); } 
-            20% { opacity: 1; } 
-            100% { opacity: 0; transform: translateY(-30vh) scale(1.8) rotate(45deg); } 
-        }
+        /* ========================================= */
+        /* EFEK KEMBANG API CINTA (MELEDAK)          */
+        /* ========================================= */
         .firework-particle {
-            position: fixed; pointer-events: none; z-index: 250;
-            animation: floatUpFast 2.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            position: fixed; bottom: -10vh; left: 50%;
+            z-index: 9999; pointer-events: none;
+        }
+        @keyframes explodeFirework { 
+            0% { transform: translate(-50%, 0) scale(0.2) rotate(0deg); opacity: 1; } 
+            70% { opacity: 1; } 
+            100% { transform: translate(calc(-50% + var(--tx)), var(--ty)) scale(var(--scale)) rotate(var(--rot)); opacity: 0; } 
         }
 
         /* Polaroid styling */
@@ -206,23 +196,16 @@
     <div id="lock-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-start bg-cover bg-center transition-all duration-1000 ease-in-out">
         <div id="lock-bg-blur" class="absolute inset-0 bg-black/10 transition-all duration-700"></div>
         
-        <!-- TAHAP 1: TAMPILAN AWAL (JAM & WIDGET) -->
         <div id="view-initial" class="absolute inset-0 flex flex-col justify-between pt-16 pb-6 z-20 cursor-pointer" onclick="showPinView()">
-            
-            <!-- Tanggal & Jam Super Besar -->
             <div class="flex flex-col items-center w-full px-4">
                 <p id="lock-date-main" class="text-white text-lg font-semibold drop-shadow-md tracking-wide mb-1">Mon Nov 3</p>
-                <!-- Font Jam Bergaya iOS 16 (Transparan/Blend) -->
                 <h1 id="lock-time-main" class="ios-time drop-shadow-2xl">11:19</h1>
             </div>
             
-            <!-- Area Bawah (Pemutar Musik & Notifikasi) -->
             <div class="w-full flex flex-col items-center px-5 gap-3 mt-auto mb-10">
-                
-                <!-- Widget Pemutar Musik -->
+                <!-- Widget Musik -->
                 <div class="liquid-widget w-full max-w-sm rounded-3xl p-4 flex flex-col gap-3">
                     <div class="flex items-center gap-4">
-                        <!-- Cover Album -->
                         <div class="w-14 h-14 rounded-lg bg-gray-800 flex-shrink-0 overflow-hidden shadow-lg">
                             <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Album Art" class="w-full h-full object-cover">
                         </div>
@@ -230,7 +213,6 @@
                             <h3 class="text-white font-semibold text-[15px] leading-tight">Drama (feat. Drake)</h3>
                             <p class="text-white/70 text-[13px]">Roy Woods, Drake</p>
                         </div>
-                        <!-- Sound Wave Icon -->
                         <div class="flex items-end gap-0.5 h-4">
                             <div class="w-0.5 h-2 bg-white rounded-full animate-pulse"></div>
                             <div class="w-0.5 h-4 bg-white rounded-full animate-pulse" style="animation-delay: 0.1s"></div>
@@ -239,7 +221,6 @@
                         </div>
                     </div>
                     
-                    <!-- Progress Bar -->
                     <div class="flex items-center gap-3 w-full">
                         <span class="text-white/70 text-[10px] font-medium">1:34</span>
                         <div class="flex-grow h-1.5 bg-white/30 rounded-full relative">
@@ -248,18 +229,13 @@
                         <span class="text-white/70 text-[10px] font-medium">-2:38</span>
                     </div>
                     
-                    <!-- Controls -->
                     <div class="flex justify-center items-center gap-8 mt-1">
-                        <!-- Backward -->
                         <svg class="w-7 h-7 text-white fill-current" viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
-                        <!-- Pause -->
                         <svg class="w-9 h-9 text-white fill-current" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                        <!-- Forward -->
                         <svg class="w-7 h-7 text-white fill-current" viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
                     </div>
                 </div>
 
-                <!-- Notifikasi -->
                 <div class="liquid-widget w-full max-w-sm rounded-2xl p-3 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-full bg-yellow-400 flex items-center justify-center text-xl shadow-md border border-white/20">👻</div>
@@ -272,16 +248,13 @@
                 </div>
             </div>
 
-            <!-- Shortcut Buttons & Home Indicator -->
             <div class="w-full px-10 flex justify-between items-end mb-2">
                 <button class="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 text-white text-xl">🔦</button>
                 <button class="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 text-white text-xl">📷</button>
             </div>
-            
             <div class="w-32 h-1.5 bg-white rounded-full mx-auto animate-pulse-slow shadow-lg"></div>
         </div>
 
-        <!-- TAHAP 2: TAMPILAN LOGIN PIN -->
         <div id="view-pin" class="absolute inset-0 flex flex-col items-center justify-center pt-10 z-10 opacity-0 pointer-events-none transform translate-y-12">
             <h2 class="text-white mb-6 text-sm tracking-widest font-medium drop-shadow-md">MASUKKAN PIN</h2>
             <div class="flex gap-5 mb-14" id="pin-dots">
@@ -306,7 +279,6 @@
                 <button onclick="pressPin('0')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">0</button>
                 <button onclick="pressPin('del')" class="w-[75px] h-[75px] rounded-full text-white text-lg font-medium flex justify-center items-center active:bg-white/20 transition-all">Hapus</button>
             </div>
-            <!-- Hint Dihapus sepenuhnya -->
         </div>
     </div>
 
@@ -318,7 +290,7 @@
 
     <div class="scroll-container">
         
-        <!-- SLIDE 1: Pembukaan & Surat Halaman Baru -->
+        <!-- SLIDE 1: Pembukaan & Surat Halaman Penuh -->
         <div id="slide1" class="min-h-screen relative w-full overflow-hidden flex items-center justify-center">
             
             <div class="absolute top-1/4 left-1/4 text-2xl animate-float opacity-70">🌸</div>
@@ -340,29 +312,31 @@
                 </button>
             </div>
 
-            <!-- ENVELOPE MASTER & SURAT RAKSASA -->
+            <!-- ENVELOPE MASTER -->
             <div id="the-envelope" class="envelope-master absolute top-[35%] left-1/2 z-20 pointer-events-none">
                 <div class="env-back"></div>
                 
                 <div class="env-letter flex flex-col items-center justify-center">
-                    <div class="letter-content absolute inset-0 w-full h-full p-6 md:p-10 flex flex-col items-center text-center">
+                    <!-- KONTEN SURAT FULLSCREEN (Rapi dan tidak terpotong) -->
+                    <div class="letter-content absolute inset-0 w-full h-full flex flex-col items-center justify-center text-center max-w-4xl mx-auto px-4 md:px-10">
                         
-                        <!-- PIGURA FOTO DI KANAN ATAS -->
-                        <div class="absolute top-5 right-5 w-16 h-16 md:w-20 md:h-20 rounded-full border-4 border-rose-100 overflow-hidden shadow-lg transform rotate-3 animate-float-fast z-10">
+                        <!-- PIGURA FOTO DI KANAN ATAS SURAT -->
+                        <div class="absolute top-6 right-6 w-16 h-16 md:w-24 md:h-24 rounded-full border-4 border-rose-100 overflow-hidden shadow-lg transform rotate-3 animate-float-fast z-10">
+                            <!-- GANTI URL FOTO INI -->
                             <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Foto Kita" class="w-full h-full object-cover">
                         </div>
 
-                        <div class="text-4xl mb-2 md:mb-4 animate-float mt-2">🌸</div>
+                        <div class="text-4xl mb-2 md:mb-6 animate-float">🌸</div>
                         <h2 class="font-script text-4xl md:text-6xl text-[#f43f5e] mb-2 md:mb-4 drop-shadow-sm">Selamat Ulang Tahun!</h2>
-                        <h3 class="text-xl md:text-3xl font-semibold text-rose-500 mb-4 md:mb-8">[Nama Panggilan] ❤️</h3>
+                        <h3 class="text-xl md:text-3xl font-semibold text-rose-500 mb-6 md:mb-10">[Nama Panggilan] ❤️</h3>
                         
-                        <div class="text-[14px] md:text-lg text-gray-700 leading-relaxed font-light space-y-4 px-2 md:px-10">
+                        <div class="text-[14px] md:text-xl text-gray-700 leading-relaxed font-light space-y-4 md:space-y-6 px-4 md:px-12">
                             <p>Di hari yang spesial ini, aku cuma mau bilang terima kasih. Terima kasih udah jadi versi terbaik dari diri kamu sendiri.</p>
                             <p>Kehadiran kamu itu kayak warna pink di langit sore, selalu bikin tenang dan bahagia. Kamu pantes dapetin semua hal manis di dunia ini.</p>
                         </div>
                         
                         <!-- TOMBOL LOVE PENGGANTI -->
-                        <div class="mt-auto pt-4 pb-2 flex flex-col items-center justify-center cursor-pointer group" onclick="customSmoothScroll('slide2')">
+                        <div class="mt-8 md:mt-12 pt-4 pb-2 flex flex-col items-center justify-center cursor-pointer group" onclick="customSmoothScroll('slide2')">
                             <div class="text-6xl md:text-7xl animate-pulse-slow drop-shadow-xl group-hover:scale-125 transition-transform duration-300">💖</div>
                             <p class="text-rose-400 font-bold text-[10px] md:text-xs tracking-[0.2em] mt-3 uppercase animate-float-fast font-sans">Klik Love Untuk Melanjutkan</p>
                         </div>
@@ -464,6 +438,9 @@
 
     <!-- SCRIPT INTERAKTIF -->
     <script>
+        // ==========================================
+        // LOGIKA LOCK SCREEN (TRANSISI & PIN)
+        // ==========================================
         let currentPin = '';
         const correctPin = '121212'; 
 
@@ -488,8 +465,6 @@
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
-            
-            // Format: "Mon Nov 3" style
             const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
             const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
             
@@ -610,23 +585,44 @@
             }, 1800);
         }
 
+        // ==========================================
+        // KEMBANG API RAKSASA (MELEDAK DARI BAWAH)
+        // ==========================================
+        function fireworkParticle() {
+            const heart = document.createElement('div');
+            heart.classList.add('firework-particle');
+            const emojis = ['💖', '💕', '💗', '🌸', '✨', '🥰', '🎇'];
+            heart.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
+            
+            // Menyebar di sepanjang layar bawah
+            heart.style.left = (Math.random() * 100) + 'vw';
+            heart.style.fontSize = (Math.random() * 2 + 1.5) + 'rem';
+
+            // Lintasan Kembang Api (Meledak Menyebar ke Atas)
+            const tx = (Math.random() * 40 - 20) + 'vw';
+            const ty = -(Math.random() * 80 + 20) + 'vh';
+            const rot = (Math.random() * 360) + 'deg';
+            const scale = (Math.random() * 1.5 + 1);
+
+            heart.style.setProperty('--tx', tx);
+            heart.style.setProperty('--ty', ty);
+            heart.style.setProperty('--rot', rot);
+            heart.style.setProperty('--scale', scale);
+
+            const duration = Math.random() * 2 + 1.5;
+            heart.style.animation = `explodeFirework ${duration}s cubic-bezier(0.25, 1, 0.5, 1) forwards`;
+
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), duration * 1000);
+        }
+
         function fireworkMagic() {
             let count = 0;
             const interval = setInterval(() => {
-                for(let i=0; i<8; i++) {
-                    const heart = document.createElement('div');
-                    heart.classList.add('firework-particle');
-                    const emojis = ['💖', '💕', '💗', '🌸', '✨', '🥰'];
-                    heart.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
-                    heart.style.left = (Math.random() * 100) + 'vw';
-                    const duration = Math.random() * 2 + 2;
-                    heart.style.animationDuration = duration + 's';
-                    heart.style.transform = `scale(${Math.random() * 1 + 1})`;
-                    document.body.appendChild(heart);
-                    setTimeout(() => heart.remove(), duration * 1000);
-                }
+                // Keluarkan 12 partikel setiap 50 milidetik (Total ratusan partikel!)
+                for(let i=0; i<12; i++) fireworkParticle();
                 count++;
-                if(count > 60) clearInterval(interval);
+                if(count > 60) clearInterval(interval); // Kembang api menyala heboh selama 3 detik
             }, 50);
         }
     </script>
