@@ -26,7 +26,7 @@
                         'spin-slow': 'spin 15s linear infinite',
                     },
                     keyframes: {
-                        /* Semua animasi melayang mulus (Anti-kasar) */
+                        /* Semua animasi melayang mulus (Anti-kasar/Premium Feel) */
                         float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-12px)' } },
                         'float-fast': { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-8px)' } },
                         swing: { '0%': { transform: 'rotate(-2deg)' }, '100%': { transform: 'rotate(2deg)' } },
@@ -36,6 +36,7 @@
             }
         }
     </script>
+    
     <style>
         body.locked { overflow: hidden; height: 100vh; }
         body {
@@ -48,11 +49,10 @@
         /* IPHONE LOCK SCREEN & LIQUID GLASS         */
         /* ========================================= */
         #lock-screen {
-            /* Background hitam pekat di-fallback agar amplop tidak bocor */
             background-color: #1a1a1a;
             /* GANTI URL BACKGROUND INI DENGAN FOTO PILIHANMU */
             background-image: url('https://images.unsplash.com/photo-1607519961601-52319f390025?ixlib=rb-4.0.3&auto=format&fit=crop&w=1080&q=80');
-            z-index: 1000; /* Paling atas */
+            z-index: 1000; 
         }
         #lock-bg-blur { transition: backdrop-filter 0.8s ease, background-color 0.8s ease; }
         
@@ -100,15 +100,15 @@
         
         .envelope-master { 
             position: absolute;
-            top: 35vh; left: 50vw; /* Menggunakan VW/VH agar presisi di tengah */
+            top: 35vh; left: 50vw; 
             width: 320px; height: 200px; 
-            transform: translate(-50%, -50%) scale(0.38); /* Skala kecil awal */
+            transform: translate(-50%, -50%) scale(0.38); 
             transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); 
             z-index: 20;
         }
         .envelope-master.is-opening { 
             pointer-events: auto; 
-            transform: translate(-50%, -50%) scale(1); /* Kembali ukuran asli di tengah persis */
+            transform: translate(-50%, -50%) scale(1); 
         }
 
         .env-back { position: absolute; inset: 0; background: #FDA4AF; border-radius: 12px; z-index: 1; box-shadow: 0 15px 35px rgba(225, 29, 72, 0.2); }
@@ -133,7 +133,7 @@
         .envelope-master.is-opening .env-back, .envelope-master.is-opening .env-front { animation: envelopeVanishBase 0.8s ease forwards 2.5s; }
         .envelope-master.is-opening .env-flap-wrapper { animation: envelopeVanishFlap 0.8s ease forwards 2.5s; }
 
-        /* SURAT RAKSASA (ANTI MIRING, ANTI TERPOTONG) */
+        /* SURAT RAKSASA (FULL 100% LAYAR) */
         .env-letter {
             position: absolute; bottom: 10px; left: 10px; right: 10px; height: 180px; 
             background: #fff; border-radius: 12px; z-index: 2;
@@ -146,14 +146,9 @@
 
         /* KALKULASI ABSOLUT AGAR PRESISI 100% LAYAR */
         @keyframes letterFullscreen {
-            0% { 
-                bottom: 10px; left: 10px; right: 10px; height: 180px; z-index: 2; border-radius: 12px;
-            }
-            30% { 
-                bottom: 240px; left: 10px; right: 10px; height: 180px; z-index: 60; border-radius: 12px;
-            }
+            0% { bottom: 10px; left: 10px; right: 10px; height: 180px; z-index: 2; border-radius: 12px; }
+            30% { bottom: 240px; left: 10px; right: 10px; height: 180px; z-index: 60; border-radius: 12px; }
             100% { 
-                /* Mengambil alih 100% layar menggunakan kalkulasi jarak dari tengah amplop */
                 bottom: calc(-65vh + 100px); 
                 left: calc(-50vw + 160px); 
                 right: auto;
@@ -167,7 +162,6 @@
 
         .letter-content { 
             opacity: 0; transition: opacity 0.8s ease 3.2s; 
-            /* Scroll internal agar tidak terpotong di HP kecil */
             overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
         }
         .envelope-master.is-opening .letter-content { opacity: 1; }
@@ -191,7 +185,7 @@
             100% { transform: scale(0.2); opacity: 0; visibility: hidden; }
         }
 
-        /* EFEK KEMBANG API LEMBUT (1x Ledakan) */
+        /* EFEK KEMBANG API LEMBUT (1x Ledakan Bunga & Hati) */
         .firework-particle {
             position: fixed; bottom: -10vh; left: 50%;
             z-index: 9999; pointer-events: none;
@@ -203,15 +197,14 @@
         }
 
         /* Polaroid styling */
-        .polaroid { background: white; padding: 12px 12px 35px 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: relative; }
+        .polaroid { background: white; padding: 10px 10px 30px 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); position: relative; }
         .reveal { opacity: 0; transform: translateY(40px); transition: all 1.2s cubic-bezier(0.5, 0, 0, 1); }
         .reveal.active { opacity: 1; transform: translateY(0); }
     </style>
 </head>
 <body class="font-sans text-gray-800 antialiased locked">
 
-    <!-- AUDIO ELEMENT: DIPUTAR OTOMATIS SAAT LAYAR DIKLIK -->
-    <!-- Ganti URL ini dengan lagu pilihanmu -->
+    <!-- AUDIO ELEMENT: DIPUTAR OTOMATIS SAAT LAYAR KUNCI DIKLIK -->
     <audio id="bg-music" loop>
         <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=a-soft-piano-and-strings-111322.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
@@ -343,11 +336,11 @@
                 <div class="env-back"></div>
                 
                 <div class="env-letter flex flex-col items-center justify-center">
-                    <!-- KONTEN SURAT FULLSCREEN (Rapi dan tidak terpotong) -->
+                    <!-- KONTEN SURAT FULLSCREEN -->
                     <div class="letter-content absolute inset-0 w-full h-full flex flex-col items-center text-center px-4 pt-12 md:pt-20">
                         
                         <!-- PIGURA FOTO DI KANAN ATAS (SEKARANG KOTAK/POLAROID STYLE) -->
-                        <div class="absolute top-8 right-8 w-20 h-20 md:w-28 md:h-28 rounded-xl border-[6px] border-rose-100 overflow-hidden shadow-xl transform rotate-3 animate-float-fast z-10">
+                        <div class="absolute top-8 right-8 w-20 h-20 md:w-28 md:h-28 rounded-xl border-[6px] border-rose-100 overflow-hidden shadow-xl transform rotate-[12deg] animate-float-fast z-10">
                             <!-- GANTI URL FOTO INI -->
                             <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Foto Kita" class="w-full h-full object-cover">
                         </div>
@@ -361,7 +354,7 @@
                             <p>Kehadiran kamu itu kayak warna pink di langit sore, selalu bikin tenang dan bahagia. Kamu pantes dapetin semua hal manis di dunia ini.</p>
                         </div>
                         
-                        <!-- TOMBOL LOVE NAIK KE ATAS AMAN DARI POTONGAN BAWAH -->
+                        <!-- TOMBOL LOVE NAIK KE ATAS AGAR AMAN -->
                         <div class="mt-14 md:mt-20 flex flex-col items-center justify-center cursor-pointer group" onclick="customSmoothScroll('slide2')">
                             <div class="text-7xl md:text-8xl animate-pulse-slow drop-shadow-xl group-hover:scale-125 transition-transform duration-300">💖</div>
                             <p class="font-sans font-bold uppercase tracking-[0.2em] text-rose-400 text-[11px] md:text-sm mt-5 animate-float-fast">Klik Love Untuk Melanjutkan</p>
@@ -404,29 +397,90 @@
             </div>
         </div>
 
-        <!-- SLIDE 3: Galeri Memori -->
-        <div id="slide3" class="min-h-screen flex flex-col items-center justify-center max-w-4xl w-full mx-auto p-4 py-20 overflow-hidden relative">
-            <h2 class="font-script text-5xl text-[#f43f5e] mb-14 text-center reveal drop-shadow-sm">Momen-momen Cantikmu</h2>
+        <!-- SLIDE 3: Galeri Memori 8 Foto (Dengan Tali Putus-putus) -->
+        <div id="slide3" class="min-h-screen flex flex-col items-center justify-start w-full mx-auto px-4 py-20 overflow-hidden relative">
+            <h2 class="font-script text-5xl text-[#f43f5e] mb-16 text-center reveal drop-shadow-sm">Momen-momen Cantikmu</h2>
             
-            <div class="flex flex-wrap justify-center gap-10 md:gap-16 mb-14">
-                <div class="polaroid w-52 md:w-64 animate-swing reveal" style="animation-delay: 0s;">
-                    <div class="absolute -top-5 -right-4 text-4xl z-10 animate-pulse-slow drop-shadow-md">🎀</div>
-                    <div class="bg-rose-100 w-full h-52 md:h-64 mb-4 rounded flex items-center justify-center overflow-hidden border border-rose-50">
-                        <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Memori 1" class="w-full h-full object-cover">
+            <div class="relative w-full max-w-lg mx-auto pb-20">
+                <!-- Garis Tali Putus-putus di Tengah -->
+                <div class="absolute left-1/2 top-0 bottom-0 w-[2px] border-l-[3px] border-dashed border-rose-300 transform -translate-x-1/2 z-0 opacity-60"></div>
+
+                <div class="flex flex-col items-center gap-16 relative z-10">
+                    <!-- Foto 1 -->
+                    <div class="polaroid w-52 md:w-64 animate-swing reveal" style="animation-delay: 0s;">
+                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-2xl z-10">🎀</div>
+                        <div class="bg-rose-100 w-full h-48 md:h-60 mb-3 rounded flex items-center justify-center overflow-hidden border border-rose-50">
+                            <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
+                        </div>
+                        <p class="font-script text-2xl md:text-3xl text-center text-gray-700">Cantik banget!</p>
                     </div>
-                    <p class="font-script text-3xl text-center text-gray-700 mt-2">Cantik banget!</p>
-                </div>
-                
-                <div class="polaroid w-52 md:w-64 animate-swing reveal" style="animation-delay: 2s; animation-direction: alternate-reverse;">
-                    <div class="absolute -bottom-5 -left-4 text-4xl z-10 animate-float drop-shadow-md">💖</div>
-                    <div class="bg-rose-100 w-full h-52 md:h-64 mb-4 rounded flex items-center justify-center overflow-hidden border border-rose-50">
-                        <img src="https://images.unsplash.com/photo-1520627725997-6a2d9894e138?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Memori 2" class="w-full h-full object-cover">
+                    
+                    <!-- Foto 2 -->
+                    <div class="polaroid w-52 md:w-64 animate-swing reveal" style="animation-delay: 1.5s; animation-direction: alternate-reverse;">
+                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-2xl z-10">📌</div>
+                        <div class="bg-rose-100 w-full h-48 md:h-60 mb-3 rounded flex items-center justify-center overflow-hidden border border-rose-50">
+                            <img src="https://images.unsplash.com/photo-1520627725997-6a2d9894e138?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
+                        </div>
+                        <p class="font-script text-2xl md:text-3xl text-center text-gray-700">Senyum favoritku ✨</p>
                     </div>
-                    <p class="font-script text-3xl text-center text-gray-700 mt-2">Senyum favoritku ✨</p>
+
+                    <!-- Foto 3 -->
+                    <div class="polaroid w-52 md:w-64 animate-swing reveal" style="animation-delay: 0.5s;">
+                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-2xl z-10">🌸</div>
+                        <div class="bg-rose-100 w-full h-48 md:h-60 mb-3 rounded flex items-center justify-center overflow-hidden border border-rose-50">
+                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
+                        </div>
+                        <p class="font-script text-2xl md:text-3xl text-center text-gray-700">Lucu parah! 🥰</p>
+                    </div>
+
+                    <!-- Foto 4 -->
+                    <div class="polaroid w-52 md:w-64 animate-swing reveal" style="animation-delay: 2.5s; animation-direction: alternate-reverse;">
+                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-2xl z-10">💖</div>
+                        <div class="bg-rose-100 w-full h-48 md:h-60 mb-3 rounded flex items-center justify-center overflow-hidden border border-rose-50">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
+                        </div>
+                        <p class="font-script text-2xl md:text-3xl text-center text-gray-700">Kesayanganku 💕</p>
+                    </div>
+
+                    <!-- Foto 5 -->
+                    <div class="polaroid w-52 md:w-64 animate-swing reveal" style="animation-delay: 1s;">
+                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-2xl z-10">🎀</div>
+                        <div class="bg-rose-100 w-full h-48 md:h-60 mb-3 rounded flex items-center justify-center overflow-hidden border border-rose-50">
+                            <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
+                        </div>
+                        <p class="font-script text-2xl md:text-3xl text-center text-gray-700">Perfect 💯</p>
+                    </div>
+
+                    <!-- Foto 6 -->
+                    <div class="polaroid w-52 md:w-64 animate-swing reveal" style="animation-delay: 3s; animation-direction: alternate-reverse;">
+                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-2xl z-10">📌</div>
+                        <div class="bg-rose-100 w-full h-48 md:h-60 mb-3 rounded flex items-center justify-center overflow-hidden border border-rose-50">
+                            <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
+                        </div>
+                        <p class="font-script text-2xl md:text-3xl text-center text-gray-700">Memori manis 📸</p>
+                    </div>
+
+                    <!-- Foto 7 -->
+                    <div class="polaroid w-52 md:w-64 animate-swing reveal" style="animation-delay: 0.8s;">
+                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-2xl z-10">🌸</div>
+                        <div class="bg-rose-100 w-full h-48 md:h-60 mb-3 rounded flex items-center justify-center overflow-hidden border border-rose-50">
+                            <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
+                        </div>
+                        <p class="font-script text-2xl md:text-3xl text-center text-gray-700">My sunshine ☀️</p>
+                    </div>
+
+                    <!-- Foto 8 -->
+                    <div class="polaroid w-52 md:w-64 animate-swing reveal" style="animation-delay: 2.2s; animation-direction: alternate-reverse;">
+                        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-2xl z-10">💖</div>
+                        <div class="bg-rose-100 w-full h-48 md:h-60 mb-3 rounded flex items-center justify-center overflow-hidden border border-rose-50">
+                            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
+                        </div>
+                        <p class="font-script text-2xl md:text-3xl text-center text-gray-700">Love u! 🥰</p>
+                    </div>
                 </div>
             </div>
             
-            <button onclick="customSmoothScroll('slide4')" class="px-10 py-3.5 bg-gradient-to-r from-[#fb7185] to-[#f43f5e] text-white rounded-full font-semibold shadow-lg hover:shadow-pink-400/50 hover:opacity-90 transition-all duration-300 reveal">
+            <button onclick="customSmoothScroll('slide4')" class="mt-8 px-10 py-3.5 bg-gradient-to-r from-[#fb7185] to-[#f43f5e] text-white rounded-full font-semibold shadow-lg hover:shadow-pink-400/50 hover:opacity-90 transition-all duration-300 reveal">
                 Terakhir nih... 🎂
             </button>
         </div>
@@ -452,7 +506,7 @@
                 </button>
             </div>
 
-            <!-- PESAN RAKSASA FINAL -->
+            <!-- PESAN RAKSASA FINAL (FONT SAMA DENGAN KLIK LOVE) -->
             <div id="final-message" class="absolute inset-0 z-[200] hidden flex-col items-center justify-center opacity-0 transition-opacity duration-1000">
                 <h1 class="font-sans font-bold uppercase tracking-[0.2em] text-4xl md:text-5xl lg:text-6xl text-[#f43f5e] drop-shadow-md mb-4 animate-float text-center px-4 leading-relaxed">
                     LOVE YOU<br>OKTA CANTIKKK <br><span class="text-5xl md:text-7xl mt-8 block drop-shadow-xl tracking-normal">🥰💖🌸✨</span>
