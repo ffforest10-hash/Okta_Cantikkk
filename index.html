@@ -38,10 +38,9 @@
     <style>
         body.locked { overflow: hidden; height: 100vh; }
         body {
-            /* Latar Belakang Pearl Pink yang sangat mewah dan bersih */
             background: linear-gradient(135deg, #fdfbfb 0%, #fdf2f8 50%, #fef2f2 100%);
             overflow-x: hidden; scrollbar-width: none; -ms-overflow-style: none;
-            color: #334155; /* Slate-700 untuk kontras premium */
+            color: #334155; 
         }
         body::-webkit-scrollbar { display: none; }
         
@@ -91,7 +90,6 @@
         }
         @keyframes floatUp { 0% { opacity: 0; transform: translateY(100vh) scale(0.5) rotate(0deg); } 15% { opacity: 0.5; } 85% { opacity: 0.5; } 100% { opacity: 0; transform: translateY(-10vh) scale(1.2) rotate(30deg); } }
 
-        /* KARTU SOLID GLASS (MEWAH & BERSIH) */
         .glass-card { 
             background: rgba(255, 255, 255, 0.85); 
             backdrop-filter: blur(24px); 
@@ -99,34 +97,20 @@
             box-shadow: 0 20px 50px rgba(225, 29, 72, 0.05), inset 0 0 0 1px rgba(255, 255, 255, 0.5); 
         }
 
-        /* TOMBOL PREMIUM 3D */
         .btn-premium {
-            background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
-            color: white;
-            box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.4), inset 0 2px 4px rgba(255,255,255,0.3);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%); color: white;
+            box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.4), inset 0 2px 4px rgba(255,255,255,0.3); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .btn-premium:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px -5px rgba(225, 29, 72, 0.5), inset 0 2px 4px rgba(255,255,255,0.4);
-        }
+        .btn-premium:hover { transform: translateY(-3px); box-shadow: 0 15px 35px -5px rgba(225, 29, 72, 0.5), inset 0 2px 4px rgba(255,255,255,0.4); }
 
         .btn-outline-premium {
-            background: white;
-            color: #e11d48;
-            border: 1.5px solid #ffe4e6;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
+            background: white; color: #e11d48; border: 1.5px solid #ffe4e6;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); transition: all 0.3s ease;
         }
-        .btn-outline-premium:hover {
-            background: #fff0f5;
-            border-color: #fecdd3;
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px -5px rgba(225, 29, 72, 0.1);
-        }
+        .btn-outline-premium:hover { background: #fff0f5; border-color: #fecdd3; transform: translateY(-3px); box-shadow: 0 15px 30px -5px rgba(225, 29, 72, 0.1); }
 
         /* ========================================= */
-        /* ANIMASI SURAT PRESISI (FULL 100% LAYAR)   */
+        /* ANIMASI SURAT (PERBAIKAN SCROLL & OVERLAP)*/
         /* ========================================= */
         #circle-bg, #intro-texts { transition: all 0.9s cubic-bezier(0.4, 0, 0.2, 1); }
         
@@ -156,16 +140,16 @@
         .envelope-master.is-opening .env-back, .envelope-master.is-opening .env-front { animation: envelopeVanishBase 0.8s ease forwards 2.5s; }
         .envelope-master.is-opening .env-flap-wrapper { animation: envelopeVanishFlap 0.8s ease forwards 2.5s; }
 
-        /* PERBAIKAN KRITIS: FULLSCREEN LETTER MENGGUNAKAN FIXED POSITION */
+        /* PERBAIKAN KRITIS SURAT: MENGGUNAKAN ABSOLUTE, BUKAN FIXED */
+        /* Ini menjamin surat menempel di Slide 1 (atas) dan BISA di-scroll ke bawah! */
         #fullscreen-letter {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: #fff; z-index: 100;
             opacity: 0; pointer-events: none; visibility: hidden;
             transition: opacity 1.2s ease;
-            overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
+            overflow: hidden; /* Mencegah elemen keluar batas Slide 1 */
         }
         
-        /* Surat akan muncul perlahan setelah amplop terbuka */
         #fullscreen-letter.show-letter {
             opacity: 1; pointer-events: auto; visibility: visible;
             animation: slideUpLetter 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
@@ -174,15 +158,6 @@
         @keyframes slideUpLetter {
             0% { transform: translateY(50px); opacity: 0; }
             100% { transform: translateY(0); opacity: 1; }
-        }
-
-        .letter-inner-content {
-            /* Border dalam ala kertas undangan mahal */
-            border: 1px solid rgba(251, 113, 133, 0.1); 
-            margin: 15px; 
-            min-height: calc(100vh - 30px); 
-            border-radius: 16px;
-            padding-bottom: 40px;
         }
 
         /* ========================================= */
@@ -353,35 +328,36 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- PERBAIKAN KRITIS: HALAMAN SURAT FULLSCREEN (TERPISAH DARI AMPLOP) -->
-        <!-- Ini menjamin surat 100% lurus, tidak terpotong, menutupi seluruh layar -->
-        <div id="fullscreen-letter" class="flex items-center justify-center p-0">
-            <div class="letter-inner-content relative w-full h-full flex flex-col items-center justify-start text-center px-4 pt-16 md:pt-24 pb-20">
-                
-                <!-- PIGURA FOTO KOTAK (POLAROID STYLE), MIRING KANAN -->
-                <div class="absolute top-8 right-8 md:top-12 md:right-16 w-24 h-24 md:w-32 md:h-32 rounded-2xl border-[6px] border-white overflow-hidden shadow-[0_10px_25px_rgba(0,0,0,0.15)] transform rotate-[15deg] animate-float-fast z-10">
-                    <!-- GANTI URL FOTO INI -->
-                    <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Foto Kita" class="w-full h-full object-cover">
-                </div>
+            <!-- PERBAIKAN KRITIS: FULLSCREEN LETTER TERPISAH (ABSOLUTE DI DALAM SLIDE 1) -->
+            <!-- Menggunakan Absolute memastikan dia menutupi Slide 1 tanpa celah, tapi tetap bisa di-scroll ke Slide 2 -->
+            <div id="fullscreen-letter" class="flex flex-col items-center justify-center p-0">
+                <div class="relative w-full h-full flex flex-col items-center justify-center text-center px-4 md:px-10">
+                    
+                    <!-- PIGURA FOTO KOTAK (POLAROID STYLE), MIRING KANAN -->
+                    <div class="absolute top-8 md:top-12 right-8 md:right-16 w-20 h-20 md:w-28 md:h-28 rounded-2xl border-[6px] border-white overflow-hidden shadow-xl transform rotate-[15deg] animate-float-fast z-10">
+                        <!-- GANTI URL FOTO INI -->
+                        <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Foto Kita" class="w-full h-full object-cover">
+                    </div>
 
-                <!-- KONTEN TEKS EDITORIAL -->
-                <div class="text-4xl md:text-5xl mb-6 animate-float mt-10 md:mt-8">🌸</div>
-                <h2 class="font-script text-5xl md:text-7xl text-[#e11d48] mb-2 font-bold drop-shadow-sm">Selamat Ulang Tahun!</h2>
-                <h3 class="text-2xl md:text-4xl font-semibold text-rose-400 mb-10 md:mb-14 tracking-wide">[Nama Panggilan] ❤️</h3>
-                
-                <div class="text-[15px] md:text-xl text-slate-600 leading-relaxed font-light space-y-6 md:space-y-8 px-4 md:px-24 max-w-4xl">
-                    <p>Di hari yang spesial ini, aku cuma mau bilang terima kasih. Terima kasih udah jadi versi terbaik dari diri kamu sendiri.</p>
-                    <p>Kehadiran kamu itu kayak warna pink di langit sore, selalu bikin tenang dan bahagia. Kamu pantes dapetin semua hal manis di dunia ini.</p>
-                </div>
-                
-                <!-- TOMBOL LOVE DI TENGAH BAWAH -->
-                <div class="mt-auto pt-10 flex flex-col items-center justify-center cursor-pointer group" onclick="customSmoothScroll('slide2')">
-                    <div class="text-7xl md:text-8xl animate-pulse-slow drop-shadow-2xl group-hover:scale-110 transition-transform duration-300">💖</div>
-                    <p class="font-sans font-bold uppercase tracking-[0.25em] text-rose-400 text-[11px] md:text-sm mt-6 animate-float-fast">Klik Love Untuk Melanjutkan</p>
+                    <!-- KONTEN TEKS EDITORIAL -->
+                    <div class="text-4xl md:text-5xl mb-4 animate-float mt-10 md:mt-6">🌸</div>
+                    <h2 class="font-script text-5xl md:text-7xl text-[#e11d48] mb-2 font-bold drop-shadow-sm">Selamat Ulang Tahun!</h2>
+                    <h3 class="text-2xl md:text-4xl font-semibold text-rose-400 mb-8 md:mb-12 tracking-wide">[Nama Panggilan] ❤️</h3>
+                    
+                    <div class="text-[15px] md:text-xl text-slate-600 leading-relaxed font-light space-y-4 md:space-y-6 px-4 md:px-24 max-w-4xl">
+                        <p>Di hari yang spesial ini, aku cuma mau bilang terima kasih. Terima kasih udah jadi versi terbaik dari diri kamu sendiri.</p>
+                        <p>Kehadiran kamu itu kayak warna pink di langit sore, selalu bikin tenang dan bahagia. Kamu pantes dapetin semua hal manis di dunia ini.</p>
+                    </div>
+                    
+                    <!-- TOMBOL LOVE NAIK AGAR AMAN -->
+                    <div class="mt-12 md:mt-16 flex flex-col items-center justify-center cursor-pointer group" onclick="customSmoothScroll('slide2')">
+                        <div class="text-7xl md:text-8xl animate-pulse-slow drop-shadow-2xl group-hover:scale-110 transition-transform duration-300">💖</div>
+                        <p class="font-sans font-bold uppercase tracking-[0.25em] text-rose-400 text-[11px] md:text-sm mt-5 animate-float-fast">Klik Love Untuk Melanjutkan</p>
+                    </div>
                 </div>
             </div>
+            
         </div>
 
         <!-- SLIDE 2: Ucapan Manis Pendek -->
@@ -634,7 +610,7 @@
             // 1. Amplop Menghilang
             document.getElementById('the-envelope').classList.add('is-opening');
             
-            // 2. Tampilkan Surat Fullscreen (Elemen Terpisah & Mutlak)
+            // 2. Tampilkan Surat Fullscreen (Muncul pelan-pelan)
             document.getElementById('fullscreen-letter').classList.add('show-letter');
 
             burstHearts();
