@@ -17,10 +17,6 @@
                         'script': ['"Dancing Script"', 'cursive'],
                         'sans': ['Poppins', 'sans-serif'],
                     },
-                    colors: {
-                        'premium-rose': '#e11d48', // Rose-600
-                        'premium-blush': '#fff0f5',
-                    },
                     animation: {
                         'float': 'float 7s ease-in-out infinite',
                         'float-fast': 'float 4s ease-in-out infinite',
@@ -33,13 +29,12 @@
                         float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-12px)' } },
                         'float-fast': { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-8px)' } },
                         swing: { '0%': { transform: 'rotate(-2deg)' }, '100%': { transform: 'rotate(2deg)' } },
-                        heartbeat: { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.12)' } }
+                        heartbeat: { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.15)' } }
                     }
                 }
             }
         }
     </script>
-    
     <style>
         body.locked { overflow: hidden; height: 100vh; }
         body {
@@ -161,38 +156,34 @@
         .envelope-master.is-opening .env-back, .envelope-master.is-opening .env-front { animation: envelopeVanishBase 0.8s ease forwards 2.5s; }
         .envelope-master.is-opening .env-flap-wrapper { animation: envelopeVanishFlap 0.8s ease forwards 2.5s; }
 
-        /* SURAT RAKSASA (KERTAS UNDANGAN PREMIUM) */
-        .env-letter {
-            position: absolute; bottom: 10px; left: 10px; right: 10px; height: 180px; 
-            background: #fff; border-radius: 12px; z-index: 2; box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+        /* PERBAIKAN KRITIS: FULLSCREEN LETTER MENGGUNAKAN FIXED POSITION */
+        #fullscreen-letter {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #fff; z-index: 100;
+            opacity: 0; pointer-events: none; visibility: hidden;
+            transition: opacity 1.2s ease;
+            overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
         }
         
-        /* LOGIKA ABSOLUT PRESISI 100% LAYAR ANTI BOCOR */
-        .envelope-master.is-opening .env-letter { animation: letterFullscreen 2.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1.2s forwards; }
-
-        @keyframes letterFullscreen {
-            0% { bottom: 10px; left: 10px; right: 10px; height: 180px; z-index: 2; border-radius: 12px; }
-            30% { bottom: 240px; left: 10px; right: 10px; height: 180px; z-index: 60; border-radius: 12px; }
-            100% { 
-                /* Kalkulasi agar pojok kiri atas surat pas di pojok kiri atas layar, ukurannya 100vw x 100vh */
-                bottom: 0; 
-                left: calc(-50vw + 160px); 
-                right: auto;
-                width: 100vw; 
-                height: 100vh; 
-                z-index: 100; 
-                border-radius: 0; 
-                box-shadow: none;
-            }
+        /* Surat akan muncul perlahan setelah amplop terbuka */
+        #fullscreen-letter.show-letter {
+            opacity: 1; pointer-events: auto; visibility: visible;
+            animation: slideUpLetter 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         }
 
-        .letter-content { 
-            opacity: 0; transition: opacity 0.8s ease 3.2s; 
-            overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
+        @keyframes slideUpLetter {
+            0% { transform: translateY(50px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .letter-inner-content {
             /* Border dalam ala kertas undangan mahal */
-            border: 1px solid rgba(251, 113, 133, 0.1); margin: 15px; height: calc(100% - 30px); border-radius: 16px;
+            border: 1px solid rgba(251, 113, 133, 0.1); 
+            margin: 15px; 
+            min-height: calc(100vh - 30px); 
+            border-radius: 16px;
+            padding-bottom: 40px;
         }
-        .envelope-master.is-opening .letter-content { opacity: 1; }
 
         /* ========================================= */
         /* ANIMASI DYNAMIC ISLAND & PAGE SHRINK      */
@@ -328,7 +319,7 @@
 
     <div class="scroll-container">
         
-        <!-- SLIDE 1: Pembukaan & Surat Halaman Penuh -->
+        <!-- SLIDE 1: Pembukaan & Amplop Kecil -->
         <div id="slide1" class="min-h-screen relative w-full overflow-hidden flex items-center justify-center">
             
             <!-- Ornamen Estetik -->
@@ -343,7 +334,7 @@
             </div>
 
             <div id="intro-texts" class="absolute top-[35%] left-1/2 transform -translate-x-1/2 translate-y-32 w-full flex flex-col items-center text-center px-4 z-10">
-                <h1 class="font-script text-5xl md:text-6xl text-premium-rose mb-3 drop-shadow-sm font-bold">Hai, Cantik...</h1>
+                <h1 class="font-script text-5xl md:text-6xl text-[#e11d48] mb-3 drop-shadow-sm font-bold">Hai, Cantik...</h1>
                 <p class="text-slate-500 mb-10 text-[16px] font-medium tracking-wide">Ada sesuatu yang spesial buat kamu hari ini.</p>
                 <button onclick="bukaKeajaiban()" class="btn-premium px-10 py-3.5 rounded-full font-semibold relative overflow-hidden group">
                     <span class="relative z-10">Buka Suratnya</span>
@@ -354,41 +345,41 @@
             <!-- ENVELOPE MASTER -->
             <div id="the-envelope" class="envelope-master z-20 pointer-events-none">
                 <div class="env-back"></div>
-                
-                <div class="env-letter flex flex-col items-center justify-center">
-                    <!-- KONTEN SURAT FULLSCREEN (INNER BORDER MEWAH) -->
-                    <div class="letter-content absolute inset-0 flex flex-col items-center text-center px-4 pt-12 md:pt-16">
-                        
-                        <!-- PIGURA FOTO KOTAK (POLAROID STYLE), MIRING KANAN -->
-                        <div class="absolute top-8 right-8 w-24 h-24 md:w-32 md:h-32 rounded-2xl border-[6px] border-white overflow-hidden shadow-[0_10px_25px_rgba(0,0,0,0.15)] transform rotate-[15deg] animate-float-fast z-10">
-                            <!-- GANTI URL FOTO INI -->
-                            <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Foto Kita" class="w-full h-full object-cover">
-                        </div>
-
-                        <!-- KONTEN TEKS EDITORIAL -->
-                        <div class="text-4xl md:text-5xl mb-6 animate-float mt-10 md:mt-8">🌸</div>
-                        <h2 class="font-script text-5xl md:text-7xl text-premium-rose mb-2 font-bold drop-shadow-sm">Selamat Ulang Tahun!</h2>
-                        <h3 class="text-2xl md:text-4xl font-semibold text-rose-400 mb-10 md:mb-14 tracking-wide">[Nama Panggilan] ❤️</h3>
-                        
-                        <div class="text-[15px] md:text-xl text-slate-600 leading-relaxed font-light space-y-6 md:space-y-8 px-4 md:px-24 max-w-4xl">
-                            <p>Di hari yang spesial ini, aku cuma mau bilang terima kasih. Terima kasih udah jadi versi terbaik dari diri kamu sendiri.</p>
-                            <p>Kehadiran kamu itu kayak warna pink di langit sore, selalu bikin tenang dan bahagia. Kamu pantes dapetin semua hal manis di dunia ini.</p>
-                        </div>
-                        
-                        <!-- TOMBOL LOVE DI TENGAH BAWAH -->
-                        <div class="mt-auto mb-10 flex flex-col items-center justify-center cursor-pointer group" onclick="customSmoothScroll('slide2')">
-                            <div class="text-7xl md:text-8xl animate-pulse-slow drop-shadow-2xl group-hover:scale-110 transition-transform duration-300">💖</div>
-                            <p class="font-sans font-bold uppercase tracking-[0.25em] text-rose-400 text-[11px] md:text-sm mt-6 animate-float-fast">Klik Love Untuk Melanjutkan</p>
-                        </div>
-                    </div>
-                </div>
-                
                 <div class="env-front"></div>
                 <div class="env-flap-wrapper">
                     <div class="env-flap-shape"></div>
                     <div class="env-flap-seal animate-heartbeat">
                         <span class="text-xl">❤️</span>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PERBAIKAN KRITIS: HALAMAN SURAT FULLSCREEN (TERPISAH DARI AMPLOP) -->
+        <!-- Ini menjamin surat 100% lurus, tidak terpotong, menutupi seluruh layar -->
+        <div id="fullscreen-letter" class="flex items-center justify-center p-0">
+            <div class="letter-inner-content relative w-full h-full flex flex-col items-center justify-start text-center px-4 pt-16 md:pt-24 pb-20">
+                
+                <!-- PIGURA FOTO KOTAK (POLAROID STYLE), MIRING KANAN -->
+                <div class="absolute top-8 right-8 md:top-12 md:right-16 w-24 h-24 md:w-32 md:h-32 rounded-2xl border-[6px] border-white overflow-hidden shadow-[0_10px_25px_rgba(0,0,0,0.15)] transform rotate-[15deg] animate-float-fast z-10">
+                    <!-- GANTI URL FOTO INI -->
+                    <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Foto Kita" class="w-full h-full object-cover">
+                </div>
+
+                <!-- KONTEN TEKS EDITORIAL -->
+                <div class="text-4xl md:text-5xl mb-6 animate-float mt-10 md:mt-8">🌸</div>
+                <h2 class="font-script text-5xl md:text-7xl text-[#e11d48] mb-2 font-bold drop-shadow-sm">Selamat Ulang Tahun!</h2>
+                <h3 class="text-2xl md:text-4xl font-semibold text-rose-400 mb-10 md:mb-14 tracking-wide">[Nama Panggilan] ❤️</h3>
+                
+                <div class="text-[15px] md:text-xl text-slate-600 leading-relaxed font-light space-y-6 md:space-y-8 px-4 md:px-24 max-w-4xl">
+                    <p>Di hari yang spesial ini, aku cuma mau bilang terima kasih. Terima kasih udah jadi versi terbaik dari diri kamu sendiri.</p>
+                    <p>Kehadiran kamu itu kayak warna pink di langit sore, selalu bikin tenang dan bahagia. Kamu pantes dapetin semua hal manis di dunia ini.</p>
+                </div>
+                
+                <!-- TOMBOL LOVE DI TENGAH BAWAH -->
+                <div class="mt-auto pt-10 flex flex-col items-center justify-center cursor-pointer group" onclick="customSmoothScroll('slide2')">
+                    <div class="text-7xl md:text-8xl animate-pulse-slow drop-shadow-2xl group-hover:scale-110 transition-transform duration-300">💖</div>
+                    <p class="font-sans font-bold uppercase tracking-[0.25em] text-rose-400 text-[11px] md:text-sm mt-6 animate-float-fast">Klik Love Untuk Melanjutkan</p>
                 </div>
             </div>
         </div>
@@ -410,7 +401,7 @@
                         <img src="https://cdn-icons-png.flaticon.com/512/814/814404.png" alt="Icon Custom" class="w-full h-full object-contain">
                     </div>
                     
-                    <h2 class="font-script text-5xl md:text-6xl text-premium-rose mb-6 font-bold">Kesayanganku,</h2>
+                    <h2 class="font-script text-5xl md:text-6xl text-[#e11d48] mb-6 font-bold">Kesayanganku,</h2>
                     
                     <div class="text-slate-600 leading-relaxed mb-10 space-y-5 text-[16px] font-medium">
                         <p>Senyummu adalah alasan kenapa hari ini begitu cerah dan spesial.</p>
@@ -426,7 +417,7 @@
 
         <!-- SLIDE 3: Galeri Memori 8 Foto (Dengan Tali Putus-putus) -->
         <div id="slide3" class="min-h-screen flex flex-col items-center justify-start w-full mx-auto px-4 py-20 overflow-hidden relative">
-            <h2 class="font-script text-5xl md:text-6xl text-premium-rose mb-20 text-center reveal drop-shadow-sm font-bold">Momen-momen Cantikmu</h2>
+            <h2 class="font-script text-5xl md:text-6xl text-[#e11d48] mb-20 text-center reveal drop-shadow-sm font-bold">Momen-momen Cantikmu</h2>
             
             <div class="relative w-full max-w-lg mx-auto pb-20">
                 <!-- Garis Tali Putus-putus (Rose Gold yang elegan) -->
@@ -436,7 +427,7 @@
                     <!-- Foto 1 -->
                     <div class="polaroid w-56 md:w-72 animate-swing reveal" style="animation-delay: 0s;">
                         <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 text-3xl z-10 drop-shadow-md">🎀</div>
-                        <div class="bg-premium-blush w-full h-52 md:h-64 mb-4 rounded-xl flex items-center justify-center overflow-hidden border border-rose-50 shadow-inner">
+                        <div class="bg-rose-50 w-full h-52 md:h-64 mb-4 rounded-xl flex items-center justify-center overflow-hidden border border-white shadow-inner">
                             <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
                         </div>
                         <p class="font-script text-2xl md:text-3xl text-center text-slate-700 font-bold">Cantik banget!</p>
@@ -445,7 +436,7 @@
                     <!-- Foto 2 -->
                     <div class="polaroid w-56 md:w-72 animate-swing reveal" style="animation-delay: 1.5s; animation-direction: alternate-reverse;">
                         <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 text-3xl z-10 drop-shadow-md">📌</div>
-                        <div class="bg-premium-blush w-full h-52 md:h-64 mb-4 rounded-xl flex items-center justify-center overflow-hidden border border-rose-50 shadow-inner">
+                        <div class="bg-rose-50 w-full h-52 md:h-64 mb-4 rounded-xl flex items-center justify-center overflow-hidden border border-white shadow-inner">
                             <img src="https://images.unsplash.com/photo-1520627725997-6a2d9894e138?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
                         </div>
                         <p class="font-script text-2xl md:text-3xl text-center text-slate-700 font-bold">Senyum favoritku ✨</p>
@@ -454,7 +445,7 @@
                     <!-- Foto 3 -->
                     <div class="polaroid w-56 md:w-72 animate-swing reveal" style="animation-delay: 0.5s;">
                         <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 text-3xl z-10 drop-shadow-md">🌸</div>
-                        <div class="bg-premium-blush w-full h-52 md:h-64 mb-4 rounded-xl flex items-center justify-center overflow-hidden border border-rose-50 shadow-inner">
+                        <div class="bg-rose-50 w-full h-52 md:h-64 mb-4 rounded-xl flex items-center justify-center overflow-hidden border border-white shadow-inner">
                             <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
                         </div>
                         <p class="font-script text-2xl md:text-3xl text-center text-slate-700 font-bold">Lucu parah! 🥰</p>
@@ -463,7 +454,7 @@
                     <!-- Foto 4 -->
                     <div class="polaroid w-56 md:w-72 animate-swing reveal" style="animation-delay: 2.5s; animation-direction: alternate-reverse;">
                         <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 text-3xl z-10 drop-shadow-md">💖</div>
-                        <div class="bg-premium-blush w-full h-52 md:h-64 mb-4 rounded-xl flex items-center justify-center overflow-hidden border border-rose-50 shadow-inner">
+                        <div class="bg-rose-50 w-full h-52 md:h-64 mb-4 rounded-xl flex items-center justify-center overflow-hidden border border-white shadow-inner">
                             <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
                         </div>
                         <p class="font-script text-2xl md:text-3xl text-center text-slate-700 font-bold">Kesayanganku 💕</p>
@@ -472,7 +463,7 @@
                     <!-- Foto 5 -->
                     <div class="polaroid w-56 md:w-72 animate-swing reveal" style="animation-delay: 1s;">
                         <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 text-3xl z-10 drop-shadow-md">🎀</div>
-                        <div class="bg-premium-blush w-full h-52 md:h-64 mb-4 rounded-xl flex items-center justify-center overflow-hidden border border-rose-50 shadow-inner">
+                        <div class="bg-rose-50 w-full h-52 md:h-64 mb-4 rounded-xl flex items-center justify-center overflow-hidden border border-white shadow-inner">
                             <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
                         </div>
                         <p class="font-script text-2xl md:text-3xl text-center text-slate-700 font-bold">Perfect 💯</p>
@@ -481,7 +472,7 @@
                     <!-- Foto 6 -->
                     <div class="polaroid w-56 md:w-72 animate-swing reveal" style="animation-delay: 3s; animation-direction: alternate-reverse;">
                         <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 text-3xl z-10 drop-shadow-md">📌</div>
-                        <div class="bg-premium-blush w-full h-52 md:h-64 mb-4 rounded-xl flex items-center justify-center overflow-hidden border border-rose-50 shadow-inner">
+                        <div class="bg-rose-50 w-full h-52 md:h-64 mb-4 rounded-xl flex items-center justify-center overflow-hidden border border-white shadow-inner">
                             <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
                         </div>
                         <p class="font-script text-2xl md:text-3xl text-center text-slate-700 font-bold">Memori manis 📸</p>
@@ -490,7 +481,7 @@
                     <!-- Foto 7 -->
                     <div class="polaroid w-56 md:w-72 animate-swing reveal" style="animation-delay: 0.8s;">
                         <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 text-3xl z-10 drop-shadow-md">🌸</div>
-                        <div class="bg-premium-blush w-full h-52 md:h-64 mb-4 rounded-xl flex items-center justify-center overflow-hidden border border-rose-50 shadow-inner">
+                        <div class="bg-rose-50 w-full h-52 md:h-64 mb-4 rounded-xl flex items-center justify-center overflow-hidden border border-white shadow-inner">
                             <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
                         </div>
                         <p class="font-script text-2xl md:text-3xl text-center text-slate-700 font-bold">My sunshine ☀️</p>
@@ -499,7 +490,7 @@
                     <!-- Foto 8 -->
                     <div class="polaroid w-56 md:w-72 animate-swing reveal" style="animation-delay: 2.2s; animation-direction: alternate-reverse;">
                         <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 text-3xl z-10 drop-shadow-md">💖</div>
-                        <div class="bg-premium-blush w-full h-52 md:h-64 mb-4 rounded-xl flex items-center justify-center overflow-hidden border border-rose-50 shadow-inner">
+                        <div class="bg-rose-50 w-full h-52 md:h-64 mb-4 rounded-xl flex items-center justify-center overflow-hidden border border-white shadow-inner">
                             <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
                         </div>
                         <p class="font-script text-2xl md:text-3xl text-center text-slate-700 font-bold">Love u! 🥰</p>
@@ -524,7 +515,7 @@
                 
                 <div class="glass-card rounded-[2.5rem] p-10 md:p-12 mb-12 w-full reveal relative overflow-hidden">
                     <div class="absolute top-0 right-0 p-5 text-4xl opacity-30">✨</div>
-                    <h2 class="font-script text-5xl md:text-6xl text-premium-rose mb-6 font-bold">Make a Wish! ✨</h2>
+                    <h2 class="font-script text-5xl md:text-6xl text-[#e11d48] mb-6 font-bold">Make a Wish! ✨</h2>
                     <p class="text-slate-600 mb-6 text-[16px] leading-relaxed font-medium">Semoga di umur yang baru ini, kamu semakin bersinar, semakin bahagia, dan semua yang kamu semogakan bisa terwujud satu per satu.</p>
                 </div>
                 
@@ -535,7 +526,7 @@
 
             <!-- PESAN RAKSASA FINAL (FONT SAMA DENGAN KLIK LOVE) -->
             <div id="final-message" class="absolute inset-0 z-[200] hidden flex-col items-center justify-center opacity-0 transition-opacity duration-1000">
-                <h1 class="font-sans font-bold uppercase tracking-[0.25em] text-4xl md:text-5xl lg:text-6xl text-premium-rose drop-shadow-lg mb-4 animate-float text-center px-4 leading-relaxed">
+                <h1 class="font-sans font-bold uppercase tracking-[0.25em] text-4xl md:text-5xl lg:text-6xl text-[#e11d48] drop-shadow-lg mb-4 animate-float text-center px-4 leading-relaxed">
                     LOVE YOU<br>OKTA CANTIKKK <br><span class="text-5xl md:text-7xl mt-8 block drop-shadow-2xl tracking-normal">🥰💖🌸✨</span>
                 </h1>
             </div>
@@ -634,12 +625,18 @@
         }
 
         // ==========================================
-        // LOGIKA WEB UTAMA (Surat & Scroll)
+        // LOGIKA WEB UTAMA (Surat Raksasa & Scroll)
         // ==========================================
         function bukaKeajaiban() {
             document.getElementById('circle-bg').style.cssText = 'opacity:0; transform: translate(-50%, -50%) scale(0.5)';
             document.getElementById('intro-texts').style.cssText = 'opacity:0; transform: translate(-50%, 150px); pointer-events:none';
+            
+            // 1. Amplop Menghilang
             document.getElementById('the-envelope').classList.add('is-opening');
+            
+            // 2. Tampilkan Surat Fullscreen (Elemen Terpisah & Mutlak)
+            document.getElementById('fullscreen-letter').classList.add('show-letter');
+
             burstHearts();
         }
 
