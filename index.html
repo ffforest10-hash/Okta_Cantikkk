@@ -43,6 +43,8 @@
             background: linear-gradient(135deg, #fdfbfb 0%, #fdf2f8 50%, #fef2f2 100%);
             overflow: hidden; 
             color: #334155; 
+            margin: 0;
+            padding: 0;
         }
         
         /* ========================================= */
@@ -50,20 +52,29 @@
         /* ========================================= */
         #lock-screen {
             background-color: #1a1a1a;
-            /* BACKGROUND LOCKSCREEN SUDAH DIPERBAIKI (COVER & CENTER) */
-            background-image: url('https://images.unsplash.com/photo-1607519961601-52319f390025?ixlib=rb-4.0.3&auto=format&fit=crop&w=1080&q=80');
+            background-image: url('https://images.unsplash.com/photo-1607519961601-52319f390025');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            z-index: 1000; 
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: 9999;
+            transition: all 1s ease-in-out;
         }
-        /* Overlay gelap agar layar lebih elegan dan teks mudah dibaca */
         #lock-bg-overlay {
             position: absolute; inset: 0; background: rgba(0,0,0,0.25);
             transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 1;
         }
-        #lock-bg-blur { transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
-        
+        #lock-bg-blur { 
+            position: absolute; inset: 0; background: transparent; 
+            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 2;
+        }
+        #lock-content-wrapper {
+            position: absolute; inset: 0; z-index: 3;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+        }
+
         .liquid-widget {
             background: rgba(30, 30, 30, 0.55); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
             border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4);
@@ -86,7 +97,7 @@
         }
 
         /* ========================================= */
-        /* SISTEM PANEL SLIDE BARU (SMOOTH SPA)      */
+        /* SISTEM PANEL SLIDE (SMOOTH SPA)           */
         /* ========================================= */
         .slide-panel {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -118,12 +129,14 @@
         .btn-premium {
             background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%); color: white;
             box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.4), inset 0 2px 4px rgba(255,255,255,0.3); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            border: none; outline: none; cursor: pointer;
         }
         .btn-premium:hover { transform: translateY(-4px); box-shadow: 0 15px 35px -5px rgba(225, 29, 72, 0.5), inset 0 2px 4px rgba(255,255,255,0.4); }
 
         .btn-outline-premium {
             background: white; color: #e11d48; border: 1.5px solid #ffe4e6;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            cursor: pointer;
         }
         .btn-outline-premium:hover { background: #fff0f5; border-color: #fecdd3; transform: translateY(-4px); box-shadow: 0 15px 30px -5px rgba(225, 29, 72, 0.15); }
 
@@ -160,7 +173,7 @@
 
         /* ABSOLUTE FULLSCREEN LETTER */
         #fullscreen-letter {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0; width: 100vw; height: 100vh;
             background: #ffffff; z-index: 100;
             opacity: 0; pointer-events: none; visibility: hidden;
             transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1);
@@ -176,7 +189,7 @@
         /* ========================================= */
         /* ANIMASI DYNAMIC ISLAND & KEMBANG API      */
         /* ========================================= */
-        .island-shrink { animation: islandShrink 0.8s cubic-bezier(0.5, 0, 0, 1) forwards !important; white-space: nowrap; overflow: hidden; pointer-events: none; }
+        .island-shrink { animation: islandShrink 0.8s cubic-bezier(0.5, 0, 0, 1) forwards !important; white-space: nowrap; overflow: hidden; pointer-events: none; border: none; }
         @keyframes islandShrink {
             0% { width: 300px; border-radius: 999px; }
             40% { width: 50px; height: 50px; padding: 0; background: black; color: transparent; border-color: black; border-radius: 50px; }
@@ -211,97 +224,99 @@
     </audio>
 
     <!-- ========================================= -->
-    <!-- IPHONE LOCK SCREEN (LIQUID GLASS)         -->
+    <!-- IPHONE LOCK SCREEN (HARDCODED FULLSCREEN) -->
     <!-- ========================================= -->
-    <div id="lock-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-start transition-all duration-1000 ease-in-out">
+    <div id="lock-screen">
         <div id="lock-bg-overlay"></div>
-        <div id="lock-bg-blur" class="absolute inset-0 bg-transparent transition-all duration-700"></div>
+        <div id="lock-bg-blur"></div>
         
-        <div id="view-initial" class="absolute inset-0 flex flex-col justify-between pt-16 pb-6 z-20 cursor-pointer" onclick="showPinView()">
-            <div class="flex flex-col items-center w-full px-4">
-                <p id="lock-date-main" class="text-white text-lg font-semibold drop-shadow-md tracking-wide mb-1">Mon Nov 3</p>
-                <h1 id="lock-time-main" class="ios-time drop-shadow-2xl">11:19</h1>
-            </div>
-            
-            <div class="w-full flex flex-col items-center px-5 gap-3 mt-auto mb-10 pointer-events-none">
-                <div class="liquid-widget w-full max-w-sm rounded-3xl p-4 flex flex-col gap-3">
-                    <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-lg bg-gray-800 flex-shrink-0 overflow-hidden shadow-lg border border-white/10">
-                            <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Album Art" class="w-full h-full object-cover">
+        <div id="lock-content-wrapper">
+            <div id="view-initial" class="absolute inset-0 flex flex-col justify-between pt-16 pb-6 w-full cursor-pointer z-20" onclick="showPinView()">
+                <div class="flex flex-col items-center w-full px-4">
+                    <p id="lock-date-main" class="text-white text-lg font-semibold drop-shadow-md tracking-wide mb-1">Mon Nov 3</p>
+                    <h1 id="lock-time-main" class="ios-time drop-shadow-2xl">11:19</h1>
+                </div>
+                
+                <div class="w-full flex flex-col items-center px-5 gap-3 mt-auto mb-10 pointer-events-none">
+                    <div class="liquid-widget w-full max-w-sm rounded-3xl p-4 flex flex-col gap-3">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-lg bg-gray-800 flex-shrink-0 overflow-hidden shadow-lg border border-white/10">
+                                <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Album Art" class="w-full h-full object-cover">
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="text-white font-semibold text-[15px] leading-tight">Drama (feat. Drake)</h3>
+                                <p class="text-white/70 text-[13px]">Roy Woods, Drake</p>
+                            </div>
+                            <div class="flex items-end gap-0.5 h-4">
+                                <div class="w-0.5 h-2 bg-white rounded-full animate-pulse"></div>
+                                <div class="w-0.5 h-4 bg-white rounded-full animate-pulse" style="animation-delay: 0.1s"></div>
+                                <div class="w-0.5 h-3 bg-white rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+                                <div class="w-0.5 h-2 bg-white rounded-full animate-pulse" style="animation-delay: 0.3s"></div>
+                            </div>
                         </div>
-                        <div class="flex-grow">
-                            <h3 class="text-white font-semibold text-[15px] leading-tight">Drama (feat. Drake)</h3>
-                            <p class="text-white/70 text-[13px]">Roy Woods, Drake</p>
+                        
+                        <div class="flex items-center gap-3 w-full">
+                            <span class="text-white/70 text-[10px] font-medium">1:34</span>
+                            <div class="flex-grow h-1.5 bg-white/30 rounded-full relative overflow-hidden">
+                                <div class="absolute left-0 top-0 h-full w-1/3 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.9)]"></div>
+                            </div>
+                            <span class="text-white/70 text-[10px] font-medium">-2:38</span>
                         </div>
-                        <div class="flex items-end gap-0.5 h-4">
-                            <div class="w-0.5 h-2 bg-white rounded-full animate-pulse"></div>
-                            <div class="w-0.5 h-4 bg-white rounded-full animate-pulse" style="animation-delay: 0.1s"></div>
-                            <div class="w-0.5 h-3 bg-white rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
-                            <div class="w-0.5 h-2 bg-white rounded-full animate-pulse" style="animation-delay: 0.3s"></div>
+                        
+                        <div class="flex justify-center items-center gap-8 mt-1">
+                            <svg class="w-7 h-7 text-white fill-current opacity-90" viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
+                            <svg class="w-9 h-9 text-white fill-current opacity-100" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                            <svg class="w-7 h-7 text-white fill-current opacity-90" viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
                         </div>
                     </div>
-                    
-                    <div class="flex items-center gap-3 w-full">
-                        <span class="text-white/70 text-[10px] font-medium">1:34</span>
-                        <div class="flex-grow h-1.5 bg-white/30 rounded-full relative overflow-hidden">
-                            <div class="absolute left-0 top-0 h-full w-1/3 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.9)]"></div>
+
+                    <div class="liquid-widget w-full max-w-sm rounded-2xl p-3 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-rose-400 flex items-center justify-center text-xl shadow-md border border-white/20">💌</div>
+                            <div>
+                                <h4 class="text-white font-medium text-[14px] leading-tight">Message</h4>
+                                <p class="text-white/70 text-[12px]">You have a special letter</p>
+                            </div>
                         </div>
-                        <span class="text-white/70 text-[10px] font-medium">-2:38</span>
-                    </div>
-                    
-                    <div class="flex justify-center items-center gap-8 mt-1">
-                        <svg class="w-7 h-7 text-white fill-current opacity-90" viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
-                        <svg class="w-9 h-9 text-white fill-current opacity-100" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                        <svg class="w-7 h-7 text-white fill-current opacity-90" viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
+                        <span class="text-white/50 text-[12px] font-medium">now</span>
                     </div>
                 </div>
 
-                <div class="liquid-widget w-full max-w-sm rounded-2xl p-3 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-rose-400 flex items-center justify-center text-xl shadow-md border border-white/20">💌</div>
-                        <div>
-                            <h4 class="text-white font-medium text-[14px] leading-tight">Message</h4>
-                            <p class="text-white/70 text-[12px]">You have a special letter</p>
-                        </div>
-                    </div>
-                    <span class="text-white/50 text-[12px] font-medium">now</span>
+                <div class="w-full px-10 flex justify-between items-end mb-2">
+                    <div class="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 text-white text-xl shadow-lg">🔦</div>
+                    <div class="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 text-white text-xl shadow-lg">📷</div>
                 </div>
+                <div class="w-32 h-1.5 bg-white/90 rounded-full mx-auto animate-pulse-slow shadow-[0_0_10px_rgba(255,255,255,0.5)] mb-2"></div>
             </div>
 
-            <div class="w-full px-10 flex justify-between items-end mb-2">
-                <div class="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 text-white text-xl shadow-lg">🔦</div>
-                <div class="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 text-white text-xl shadow-lg">📷</div>
-            </div>
-            <div class="w-32 h-1.5 bg-white/90 rounded-full mx-auto animate-pulse-slow shadow-[0_0_10px_rgba(255,255,255,0.5)] mb-2"></div>
-        </div>
+            <div id="view-pin" class="absolute inset-0 flex flex-col items-center justify-center pt-8 w-full z-10 opacity-0 pointer-events-none transform translate-y-12">
+                
+                <!-- STIKER MENUNGGU PIN -->
+                <img id="pin-cat-sticker" src="download%20(4).gif" class="w-28 h-28 mx-auto mb-2 animate-bounce-soft" alt="Waiting Cat">
 
-        <div id="view-pin" class="absolute inset-0 flex flex-col items-center justify-center pt-8 z-10 opacity-0 pointer-events-none transform translate-y-12">
-            
-            <!-- STIKER MENUNGGU PIN -->
-            <img id="pin-cat-sticker" src="download (4).gif" class="w-28 h-28 mx-auto mb-2 animate-bounce-soft" alt="Waiting Cat">
-
-            <h2 class="text-white mb-6 text-sm tracking-widest font-semibold drop-shadow-md">MASUKKAN PIN</h2>
-            <div class="flex gap-5 mb-10" id="pin-dots">
-                <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all duration-200"></div>
-                <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all duration-200"></div>
-                <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all duration-200"></div>
-                <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all duration-200"></div>
-                <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all duration-200"></div>
-                <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all duration-200"></div>
-            </div>
-            <div class="grid grid-cols-3 gap-x-8 gap-y-6">
-                <button onclick="pressPin('1')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">1</button>
-                <button onclick="pressPin('2')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">2</button>
-                <button onclick="pressPin('3')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">3</button>
-                <button onclick="pressPin('4')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">4</button>
-                <button onclick="pressPin('5')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">5</button>
-                <button onclick="pressPin('6')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">6</button>
-                <button onclick="pressPin('7')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">7</button>
-                <button onclick="pressPin('8')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">8</button>
-                <button onclick="pressPin('9')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">9</button>
-                <div></div>
-                <button onclick="pressPin('0')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">0</button>
-                <button onclick="pressPin('del')" class="w-[75px] h-[75px] rounded-full text-white text-lg font-medium flex justify-center items-center active:bg-white/20 transition-all">Hapus</button>
+                <h2 class="text-white mb-6 text-sm tracking-widest font-semibold drop-shadow-md">MASUKKAN PIN</h2>
+                <div class="flex gap-5 mb-10" id="pin-dots">
+                    <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all duration-200"></div>
+                    <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all duration-200"></div>
+                    <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all duration-200"></div>
+                    <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all duration-200"></div>
+                    <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all duration-200"></div>
+                    <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all duration-200"></div>
+                </div>
+                <div class="grid grid-cols-3 gap-x-8 gap-y-6">
+                    <button onclick="pressPin('1')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">1</button>
+                    <button onclick="pressPin('2')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">2</button>
+                    <button onclick="pressPin('3')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">3</button>
+                    <button onclick="pressPin('4')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">4</button>
+                    <button onclick="pressPin('5')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">5</button>
+                    <button onclick="pressPin('6')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">6</button>
+                    <button onclick="pressPin('7')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">7</button>
+                    <button onclick="pressPin('8')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">8</button>
+                    <button onclick="pressPin('9')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">9</button>
+                    <div></div>
+                    <button onclick="pressPin('0')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">0</button>
+                    <button onclick="pressPin('del')" class="w-[75px] h-[75px] rounded-full text-white text-lg font-medium flex justify-center items-center active:bg-white/20 transition-all">Hapus</button>
+                </div>
             </div>
         </div>
     </div>
@@ -312,7 +327,7 @@
     <div id="slide1" class="slide-panel active flex items-center justify-center w-full relative">
         
         <!-- STIKER MENGINTIP DARI KARDUS (Pojok Bawah) -->
-        <img src="download (3).gif" class="absolute bottom-[-10px] right-2 w-32 h-32 z-0 opacity-80" alt="Peeking Cat">
+        <img src="download%20(3).gif" class="absolute bottom-[-10px] right-2 w-32 h-32 z-0 opacity-80" alt="Peeking Cat">
 
         <div id="intro-texts" class="absolute top-[30%] left-1/2 transform -translate-x-1/2 w-full flex flex-col items-center text-center px-4 z-10">
             <h1 class="font-script text-5xl md:text-6xl text-[#e11d48] mb-3 drop-shadow-sm font-bold">Hai, Cantik...</h1>
@@ -326,7 +341,7 @@
         <!-- ENVELOPE MASTER -->
         <div id="the-envelope" class="envelope-master z-20 pointer-events-none mt-20">
             <!-- STIKER KUCING MALU (Melayang di dekat amplop) -->
-            <img src="Mochi Mochi Peach Cat & Friend 2.gif" class="absolute -top-24 -left-10 w-28 h-28 animate-float-fast z-50 drop-shadow-lg" alt="Shy Cat">
+            <img src="Mochi%20Mochi%20Peach%20Cat%20%26%20Friend%202.gif" class="absolute -top-24 -left-10 w-28 h-28 animate-float-fast z-50 drop-shadow-lg" alt="Shy Cat">
             
             <div class="env-back"></div>
             <div class="env-front"></div>
@@ -374,7 +389,7 @@
             <div class="relative z-10 bg-white/70 p-8 rounded-3xl border border-white/80 shadow-sm">
                 
                 <!-- STIKER CIUMAN CINTA -->
-                <img src="download (1).gif" class="w-24 h-24 md:w-32 md:h-32 mx-auto mb-4 animate-float drop-shadow-md" alt="Kiss Cat">
+                <img src="download%20(1).gif" class="w-24 h-24 md:w-32 md:h-32 mx-auto mb-4 animate-float drop-shadow-md" alt="Kiss Cat">
                 
                 <h2 class="font-script text-5xl md:text-6xl text-[#e11d48] mb-6 font-bold">Kesayanganku,</h2>
                 
@@ -397,9 +412,9 @@
         
         <!-- HEADER GALERI DENGAN STIKER COUPLE -->
         <div class="flex justify-center items-center gap-4 mb-16 reveal">
-            <img src="Love Couple Sticker - Love Couple Hug - Temukan & Bagikan GIF.jpg" class="w-20 h-20 rounded-full mix-blend-multiply animate-float" alt="Couple Hug 1">
+            <img src="Love%20Couple%20Sticker%20-%20Love%20Couple%20Hug%20-%20Temukan%20%26%20Bagikan%20GIF.jpg" class="w-20 h-20 rounded-full mix-blend-multiply animate-float" alt="Couple Hug 1">
             <h2 class="font-script text-5xl md:text-6xl text-[#e11d48] text-center drop-shadow-sm font-bold">Momen Cantikmu</h2>
-            <img src="download (2).jpg" class="w-20 h-20 rounded-full mix-blend-multiply animate-float-fast" alt="Couple Hug 2">
+            <img src="download%20(2).jpg" class="w-20 h-20 rounded-full mix-blend-multiply animate-float-fast" alt="Couple Hug 2">
         </div>
         
         <div class="relative w-full max-w-lg mx-auto pb-10">
@@ -472,7 +487,7 @@
         <div id="final-message" class="absolute inset-0 z-[200] hidden flex-col items-center justify-center opacity-0 transition-opacity duration-1000">
             
             <!-- STIKER FINAL: MEMELUK HATI RAKSASA -->
-            <img src="Duke's Wife [Taerin-Eunkook] [End] ✔.gif" class="w-48 h-48 mb-6 animate-float drop-shadow-2xl" alt="Big Heart Cat">
+            <img src="Duke's%20Wife%20%5BTaerin-Eunkook%5D%20%5BEnd%5D%20%E2%9C%94.gif" class="w-48 h-48 mb-6 animate-float drop-shadow-2xl" alt="Big Heart Cat">
 
             <h1 class="font-sans font-bold uppercase tracking-[0.25em] text-4xl md:text-5xl lg:text-6xl text-[#e11d48] drop-shadow-lg mb-4 text-center px-4 leading-relaxed">
                 LOVE YOU<br>OKTA CANTIKKK
@@ -560,7 +575,8 @@
             } else {
                 // EFEK SALAH PIN: STIKER BERUBAH JADI KUCING MARAH
                 const originalSrc = sticker.src;
-                sticker.src = "Cute Gif GIF – Cute Gif Angry Cat – discover and share GIFs.jpg";
+                // Menggunakan URL Encode agar tidak error di browser
+                sticker.src = "Cute%20Gif%20GIF%20%E2%80%93%20Cute%20Gif%20Angry%20Cat%20%E2%80%93%20discover%20and%20share%20GIFs.jpg";
                 
                 const dotsContainer = document.getElementById('pin-dots');
                 dotsContainer.classList.add('shake');
@@ -568,7 +584,7 @@
                 setTimeout(() => {
                     dotsContainer.classList.remove('shake');
                     currentPin = ''; updateDots();
-                    sticker.src = originalSrc; // Kembali ke stiker semula
+                    sticker.src = originalSrc; 
                 }, 800);
             }
         }
@@ -646,7 +662,6 @@
         }
 
         function fireworkMagic() {
-            // HANYA 1X LEDAKAN SERENTAK
             for(let i=0; i<45; i++) {
                 setTimeout(fireworkParticle, i * 15);
             }
