@@ -2,11 +2,12 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Happy Birthday Okta Cantikkk!</title>
-    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
@@ -15,441 +16,639 @@
                     fontFamily: {
                         'script': ['"Dancing Script"', 'cursive'],
                         'sans': ['Poppins', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'float-fast': 'float 3.5s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'swing': 'swing 5s ease-in-out infinite alternate',
+                        'heartbeat': 'heartbeat 2s ease-in-out infinite',
+                        'spin-slow': 'spin 12s linear infinite',
+                        'bounce-soft': 'bounceSoft 2s infinite'
+                    },
+                    keyframes: {
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-15px)' } },
+                        'float-fast': { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-8px)' } },
+                        swing: { '0%': { transform: 'rotate(-3deg)' }, '100%': { transform: 'rotate(3deg)' } },
+                        heartbeat: { '0%, 100%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.12)' } },
+                        bounceSoft: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } }
                     }
                 }
             }
         }
     </script>
-
     <style>
-        /* BASE STYLES */
-        body { margin: 0; padding: 0; overflow: hidden; background: #fff0f5; color: #334155; touch-action: manipulation; }
+        body.locked { overflow: hidden; height: 100vh; }
+        body {
+            background: linear-gradient(135deg, #fdfbfb 0%, #fdf2f8 50%, #fef2f2 100%);
+            overflow: hidden; 
+            color: #334155; 
+        }
         
-        /* SMOOTH ANIMATIONS */
-        @keyframes float { 0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); } 50% { transform: translateY(-10px) rotate(var(--r, 0deg)); } }
-        @keyframes pulse-slow { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-        @keyframes heartbeat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.15); } 30% { transform: scale(1); } 45% { transform: scale(1.15); } 60% { transform: scale(1); } }
-        @keyframes swing { 0% { transform: rotate(-3deg); } 100% { transform: rotate(3deg); } }
-        
-        .animate-float { animation: float 6s ease-in-out infinite; }
-        .animate-float-fast { animation: float 4s ease-in-out infinite; }
-        .animate-pulse-slow { animation: pulse-slow 3s ease-in-out infinite; }
-        .animate-heartbeat { animation: heartbeat 2s ease-in-out infinite; }
-        .animate-swing { animation: swing 4s ease-in-out infinite alternate; }
-
-        /* LOCKSCREEN LIQUID UI */
+        /* ========================================= */
+        /* IPHONE LOCK SCREEN & LIQUID GLASS         */
+        /* ========================================= */
         #lock-screen {
-            background: url('https://images.unsplash.com/photo-1607519961601-52319f390025?ixlib=rb-4.0.3&auto=format&fit=crop&w=1080&q=80') center/cover;
+            background-color: #1a1a1a;
+            /* BACKGROUND LOCKSCREEN SUDAH DIPERBAIKI (COVER & CENTER) */
+            background-image: url('https://images.unsplash.com/photo-1607519961601-52319f390025?ixlib=rb-4.0.3&auto=format&fit=crop&w=1080&q=80');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: 1000; 
         }
-        .glass-panel { background: rgba(30, 30, 30, 0.5); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
-        .pin-btn { background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); transition: transform 0.1s; border: 1px solid rgba(255,255,255,0.2); }
-        .pin-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.3); }
+        /* Overlay gelap agar layar lebih elegan dan teks mudah dibaca */
+        #lock-bg-overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.25);
+            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        #lock-bg-blur { transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+        
+        .liquid-widget {
+            background: rgba(30, 30, 30, 0.55); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4);
+        }
 
-        /* SPA NAVIGATION & PANELS */
-        .spa-panel {
+        .liquid-btn {
+            background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), inset 0 0 10px rgba(255,255,255,0.1);
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .liquid-btn:active { background: rgba(255, 255, 255, 0.3); transform: scale(0.92); }
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-8px, 0, 0); } 40%, 60% { transform: translate3d(8px, 0, 0); } }
+
+        #view-initial, #view-pin { transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+
+        .ios-time {
+            font-size: 110px; font-weight: 700; letter-spacing: -0.05em; line-height: 0.9;
+            color: rgba(255, 255, 255, 0.95); mix-blend-mode: overlay;
+        }
+
+        /* ========================================= */
+        /* SISTEM PANEL SLIDE BARU (SMOOTH SPA)      */
+        /* ========================================= */
+        .slide-panel {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            opacity: 0; visibility: hidden; z-index: 10;
-            transition: opacity 0.8s ease, visibility 0.8s;
-            overflow-y: auto; overflow-x: hidden;
-            background: linear-gradient(135deg, #fff0f5 0%, #fae8ff 50%, #fff0f5 100%);
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), visibility 0.8s;
+            overflow-y: auto; overflow-x: hidden; z-index: 10;
+            scrollbar-width: none; -ms-overflow-style: none;
         }
-        .spa-panel.active { opacity: 1; visibility: visible; z-index: 20; }
-        .spa-panel::-webkit-scrollbar { display: none; } /* Hide scrollbar */
+        .slide-panel::-webkit-scrollbar { display: none; }
+        
+        .slide-panel.active {
+            opacity: 1; visibility: visible; pointer-events: auto; z-index: 20;
+            animation: slideInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes slideInUp {
+            0% { transform: translateY(40px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
 
-        /* PREMIUM BUTTONS */
+        /* ========================================= */
+        /* UI MEWAH & GLASSMORPHISM                  */
+        /* ========================================= */
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(24px); 
+            border: 1px solid rgba(255, 255, 255, 1); 
+            box-shadow: 0 20px 50px rgba(225, 29, 72, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.5); 
+        }
+
         .btn-premium {
             background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%); color: white;
-            box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.4), inset 0 2px 4px rgba(255,255,255,0.3);
-            transition: transform 0.3s;
+            box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.4), inset 0 2px 4px rgba(255,255,255,0.3); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
-        .btn-premium:active { transform: scale(0.95); }
-        .btn-outline {
-            background: rgba(255,255,255,0.9); color: #e11d48; border: 2px solid #ffe4e6;
-            box-shadow: 0 8px 20px rgba(225, 29, 72, 0.1); transition: transform 0.3s;
-        }
-        .btn-outline:active { transform: scale(0.95); }
+        .btn-premium:hover { transform: translateY(-4px); box-shadow: 0 15px 35px -5px rgba(225, 29, 72, 0.5), inset 0 2px 4px rgba(255,255,255,0.4); }
 
-        /* ENVELOPE MECHANICS */
-        .envelope-master { position: relative; width: 300px; height: 180px; z-index: 30; transition: transform 0.8s; }
-        .env-back { position: absolute; inset: 0; background: #FDA4AF; border-radius: 12px; box-shadow: 0 15px 40px rgba(225, 29, 72, 0.2); }
-        .env-front { position: absolute; inset: 0; border-radius: 12px; overflow: hidden; pointer-events: none; z-index: 3; }
+        .btn-outline-premium {
+            background: white; color: #e11d48; border: 1.5px solid #ffe4e6;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .btn-outline-premium:hover { background: #fff0f5; border-color: #fecdd3; transform: translateY(-4px); box-shadow: 0 15px 30px -5px rgba(225, 29, 72, 0.15); }
+
+        /* ========================================= */
+        /* ANIMASI AMPLOP & SURAT FULLSCREEN         */
+        /* ========================================= */
+        #intro-texts { transition: all 0.9s cubic-bezier(0.25, 1, 0.5, 1); }
+        
+        .envelope-master { 
+            position: absolute; top: 35vh; left: 50vw; 
+            width: 320px; height: 200px; 
+            transform: translate(-50%, -50%) scale(0.38); 
+            transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1); z-index: 20;
+        }
+        .envelope-master.is-opening { pointer-events: auto; transform: translate(-50%, -50%) scale(1); }
+
+        .env-back { position: absolute; inset: 0; background: #FDA4AF; border-radius: 12px; z-index: 1; box-shadow: 0 20px 40px rgba(225, 29, 72, 0.25); }
+        .env-front { position: absolute; inset: 0; z-index: 3; border-radius: 12px; overflow: hidden; pointer-events: none; }
         .env-front::before { content: ''; position: absolute; inset: 0; background: #FECDD3; clip-path: polygon(0 0, 50% 50%, 0 100%, 100% 100%, 100% 0); }
         .env-front::after { content: ''; position: absolute; inset: 0; background: #FFE4E6; clip-path: polygon(0 100%, 50% 55%, 100% 100%); }
-        .env-flap-wrapper { position: absolute; top: 0; left: 0; right: 0; height: 60%; transform-origin: top; transition: transform 0.8s ease 0.2s; z-index: 4; }
-        .env-flap-shape { width: 100%; height: 100%; background: #FB7185; clip-path: polygon(0 0, 100% 0, 50% 100%); border-radius: 12px 12px 0 0; }
-        .env-seal { position: absolute; bottom: -20px; left: calc(50% - 20px); width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: opacity 0.2s; }
+
+        .env-flap-wrapper { position: absolute; top: 0; left: 0; right: 0; height: 60%; transform-origin: top; transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1) 1s; z-index: 4; }
+        .env-flap-shape { width: 100%; height: 100%; background: #FB7185; clip-path: polygon(0 0, 100% 0, 50% 100%); border-top-left-radius: 12px; border-top-right-radius: 12px; }
+        .env-flap-seal { position: absolute; bottom: -22px; left: calc(50% - 22px); width: 44px; height: 44px; background: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .env-flap-seal span { display: block; transition: transform 0.1s 1.4s; }
         
-        .is-opening .env-flap-wrapper { transform: rotateX(180deg); z-index: 1; }
-        .is-opening .env-seal { opacity: 0; }
-        .is-opening.envelope-master { transform: translateY(100px) scale(0.8); opacity: 0; transition: all 0.8s ease 1s; visibility: hidden; }
+        .envelope-master.is-opening .env-flap-wrapper { transform: rotateX(180deg); z-index: 1; }
+        .envelope-master.is-opening .env-flap-seal span { transform: rotateX(180deg); }
 
-        /* PERFECT FULLSCREEN LETTER */
-        #letter-fullscreen {
-            position: fixed; inset: 0; background: #ffffff; z-index: 100;
-            opacity: 0; visibility: hidden; transform: translateY(30px);
-            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1) 1.2s;
-            overflow-y: auto;
+        @keyframes envelopeVanishBase { to { opacity: 0; transform: scale(0.5); visibility: hidden; } }
+        @keyframes envelopeVanishFlap { to { opacity: 0; transform: rotateX(180deg) scale(0.5); visibility: hidden; } }
+        .envelope-master.is-opening .env-back, .envelope-master.is-opening .env-front { animation: envelopeVanishBase 0.8s ease forwards 2.5s; }
+        .envelope-master.is-opening .env-flap-wrapper { animation: envelopeVanishFlap 0.8s ease forwards 2.5s; }
+
+        /* ABSOLUTE FULLSCREEN LETTER */
+        #fullscreen-letter {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #ffffff; z-index: 100;
+            opacity: 0; pointer-events: none; visibility: hidden;
+            transition: opacity 1.2s cubic-bezier(0.25, 1, 0.5, 1);
+            overflow-y: auto; overflow-x: hidden; scrollbar-width: none;
         }
-        #letter-fullscreen.show { opacity: 1; visibility: visible; transform: translateY(0); }
+        #fullscreen-letter::-webkit-scrollbar { display: none; }
+        #fullscreen-letter.show-letter {
+            opacity: 1; pointer-events: auto; visibility: visible;
+            animation: slideUpLetter 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes slideUpLetter { 0% { transform: translateY(60px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
 
-        /* POLAROID GALLERY */
-        .polaroid { background: white; padding: 10px 10px 30px 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); border-radius: 4px; }
-        .dashed-line { position: absolute; left: 50%; top: 0; bottom: 0; width: 2px; border-left: 3px dashed #fbcfe8; transform: translateX(-50%); z-index: 0; }
+        /* ========================================= */
+        /* ANIMASI DYNAMIC ISLAND & KEMBANG API      */
+        /* ========================================= */
+        .island-shrink { animation: islandShrink 0.8s cubic-bezier(0.5, 0, 0, 1) forwards !important; white-space: nowrap; overflow: hidden; pointer-events: none; }
+        @keyframes islandShrink {
+            0% { width: 300px; border-radius: 999px; }
+            40% { width: 50px; height: 50px; padding: 0; background: black; color: transparent; border-color: black; border-radius: 50px; }
+            100% { width: 0px; height: 0px; padding: 0; margin: 0; opacity: 0; border: none; }
+        }
 
-        /* FINAL MAGIC */
-        .shrink-out { animation: shrinkAway 1s forwards; pointer-events: none; }
-        @keyframes shrinkAway { to { transform: scale(0); opacity: 0; } }
-        .firework-particle { position: fixed; bottom: -5vh; left: 50%; z-index: 9999; pointer-events: none; }
-        @keyframes explode { 0% { transform: translate(-50%, 0) scale(0.5); opacity: 1; } 100% { transform: translate(calc(-50% + var(--tx)), var(--ty)) scale(var(--scale)); opacity: 0; } }
+        .page-shrink { animation: pageShrink 1.2s cubic-bezier(0.5, 0, 0, 1) forwards; }
+        @keyframes pageShrink { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.2); opacity: 0; visibility: hidden; } }
+
+        .firework-particle { position: fixed; bottom: -10vh; left: 50%; z-index: 9999; pointer-events: none; }
+        @keyframes explodeFirework { 
+            0% { transform: translate(-50%, 0) scale(0.2) rotate(0deg); opacity: 1; } 
+            70% { opacity: 1; } 
+            100% { transform: translate(calc(-50% + var(--tx)), var(--ty)) scale(var(--scale)) rotate(var(--rot)); opacity: 0; } 
+        }
+
+        /* POLAROID MEWAH */
+        .polaroid { 
+            background: white; padding: 12px 12px 35px 12px; position: relative; 
+            border: 1px solid #f8fafc; border-radius: 12px;
+            box-shadow: 0 15px 35px -5px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.05); 
+        }
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 1.2s cubic-bezier(0.25, 1, 0.5, 1); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
     </style>
 </head>
-<body>
+<body class="font-sans antialiased locked">
 
+    <!-- AUDIO ELEMENT -->
     <audio id="bg-music" loop>
         <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=a-soft-piano-and-strings-111322.mp3" type="audio/mpeg">
     </audio>
 
-    <div id="lock-screen" class="fixed inset-0 z-[200] flex flex-col items-center justify-start transition-all duration-700">
-        <div id="lock-bg-overlay" class="absolute inset-0 bg-black/20 transition-all duration-700"></div>
+    <!-- ========================================= -->
+    <!-- IPHONE LOCK SCREEN (LIQUID GLASS)         -->
+    <!-- ========================================= -->
+    <div id="lock-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-start transition-all duration-1000 ease-in-out">
+        <div id="lock-bg-overlay"></div>
+        <div id="lock-bg-blur" class="absolute inset-0 bg-transparent transition-all duration-700"></div>
         
-        <!-- INITIAL VIEW -->
-        <div id="view-initial" class="absolute inset-0 flex flex-col justify-between pt-16 pb-8 z-10 cursor-pointer" onclick="goToPin()">
+        <div id="view-initial" class="absolute inset-0 flex flex-col justify-between pt-16 pb-6 z-20 cursor-pointer" onclick="showPinView()">
             <div class="flex flex-col items-center w-full px-4">
-                <p id="lock-date" class="text-white text-lg font-medium drop-shadow-md mb-1">Mon Nov 3</p>
-                <h1 id="lock-time" class="text-[100px] font-bold text-white/90 leading-none drop-shadow-2xl mix-blend-overlay">11:19</h1>
+                <p id="lock-date-main" class="text-white text-lg font-semibold drop-shadow-md tracking-wide mb-1">Mon Nov 3</p>
+                <h1 id="lock-time-main" class="ios-time drop-shadow-2xl">11:19</h1>
             </div>
             
-            <div class="w-full flex flex-col items-center px-6 gap-3 mt-auto mb-10">
-                <div class="glass-panel w-full max-w-sm rounded-3xl p-4 flex flex-col gap-3">
+            <div class="w-full flex flex-col items-center px-5 gap-3 mt-auto mb-10 pointer-events-none">
+                <div class="liquid-widget w-full max-w-sm rounded-3xl p-4 flex flex-col gap-3">
                     <div class="flex items-center gap-4">
-                        <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=200&q=80" class="w-14 h-14 rounded-lg shadow-md object-cover">
+                        <div class="w-14 h-14 rounded-lg bg-gray-800 flex-shrink-0 overflow-hidden shadow-lg border border-white/10">
+                            <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" alt="Album Art" class="w-full h-full object-cover">
+                        </div>
                         <div class="flex-grow">
-                            <h3 class="text-white font-semibold text-sm">Drama (feat. Drake)</h3>
-                            <p class="text-white/70 text-xs">Roy Woods, Drake</p>
+                            <h3 class="text-white font-semibold text-[15px] leading-tight">Drama (feat. Drake)</h3>
+                            <p class="text-white/70 text-[13px]">Roy Woods, Drake</p>
+                        </div>
+                        <div class="flex items-end gap-0.5 h-4">
+                            <div class="w-0.5 h-2 bg-white rounded-full animate-pulse"></div>
+                            <div class="w-0.5 h-4 bg-white rounded-full animate-pulse" style="animation-delay: 0.1s"></div>
+                            <div class="w-0.5 h-3 bg-white rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+                            <div class="w-0.5 h-2 bg-white rounded-full animate-pulse" style="animation-delay: 0.3s"></div>
                         </div>
                     </div>
-                    <div class="flex justify-center items-center gap-6 mt-1 text-white">
-                        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
-                        <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                        <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
+                    
+                    <div class="flex items-center gap-3 w-full">
+                        <span class="text-white/70 text-[10px] font-medium">1:34</span>
+                        <div class="flex-grow h-1.5 bg-white/30 rounded-full relative overflow-hidden">
+                            <div class="absolute left-0 top-0 h-full w-1/3 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.9)]"></div>
+                        </div>
+                        <span class="text-white/70 text-[10px] font-medium">-2:38</span>
+                    </div>
+                    
+                    <div class="flex justify-center items-center gap-8 mt-1">
+                        <svg class="w-7 h-7 text-white fill-current opacity-90" viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
+                        <svg class="w-9 h-9 text-white fill-current opacity-100" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                        <svg class="w-7 h-7 text-white fill-current opacity-90" viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
                     </div>
                 </div>
-                <div class="glass-panel w-full max-w-sm rounded-2xl p-3 flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-yellow-400 flex items-center justify-center text-sm shadow-md">👻</div>
-                    <div>
-                        <h4 class="text-white font-medium text-sm">Snapchat</h4>
-                        <p class="text-white/70 text-xs">3 Notifications</p>
+
+                <div class="liquid-widget w-full max-w-sm rounded-2xl p-3 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-rose-400 flex items-center justify-center text-xl shadow-md border border-white/20">💌</div>
+                        <div>
+                            <h4 class="text-white font-medium text-[14px] leading-tight">Message</h4>
+                            <p class="text-white/70 text-[12px]">You have a special letter</p>
+                        </div>
                     </div>
+                    <span class="text-white/50 text-[12px] font-medium">now</span>
                 </div>
             </div>
-            <div class="w-32 h-1.5 bg-white rounded-full mx-auto animate-pulse-slow opacity-80"></div>
+
+            <div class="w-full px-10 flex justify-between items-end mb-2">
+                <div class="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 text-white text-xl shadow-lg">🔦</div>
+                <div class="w-12 h-12 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 text-white text-xl shadow-lg">📷</div>
+            </div>
+            <div class="w-32 h-1.5 bg-white/90 rounded-full mx-auto animate-pulse-slow shadow-[0_0_10px_rgba(255,255,255,0.5)] mb-2"></div>
         </div>
 
-        <!-- PIN VIEW -->
-        <div id="view-pin" class="absolute inset-0 flex flex-col items-center justify-center pt-10 z-20 opacity-0 pointer-events-none transition-all duration-500 transform translate-y-10">
-            <h2 class="text-white mb-6 text-sm tracking-widest font-medium drop-shadow">MASUKKAN PIN</h2>
-            <div class="flex gap-4 mb-12" id="pin-dots">
-                <div class="w-3 h-3 rounded-full border-2 border-white transition-all"></div>
-                <div class="w-3 h-3 rounded-full border-2 border-white transition-all"></div>
-                <div class="w-3 h-3 rounded-full border-2 border-white transition-all"></div>
-                <div class="w-3 h-3 rounded-full border-2 border-white transition-all"></div>
-                <div class="w-3 h-3 rounded-full border-2 border-white transition-all"></div>
-                <div class="w-3 h-3 rounded-full border-2 border-white transition-all"></div>
+        <div id="view-pin" class="absolute inset-0 flex flex-col items-center justify-center pt-8 z-10 opacity-0 pointer-events-none transform translate-y-12">
+            
+            <!-- STIKER MENUNGGU PIN -->
+            <img id="pin-cat-sticker" src="download (4).gif" class="w-28 h-28 mx-auto mb-2 animate-bounce-soft" alt="Waiting Cat">
+
+            <h2 class="text-white mb-6 text-sm tracking-widest font-semibold drop-shadow-md">MASUKKAN PIN</h2>
+            <div class="flex gap-5 mb-10" id="pin-dots">
+                <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all duration-200"></div>
+                <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all duration-200"></div>
+                <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all duration-200"></div>
+                <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all duration-200"></div>
+                <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all duration-200"></div>
+                <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all duration-200"></div>
             </div>
-            <div class="grid grid-cols-3 gap-6">
-                <button onclick="pressPin('1')" class="pin-btn w-[70px] h-[70px] rounded-full text-white text-2xl">1</button>
-                <button onclick="pressPin('2')" class="pin-btn w-[70px] h-[70px] rounded-full text-white text-2xl">2</button>
-                <button onclick="pressPin('3')" class="pin-btn w-[70px] h-[70px] rounded-full text-white text-2xl">3</button>
-                <button onclick="pressPin('4')" class="pin-btn w-[70px] h-[70px] rounded-full text-white text-2xl">4</button>
-                <button onclick="pressPin('5')" class="pin-btn w-[70px] h-[70px] rounded-full text-white text-2xl">5</button>
-                <button onclick="pressPin('6')" class="pin-btn w-[70px] h-[70px] rounded-full text-white text-2xl">6</button>
-                <button onclick="pressPin('7')" class="pin-btn w-[70px] h-[70px] rounded-full text-white text-2xl">7</button>
-                <button onclick="pressPin('8')" class="pin-btn w-[70px] h-[70px] rounded-full text-white text-2xl">8</button>
-                <button onclick="pressPin('9')" class="pin-btn w-[70px] h-[70px] rounded-full text-white text-2xl">9</button>
+            <div class="grid grid-cols-3 gap-x-8 gap-y-6">
+                <button onclick="pressPin('1')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">1</button>
+                <button onclick="pressPin('2')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">2</button>
+                <button onclick="pressPin('3')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">3</button>
+                <button onclick="pressPin('4')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">4</button>
+                <button onclick="pressPin('5')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">5</button>
+                <button onclick="pressPin('6')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">6</button>
+                <button onclick="pressPin('7')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">7</button>
+                <button onclick="pressPin('8')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">8</button>
+                <button onclick="pressPin('9')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">9</button>
                 <div></div>
-                <button onclick="pressPin('0')" class="pin-btn w-[70px] h-[70px] rounded-full text-white text-2xl">0</button>
-                <button onclick="pressPin('del')" class="w-[70px] h-[70px] rounded-full text-white text-sm font-medium">Hapus</button>
+                <button onclick="pressPin('0')" class="liquid-btn w-[75px] h-[75px] rounded-full text-white text-3xl font-light">0</button>
+                <button onclick="pressPin('del')" class="w-[75px] h-[75px] rounded-full text-white text-lg font-medium flex justify-center items-center active:bg-white/20 transition-all">Hapus</button>
             </div>
         </div>
     </div>
 
-    <!-- SLIDE 1: INTRO & ENVELOPE -->
-    <div id="slide1" class="spa-panel active flex flex-col items-center justify-center">
-        <!-- Floating Decor -->
-        <div class="absolute top-20 left-10 text-2xl animate-float opacity-70">🌸</div>
-        <div class="absolute bottom-32 right-10 text-3xl animate-float-fast opacity-70">✨</div>
+    <!-- ========================================= -->
+    <!-- SLIDE 1: Amplop & Surat Fullscreen        -->
+    <!-- ========================================= -->
+    <div id="slide1" class="slide-panel active flex items-center justify-center w-full relative">
         
-        <div id="intro-wrap" class="flex flex-col items-center z-10 transition-opacity duration-500">
-            <h1 class="font-script text-5xl md:text-6xl text-rose-500 mb-2 drop-shadow-sm font-bold">Hai, Cantik...</h1>
-            <p class="text-slate-500 mb-16 text-sm font-medium tracking-wide">Ada sesuatu yang spesial buat kamu.</p>
-            
-            <div id="envelope" class="envelope-master mb-12">
-                <div class="env-back"></div>
-                <div class="env-front"></div>
-                <div class="env-flap-wrapper">
-                    <div class="env-flap-shape"></div>
-                    <div class="env-seal animate-heartbeat text-sm">❤️</div>
-                </div>
-            </div>
-            
-            <button onclick="openLetter()" class="btn-premium px-10 py-3.5 rounded-full font-semibold text-sm tracking-wide">
-                Buka Suratnya
+        <!-- STIKER MENGINTIP DARI KARDUS (Pojok Bawah) -->
+        <img src="download (3).gif" class="absolute bottom-[-10px] right-2 w-32 h-32 z-0 opacity-80" alt="Peeking Cat">
+
+        <div id="intro-texts" class="absolute top-[30%] left-1/2 transform -translate-x-1/2 w-full flex flex-col items-center text-center px-4 z-10">
+            <h1 class="font-script text-5xl md:text-6xl text-[#e11d48] mb-3 drop-shadow-sm font-bold">Hai, Cantik...</h1>
+            <p class="text-slate-500 mb-10 text-[16px] font-medium tracking-wide">Ada sesuatu yang spesial buat kamu hari ini.</p>
+            <button onclick="bukaKeajaiban()" class="btn-premium px-10 py-3.5 rounded-full font-semibold relative overflow-hidden group">
+                <span class="relative z-10">Buka Suratnya</span>
+                <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
             </button>
         </div>
-    </div>
 
-    <!-- FULLSCREEN LETTER (Appears completely covering everything) -->
-    <div id="letter-fullscreen" class="flex flex-col items-center py-12 px-6">
-        <div class="w-full max-w-2xl relative flex flex-col items-center text-center mt-10">
+        <!-- ENVELOPE MASTER -->
+        <div id="the-envelope" class="envelope-master z-20 pointer-events-none mt-20">
+            <!-- STIKER KUCING MALU (Melayang di dekat amplop) -->
+            <img src="Mochi Mochi Peach Cat & Friend 2.gif" class="absolute -top-24 -left-10 w-28 h-28 animate-float-fast z-50 drop-shadow-lg" alt="Shy Cat">
             
-            <!-- PHOTO NEAR "TAHUN!" (Rotated right, floating) -->
-            <div class="absolute -top-6 right-0 md:right-8 w-24 h-24 p-1 bg-white rounded-xl shadow-lg border border-gray-100 animate-float-fast z-10" style="--r: 12deg; transform: rotate(12deg);">
-                <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?w=400&q=80" class="w-full h-full object-cover rounded-lg">
+            <div class="env-back"></div>
+            <div class="env-front"></div>
+            <div class="env-flap-wrapper">
+                <div class="env-flap-shape"></div>
+                <div class="env-flap-seal animate-heartbeat">
+                    <span class="text-xl">❤️</span>
+                </div>
             </div>
+        </div>
 
-            <div class="text-4xl mb-6 animate-pulse-slow">🌸</div>
-            <h2 class="font-script text-5xl md:text-6xl text-rose-500 mb-2 font-bold relative z-0">Selamat Ulang Tahun!</h2>
-            <h3 class="text-2xl md:text-3xl font-semibold text-rose-400 mb-10">[Nama Panggilan] ❤️</h3>
-            
-            <div class="text-slate-600 leading-relaxed space-y-6 text-sm md:text-base px-2">
-                <p>Di hari yang spesial ini, aku cuma mau bilang terima kasih. Terima kasih udah jadi versi terbaik dari diri kamu sendiri.</p>
-                <p>Kehadiran kamu itu kayak warna pink di langit sore, selalu bikin tenang dan bahagia. Kamu pantes dapetin semua hal manis di dunia ini.</p>
-            </div>
-            
-            <!-- BUTTON LOVE (Using Poppins, Bold, Uppercase, Wide Tracking) -->
-            <div class="mt-16 flex flex-col items-center cursor-pointer active:scale-95 transition-transform" onclick="navigateSPA('slide2')">
-                <div class="text-7xl animate-heartbeat drop-shadow-xl mb-4">💖</div>
-                <span class="font-sans font-bold uppercase tracking-[0.2em] text-rose-400 text-xs">Klik Love Untuk Melanjutkan</span>
+        <!-- FULLSCREEN LETTER (ABSOLUTE DI DALAM SLIDE 1) -->
+        <div id="fullscreen-letter" class="flex flex-col items-center justify-start p-0">
+            <div class="letter-content absolute inset-0 w-full h-full flex flex-col items-center justify-center text-center px-4 md:px-10 py-10">
+                
+                <!-- PIGURA FOTO POLAROID MIRING -->
+                <div class="absolute top-10 md:top-14 right-8 md:right-16 w-24 h-24 md:w-32 md:h-32 rounded-2xl border-[6px] border-white overflow-hidden shadow-[0_15px_35px_rgba(0,0,0,0.15)] transform rotate-[12deg] animate-float-fast z-10">
+                    <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Foto Kita" class="w-full h-full object-cover">
+                </div>
+
+                <div class="text-4xl md:text-5xl mb-4 animate-float mt-16 md:mt-10">🌸</div>
+                <h2 class="font-script text-5xl md:text-7xl text-[#e11d48] mb-4 font-bold drop-shadow-sm">Selamat Ulang Tahun!</h2>
+                <h3 class="text-2xl md:text-4xl font-semibold text-rose-400 mb-8 md:mb-12 tracking-wide">[Nama Panggilan] ❤️</h3>
+                
+                <div class="text-[15px] md:text-xl text-slate-600 leading-relaxed font-medium space-y-4 md:space-y-6 px-6 md:px-24 max-w-4xl">
+                    <p>Di hari yang spesial ini, aku cuma mau bilang terima kasih. Terima kasih udah jadi versi terbaik dari diri kamu sendiri.</p>
+                    <p>Kehadiran kamu itu kayak warna pink di langit sore, selalu bikin tenang dan bahagia. Kamu pantes dapetin semua hal manis di dunia ini.</p>
+                </div>
+                
+                <!-- TOMBOL LOVE: NAVIGASI KE SLIDE 2 -->
+                <div class="mt-16 md:mt-20 flex flex-col items-center justify-center cursor-pointer group" onclick="goToSlide('slide2')">
+                    <div class="text-7xl md:text-8xl animate-pulse-slow drop-shadow-2xl group-hover:scale-110 transition-transform duration-300">💖</div>
+                    <p class="font-sans font-bold uppercase tracking-[0.25em] text-rose-400 text-[11px] md:text-sm mt-5 animate-float-fast">Klik Love Untuk Melanjutkan</p>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- SLIDE 2: SWEET MESSAGE -->
-    <div id="slide2" class="spa-panel flex flex-col items-center justify-center p-6">
-        <div class="bg-white/80 backdrop-blur-xl rounded-[2rem] p-8 max-w-sm w-full text-center shadow-xl border border-white relative">
-            <div class="absolute -top-8 -left-6 text-5xl animate-float">🐱</div>
+    <!-- ========================================= -->
+    <!-- SLIDE 2: Ucapan Manis Pendek              -->
+    <!-- ========================================= -->
+    <div id="slide2" class="slide-panel flex flex-col items-center justify-center p-4 relative">
+        <div class="glass-card max-w-lg w-full mx-auto rounded-[2.5rem] p-8 md:p-12 text-center relative reveal">
             
-            <!-- CUSTOM PNG ICON -->
-            <img src="https://cdn-icons-png.flaticon.com/512/814/814404.png" class="w-16 h-16 mx-auto mb-6 animate-float drop-shadow-md">
-            
-            <h2 class="font-script text-4xl text-rose-500 mb-4 font-bold">Kesayanganku,</h2>
-            <p class="text-slate-600 text-sm leading-relaxed mb-8">Senyummu adalah alasan kenapa hari ini begitu cerah dan spesial.<br><br>Siap melihat memori manis kita? ❤️</p>
-            
-            <button onclick="navigateSPA('slide3')" class="btn-outline px-8 py-3 rounded-full font-bold text-sm">
-                Galeri Foto 📸
-            </button>
+            <div class="relative z-10 bg-white/70 p-8 rounded-3xl border border-white/80 shadow-sm">
+                
+                <!-- STIKER CIUMAN CINTA -->
+                <img src="download (1).gif" class="w-24 h-24 md:w-32 md:h-32 mx-auto mb-4 animate-float drop-shadow-md" alt="Kiss Cat">
+                
+                <h2 class="font-script text-5xl md:text-6xl text-[#e11d48] mb-6 font-bold">Kesayanganku,</h2>
+                
+                <div class="text-slate-600 leading-relaxed mb-10 space-y-5 text-[16px] font-medium">
+                    <p>Senyummu adalah alasan kenapa hari ini begitu cerah dan spesial.</p>
+                    <p>Klik tombol di bawah untuk melihat memori manis kita! ❤️</p>
+                </div>
+                
+                <button onclick="goToSlide('slide3')" class="btn-outline-premium px-8 py-3.5 rounded-full font-bold tracking-wide">
+                    Galeri Foto 📸
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- SLIDE 3: GALLERY 8 PHOTOS -->
-    <div id="slide3" class="spa-panel py-16 px-4">
-        <h2 class="font-script text-4xl text-rose-500 mb-12 text-center font-bold">Momen Cantikmu</h2>
+    <!-- ========================================= -->
+    <!-- SLIDE 3: Galeri Memori                    -->
+    <!-- ========================================= -->
+    <div id="slide3" class="slide-panel w-full mx-auto px-4 pt-24 pb-40 relative">
         
-        <div class="relative max-w-xs mx-auto">
-            <!-- DASHED LINE -->
-            <div class="dashed-line"></div>
-            
-            <div class="flex flex-col gap-12 relative z-10 items-center pb-10">
-                <!-- PHOTO 1 -->
-                <div class="polaroid w-56 animate-swing" style="--r: -3deg; transform: rotate(-3deg);">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 text-2xl">🎀</div>
-                    <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?w=400&q=80" class="w-full h-48 object-cover rounded mb-2 border border-gray-100">
-                    <p class="font-script text-xl text-center text-slate-700">Cantik banget!</p>
-                </div>
-                <!-- PHOTO 2 -->
-                <div class="polaroid w-56 animate-swing" style="--r: 2deg; transform: rotate(2deg); animation-delay: -1s;">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 text-2xl">📌</div>
-                    <img src="https://images.unsplash.com/photo-1520627725997-6a2d9894e138?w=400&q=80" class="w-full h-48 object-cover rounded mb-2 border border-gray-100">
-                    <p class="font-script text-xl text-center text-slate-700">Senyum favoritku ✨</p>
-                </div>
-                <!-- PHOTO 3 -->
-                <div class="polaroid w-56 animate-swing" style="--r: -2deg; transform: rotate(-2deg); animation-delay: -2s;">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 text-2xl">🌸</div>
-                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80" class="w-full h-48 object-cover rounded mb-2 border border-gray-100">
-                    <p class="font-script text-xl text-center text-slate-700">Lucu parah! 🥰</p>
-                </div>
-                <!-- PHOTO 4 -->
-                <div class="polaroid w-56 animate-swing" style="--r: 3deg; transform: rotate(3deg); animation-delay: -3s;">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 text-2xl">💖</div>
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80" class="w-full h-48 object-cover rounded mb-2 border border-gray-100">
-                    <p class="font-script text-xl text-center text-slate-700">Kesayanganku 💕</p>
-                </div>
-                <!-- PHOTO 5 -->
-                <div class="polaroid w-56 animate-swing" style="--r: -3deg; transform: rotate(-3deg); animation-delay: -0.5s;">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 text-2xl">🎀</div>
-                    <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&q=80" class="w-full h-48 object-cover rounded mb-2 border border-gray-100">
-                    <p class="font-script text-xl text-center text-slate-700">Perfect 💯</p>
-                </div>
-                <!-- PHOTO 6 -->
-                <div class="polaroid w-56 animate-swing" style="--r: 2deg; transform: rotate(2deg); animation-delay: -1.5s;">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 text-2xl">📌</div>
-                    <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&q=80" class="w-full h-48 object-cover rounded mb-2 border border-gray-100">
-                    <p class="font-script text-xl text-center text-slate-700">Memori manis 📸</p>
-                </div>
-                <!-- PHOTO 7 -->
-                <div class="polaroid w-56 animate-swing" style="--r: -2deg; transform: rotate(-2deg); animation-delay: -2.5s;">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 text-2xl">🌸</div>
-                    <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&q=80" class="w-full h-48 object-cover rounded mb-2 border border-gray-100">
-                    <p class="font-script text-xl text-center text-slate-700">My sunshine ☀️</p>
-                </div>
-                <!-- PHOTO 8 -->
-                <div class="polaroid w-56 animate-swing" style="--r: 3deg; transform: rotate(3deg); animation-delay: -3.5s;">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 text-2xl">💖</div>
-                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&q=80" class="w-full h-48 object-cover rounded mb-2 border border-gray-100">
-                    <p class="font-script text-xl text-center text-slate-700">Love u! 🥰</p>
-                </div>
-            </div>
+        <!-- HEADER GALERI DENGAN STIKER COUPLE -->
+        <div class="flex justify-center items-center gap-4 mb-16 reveal">
+            <img src="Love Couple Sticker - Love Couple Hug - Temukan & Bagikan GIF.jpg" class="w-20 h-20 rounded-full mix-blend-multiply animate-float" alt="Couple Hug 1">
+            <h2 class="font-script text-5xl md:text-6xl text-[#e11d48] text-center drop-shadow-sm font-bold">Momen Cantikmu</h2>
+            <img src="download (2).jpg" class="w-20 h-20 rounded-full mix-blend-multiply animate-float-fast" alt="Couple Hug 2">
         </div>
         
-        <div class="flex justify-center mt-6">
-            <button onclick="navigateSPA('slide4')" class="btn-premium px-10 py-3.5 rounded-full font-bold shadow-lg">
-                Terakhir nih... 🎂
-            </button>
+        <div class="relative w-full max-w-lg mx-auto pb-10">
+            <!-- Garis Tali Putus-putus -->
+            <div class="absolute left-1/2 top-0 bottom-0 w-[2px] border-l-[3px] border-dashed border-rose-200 transform -translate-x-1/2 z-0 opacity-70"></div>
+
+            <div class="flex flex-col items-center gap-16 relative z-10">
+                <!-- Foto 1 -->
+                <div class="polaroid w-56 md:w-72 animate-swing reveal">
+                    <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 text-3xl z-10 drop-shadow-md">🎀</div>
+                    <div class="bg-rose-50 w-full h-52 md:h-64 mb-4 rounded-xl flex items-center justify-center overflow-hidden border border-white shadow-inner">
+                        <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
+                    </div>
+                    <p class="font-script text-2xl md:text-3xl text-center text-slate-700 font-bold">Cantik banget!</p>
+                </div>
+                <!-- Foto 2 -->
+                <div class="polaroid w-56 md:w-72 animate-swing reveal" style="animation-direction: alternate-reverse;">
+                    <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 text-3xl z-10 drop-shadow-md">📌</div>
+                    <div class="bg-rose-50 w-full h-52 md:h-64 mb-4 rounded-xl flex items-center justify-center overflow-hidden border border-white shadow-inner">
+                        <img src="https://images.unsplash.com/photo-1520627725997-6a2d9894e138?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
+                    </div>
+                    <p class="font-script text-2xl md:text-3xl text-center text-slate-700 font-bold">Senyum favoritku ✨</p>
+                </div>
+                <!-- Foto 3 -->
+                <div class="polaroid w-56 md:w-72 animate-swing reveal">
+                    <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 text-3xl z-10 drop-shadow-md">🌸</div>
+                    <div class="bg-rose-50 w-full h-52 md:h-64 mb-4 rounded-xl flex items-center justify-center overflow-hidden border border-white shadow-inner">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
+                    </div>
+                    <p class="font-script text-2xl md:text-3xl text-center text-slate-700 font-bold">Lucu parah! 🥰</p>
+                </div>
+                <!-- Foto 4 -->
+                <div class="polaroid w-56 md:w-72 animate-swing reveal" style="animation-direction: alternate-reverse;">
+                    <div class="absolute -top-5 left-1/2 transform -translate-x-1/2 text-3xl z-10 drop-shadow-md">💖</div>
+                    <div class="bg-rose-50 w-full h-52 md:h-64 mb-4 rounded-xl flex items-center justify-center overflow-hidden border border-white shadow-inner">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
+                    </div>
+                    <p class="font-script text-2xl md:text-3xl text-center text-slate-700 font-bold">Kesayanganku 💕</p>
+                </div>
+            </div>
         </div>
+        
+        <button onclick="goToSlide('slide4')" class="btn-premium block mx-auto mt-12 px-10 py-4 rounded-full font-bold tracking-wide reveal">
+            Terakhir nih... 🎂
+        </button>
     </div>
 
-    <!-- SLIDE 4: MAKE A WISH & FINALE -->
-    <div id="slide4" class="spa-panel flex flex-col items-center justify-center p-6">
-        <div id="magic-container" class="flex flex-col items-center w-full max-w-sm">
-            <div class="text-[90px] mb-8 animate-float drop-shadow-xl relative">
-                🎂
-                <span class="absolute -left-8 top-10 text-4xl animate-pulse-slow">🎈</span>
-                <span class="absolute -right-8 bottom-0 text-3xl animate-float-fast">🎁</span>
+    <!-- ========================================= -->
+    <!-- SLIDE 4: Harapan & Keajaiban              -->
+    <!-- ========================================= -->
+    <div id="slide4" class="slide-panel flex flex-col items-center justify-center p-4 pb-32 relative">
+        
+        <div id="slide4-content" class="w-full max-w-lg flex flex-col items-center text-center">
+            
+            <!-- STIKER MATA BERBINAR -->
+            <img src="download.gif" class="w-28 h-28 mb-4 animate-bounce-soft drop-shadow-lg reveal" alt="Sparkle Cat">
+            
+            <div class="glass-card rounded-[2.5rem] p-10 md:p-12 mb-12 w-full reveal relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-5 text-4xl opacity-30">✨</div>
+                <h2 class="font-script text-5xl md:text-6xl text-[#e11d48] mb-6 font-bold">Make a Wish! ✨</h2>
+                <p class="text-slate-600 mb-6 text-[16px] leading-relaxed font-medium">Semoga di umur yang baru ini, kamu semakin bersinar, semakin bahagia, dan semua yang kamu semogakan bisa terwujud satu per satu.</p>
             </div>
             
-            <div class="bg-white/80 backdrop-blur-md rounded-3xl p-8 mb-8 text-center shadow-lg border border-white">
-                <h2 class="font-script text-4xl text-rose-500 mb-4 font-bold">Make a Wish! ✨</h2>
-                <p class="text-slate-600 text-sm leading-relaxed">Semoga di umur yang baru ini, kamu semakin bersinar, semakin bahagia, dan semua yang kamu semogakan bisa terwujud.</p>
-            </div>
-            
-            <button onclick="triggerFinale()" class="btn-outline px-8 py-3.5 rounded-full font-bold text-sm w-full max-w-[250px] flex items-center justify-center gap-2">
-                Klik untuk keajaiban <span class="animate-spin-slow">✨</span>
+            <button id="magic-btn" onclick="createMagic()" class="btn-outline-premium w-[300px] h-[64px] flex justify-center items-center rounded-full font-bold tracking-wide text-[16px] gap-3 reveal">
+                <span>Klik untuk keajaiban</span> <span class="animate-spin-slow">✨</span>
             </button>
         </div>
 
-        <!-- FINALE TEXT (HIDDEN INITIALLY) -->
-        <div id="finale-text" class="fixed inset-0 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-1000 z-50">
-            <h1 class="font-sans font-bold uppercase tracking-[0.2em] text-3xl md:text-5xl text-rose-500 text-center leading-loose">
+        <!-- PESAN RAKSASA FINAL -->
+        <div id="final-message" class="absolute inset-0 z-[200] hidden flex-col items-center justify-center opacity-0 transition-opacity duration-1000">
+            
+            <!-- STIKER FINAL: MEMELUK HATI RAKSASA -->
+            <img src="Duke's Wife [Taerin-Eunkook] [End] ✔.gif" class="w-48 h-48 mb-6 animate-float drop-shadow-2xl" alt="Big Heart Cat">
+
+            <h1 class="font-sans font-bold uppercase tracking-[0.25em] text-4xl md:text-5xl lg:text-6xl text-[#e11d48] drop-shadow-lg mb-4 text-center px-4 leading-relaxed">
                 LOVE YOU<br>OKTA CANTIKKK
             </h1>
-            <div class="text-5xl mt-6">🌸💖✨</div>
         </div>
+
     </div>
 
+    <!-- SCRIPT INTERAKTIF -->
     <script>
-        /* --- CLOCK --- */
-        setInterval(() => {
-            const d = new Date();
-            document.getElementById('lock-time').innerText = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
-            document.getElementById('lock-date').innerText = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()] + ' ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()] + ' ' + d.getDate();
-        }, 1000);
+        // ==========================================
+        // LOGIKA LOCK SCREEN
+        // ==========================================
+        let currentPin = '';
+        const correctPin = '121212'; 
 
-        /* --- LOCKSCREEN & PIN LOGIC --- */
-        let pin = '';
-        function goToPin() {
-            document.getElementById('bg-music').play().catch(()=>{});
-            document.getElementById('view-initial').style.opacity = '0';
-            document.getElementById('view-initial').style.pointerEvents = 'none';
-            document.getElementById('lock-bg-overlay').classList.replace('bg-black/20', 'bg-black/60');
-            document.getElementById('lock-bg-overlay').classList.add('backdrop-blur-xl');
+        function showPinView() {
+            const audio = document.getElementById('bg-music');
+            if(audio.paused) {
+                audio.play().catch(e => console.log("Audio play failed:", e));
+            }
+
+            const initial = document.getElementById('view-initial');
+            const pin = document.getElementById('view-pin');
+            const bgBlur = document.getElementById('lock-bg-blur');
+            const overlay = document.getElementById('lock-bg-overlay');
             
-            const pinView = document.getElementById('view-pin');
-            pinView.style.opacity = '1';
-            pinView.style.pointerEvents = 'auto';
-            pinView.style.transform = 'translateY(0)';
+            initial.style.opacity = '0';
+            initial.style.transform = 'translateY(-40px)';
+            initial.style.pointerEvents = 'none';
+            
+            pin.style.opacity = '1';
+            pin.style.transform = 'translateY(0)';
+            pin.style.pointerEvents = 'auto';
+
+            bgBlur.classList.add('bg-black/40', 'backdrop-blur-xl');
+            overlay.classList.add('bg-black/60');
         }
 
-        function pressPin(n) {
-            if(n === 'del') pin = pin.slice(0, -1);
-            else if(pin.length < 6) pin += n;
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
             
+            document.getElementById('lock-time-main').innerText = `${hours}:${minutes}`;
+            document.getElementById('lock-date-main').innerText = `${days[now.getDay()]} ${months[now.getMonth()]} ${now.getDate()}`;
+        }
+        setInterval(updateTime, 1000); updateTime();
+
+        function pressPin(num) {
+            if (num === 'del') {
+                currentPin = currentPin.slice(0, -1);
+            } else if (currentPin.length < 6) {
+                currentPin += num;
+            }
+            updateDots();
+            if (currentPin.length === 6) setTimeout(checkPin, 100);
+        }
+
+        function updateDots() {
             const dots = document.querySelectorAll('#pin-dots div');
-            dots.forEach((d, i) => d.style.background = i < pin.length ? 'white' : 'transparent');
-            
-            if(pin.length === 6) {
-                if(pin === '121212') {
-                    document.getElementById('lock-screen').style.opacity = '0';
-                    setTimeout(() => {
-                        document.getElementById('lock-screen').style.display = 'none';
-                        document.body.classList.remove('locked');
-                        createHearts(5);
-                    }, 700);
+            dots.forEach((dot, index) => {
+                if(index < currentPin.length) {
+                    dot.classList.add('bg-white', 'scale-110'); dot.classList.remove('border-2', 'border-white/80');
                 } else {
-                    pin = ''; updateDots();
-                    // Simple shake
-                    const pd = document.getElementById('pin-dots');
-                    pd.style.transform = 'translateX(10px)'; setTimeout(()=>pd.style.transform='translateX(-10px)', 100); setTimeout(()=>pd.style.transform='translateX(0)', 200);
+                    dot.classList.remove('bg-white', 'scale-110'); dot.classList.add('border-2', 'border-white/80');
                 }
+            });
+        }
+
+        function checkPin() {
+            const sticker = document.getElementById('pin-cat-sticker');
+
+            if (currentPin === correctPin) {
+                const lockScreen = document.getElementById('lock-screen');
+                lockScreen.style.opacity = '0';
+                lockScreen.style.transform = 'scale(1.05)'; 
+                
+                setTimeout(() => {
+                    lockScreen.style.display = 'none';
+                    document.body.classList.remove('locked'); 
+                }, 1000);
+            } else {
+                // EFEK SALAH PIN: STIKER BERUBAH JADI KUCING MARAH
+                const originalSrc = sticker.src;
+                sticker.src = "Cute Gif GIF – Cute Gif Angry Cat – discover and share GIFs.jpg";
+                
+                const dotsContainer = document.getElementById('pin-dots');
+                dotsContainer.classList.add('shake');
+                
+                setTimeout(() => {
+                    dotsContainer.classList.remove('shake');
+                    currentPin = ''; updateDots();
+                    sticker.src = originalSrc; // Kembali ke stiker semula
+                }, 800);
             }
         }
-        function updateDots(){ document.querySelectorAll('#pin-dots div').forEach(d=>d.style.background='transparent'); }
 
-        /* --- SPA NAVIGATION LOGIC --- */
-        function navigateSPA(targetId) {
-            document.querySelectorAll('.spa-panel').forEach(p => p.classList.remove('active'));
-            document.getElementById('letter-fullscreen').classList.remove('show');
+        // ==========================================
+        // LOGIKA SINGLE PAGE APP (GANTI SLIDE)
+        // ==========================================
+        function bukaKeajaiban() {
+            document.getElementById('intro-texts').style.cssText = 'opacity:0; transform: translate(-50%, 150px); pointer-events:none';
+            document.getElementById('the-envelope').classList.add('is-opening');
+            document.getElementById('fullscreen-letter').classList.add('show-letter');
+        }
+
+        function goToSlide(targetId) {
+            document.querySelectorAll('.slide-panel').forEach(slide => {
+                slide.classList.remove('active');
+            });
             const target = document.getElementById(targetId);
             target.classList.add('active');
-            target.scrollTop = 0;
-            createHearts(3);
+            target.scrollTop = 0; 
         }
 
-        /* --- ENVELOPE LOGIC --- */
-        function openLetter() {
-            const env = document.getElementById('envelope');
-            const intro = document.getElementById('intro-wrap');
-            const letter = document.getElementById('letter-fullscreen');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
+        }, { threshold: 0.15 });
+        document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+
+        // ==========================================
+        // LOGIKA SLIDE 4 (KEMBANG API 1X LEDAKAN)
+        // ==========================================
+        function createMagic() {
+            const btn = document.getElementById('magic-btn');
+            const content = document.getElementById('slide4-content');
+            const finalMsg = document.getElementById('final-message');
             
-            env.classList.add('is-opening');
-            intro.style.opacity = '0';
+            btn.classList.add('island-shrink');
             
-            // Show perfect fullscreen letter after envelope vanishes
             setTimeout(() => {
-                letter.classList.add('show');
-                createHearts(8);
-            }, 1200);
-        }
-
-        /* --- FINALE & FIREWORKS --- */
-        function triggerFinale() {
-            document.getElementById('magic-container').classList.add('shrink-out');
+                content.classList.add('page-shrink');
+            }, 800);
+            
             setTimeout(() => {
-                document.getElementById('finale-text').style.opacity = '1';
-                fireworks();
-            }, 1000);
-        }
-
-        function createHearts(num) {
-            const emojis = ['💖','🌸','✨'];
-            for(let i=0; i<num; i++) {
-                let h = document.createElement('div');
-                h.innerHTML = emojis[Math.floor(Math.random()*emojis.length)];
-                h.className = 'fixed text-xl pointer-events-none z-50';
-                h.style.left = Math.random()*100+'vw';
-                h.style.bottom = '-20px';
-                h.style.transition = 'all 4s ease-out';
-                document.body.appendChild(h);
-                setTimeout(() => { h.style.transform = `translateY(-120vh) rotate(${Math.random()*100}deg)`; h.style.opacity='0'; }, 50);
-                setTimeout(() => h.remove(), 4000);
-            }
-        }
-
-        function fireworks() {
-            // ONLY ONCE, ONLY FLOWERS AND HEARTS
-            const emojis = ['💖','🌸','✨','💕'];
-            for(let i=0; i<40; i++) {
+                finalMsg.style.display = 'flex';
                 setTimeout(() => {
-                    let p = document.createElement('div');
-                    p.innerHTML = emojis[Math.floor(Math.random()*emojis.length)];
-                    p.className = 'firework-particle';
-                    p.style.left = (20 + Math.random()*60) + 'vw';
-                    p.style.setProperty('--tx', (Math.random()*60 - 30) + 'vw');
-                    p.style.setProperty('--ty', -(Math.random()*80 + 20) + 'vh');
-                    p.style.setProperty('--scale', Math.random()*1.5 + 0.8);
-                    p.style.animation = `explode ${Math.random()*1.5 + 1.5}s cubic-bezier(0.25, 1, 0.5, 1) forwards`;
-                    document.body.appendChild(p);
-                    setTimeout(() => p.remove(), 3000);
-                }, i * 20);
+                    finalMsg.style.opacity = '1';
+                    fireworkMagic();
+                }, 50);
+            }, 1800);
+        }
+
+        function fireworkParticle() {
+            const heart = document.createElement('div');
+            heart.classList.add('firework-particle');
+            const emojis = ['💖', '💕', '💗', '🌸', '✨'];
+            heart.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
+            
+            heart.style.left = (Math.random() * 100) + 'vw';
+            heart.style.fontSize = (Math.random() * 2 + 1.5) + 'rem';
+
+            const tx = (Math.random() * 40 - 20) + 'vw';
+            const ty = -(Math.random() * 80 + 20) + 'vh';
+            const rot = (Math.random() * 360) + 'deg';
+            const scale = (Math.random() * 1.5 + 1);
+
+            heart.style.setProperty('--tx', tx);
+            heart.style.setProperty('--ty', ty);
+            heart.style.setProperty('--rot', rot);
+            heart.style.setProperty('--scale', scale);
+
+            const duration = Math.random() * 2 + 1.5;
+            heart.style.animation = `explodeFirework ${duration}s cubic-bezier(0.25, 1, 0.5, 1) forwards`;
+
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), duration * 1000);
+        }
+
+        function fireworkMagic() {
+            // HANYA 1X LEDAKAN SERENTAK
+            for(let i=0; i<45; i++) {
+                setTimeout(fireworkParticle, i * 15);
             }
         }
     </script>
