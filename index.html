@@ -14,9 +14,10 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-love-app';
 
+// Updated Data Structure exactly as requested
 const defaultConfig = {
   lockscreen: {
-    bgUrl: 'https://images.unsplash.com/photo-1518599904199-0ca897819ddb?q=80&w=1080&auto=format&fit=crop',
+    backgroundUrl: 'https://images.unsplash.com/photo-1518599904199-0ca897819ddb?q=80&w=1080&auto=format&fit=crop',
     dateText: 'Senin, 14 Februari',
     overlayOpacity: 0.4,
     blur: 4,
@@ -32,25 +33,26 @@ const defaultConfig = {
     ]
   },
   pin: {
-    prompt: 'Masukkan tanggal lahir',
-    correctPin: '140299',
-    errorMsg: 'Yakin tanggal lahirnya itu? 😂',
-    successMsg: 'Pinter! I love you ❤️',
-    bgUrl: 'https://images.unsplash.com/photo-1494774157365-9e04c6720e47?q=80&w=1080&auto=format&fit=crop',
-    errorStickerUrl: 'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHIzMjZ2NDhqcDJ2bDFidHcyczZocHNhbXZlZDhzcjVoeWhobWZ1ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/WwKco9a8e0qTz9n9F3/giphy.gif',
+    code: '140299',
+    hintText: 'Masukkan tanggal lahir',
+    wrongText: 'Yakin tanggal lahirnya itu? 😂',
+    successText: 'Pinter! I love you ❤️',
+    wrongStickerUrl: 'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHIzMjZ2NDhqcDJ2bDFidHcyczZocHNhbXZlZDhzcjVoeWhobWZ1ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/WwKco9a8e0qTz9n9F3/giphy.gif',
     successStickerUrl: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExejcxc3d0b2YwdWNoOW9kcm81OTcyZHAzYm9tMnNla3JsdjIzdWltaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/l4pTdcifPGuRoGnOo/giphy.gif'
   },
   letter: {
-    receiverName: 'Cintaku',
-    date: '14 Februari 2024',
     title: 'Happy Birthday, Cintaku.',
-    content: 'Selamat ulang tahun untuk orang paling spesial dalam hidupku. Terima kasih sudah menjadi alasan bahagiaku setiap hari. Semoga semua mimpimu terwujud, dan semoga kita bisa terus sama-sama bikin memori indah. I love you more than words can say. 💕\n\nScroll ke bawah ya...',
+    recipient: 'Cintaku',
+    body: 'Selamat ulang tahun untuk orang paling spesial dalam hidupku. Terima kasih sudah menjadi alasan bahagiaku setiap hari. Semoga semua mimpimu terwujud, dan semoga kita bisa terus sama-sama bikin memori indah. I love you more than words can say. 💕\n\nScroll ke bawah ya...',
+    signature: 'From yours truly.',
+    date: '14 Februari 2024',
     photoUrl: 'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=800&auto=format&fit=crop',
-    signature: 'From yours truly.'
+    decoration: ''
   },
   game: {
-    question: 'Mana foto yang paling aku suka?',
-    photos: [
+    title: 'MANA YANG PALING AKU SUKA? ❤️',
+    subtitle: 'Coba tebak dengan benar...',
+    images: [
       { url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=400&auto=format&fit=crop', msg: 'HUUUU SALAH 😭😂' },
       { url: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=400&auto=format&fit=crop', msg: 'Bukan yang ini wleee 😛' },
       { url: 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=400&auto=format&fit=crop', msg: 'Cantik sih, tapi salah! 🤪' },
@@ -58,12 +60,14 @@ const defaultConfig = {
       { url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop', msg: 'Masih salah hehehe 🙈' },
       { url: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=400&auto=format&fit=crop', msg: 'Tetot! Salah lagi ❌' }
     ],
-    twistText1: 'Gak ada di sini...',
-    twistText2: 'karena yang paling aku suka kan\nKAMU ❤️'
+    wrongText: 'HUUUU SALAH 😭😂',
+    finalText: 'Gak ada di sini...\nkarena yang paling aku suka kan\nKAMU ❤️',
+    duration: 5000
   },
   album: {
     title: 'OUR LITTLE MEMORIES',
-    photos: [
+    coverImage: '',
+    pages: [
       'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=600&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=600&auto=format&fit=crop',
       'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=600&auto=format&fit=crop',
@@ -73,8 +77,8 @@ const defaultConfig = {
     ]
   },
   whatsapp: {
-    number: '6289529889634',
-    message: 'Halo sayang! Makasih yaa buat surprisenya, aku suka banget! ❤️',
+    phone: '6289529889634',
+    defaultMessage: 'Halo sayang! Makasih yaa buat surprisenya, aku suka banget! ❤️',
     buttonText: 'KIRIM KE WHATSAPP'
   }
 };
@@ -98,22 +102,20 @@ const ConfigProvider = ({ children }) => {
           await signInAnonymously(auth);
         }
       } catch (error) {
-        console.warn("Auth warning (can be ignored if running locally):", error);
-        // Continue anyway to allow local default config to load
+        console.warn("Auth warning:", error);
       }
     };
     initAuth();
 
     const unsubscribeAuth = onAuthStateChanged(auth, (u) => {
       setUser(u);
-      if (!u) setLoading(false); // Stop loading if auth fails completely
+      if (!u) setLoading(false);
     });
     return () => unsubscribeAuth();
   }, []);
 
   useEffect(() => {
     if (!user) return;
-
     const docRef = doc(db, 'artifacts', appId, 'public', 'siteConfig');
     
     getDoc(docRef).then(async (snap) => {
@@ -121,20 +123,19 @@ const ConfigProvider = ({ children }) => {
             try {
               await setDoc(docRef, defaultConfig);
             } catch (err) {
-              console.warn("Firestore write permission denied. Menggunakan pengaturan default lokal.");
+              console.warn("Firestore write permission denied. Using local config.");
             }
         }
-    }).catch(err => {
-        console.warn("Firestore read permission denied. Menggunakan pengaturan default lokal.");
-    });
+    }).catch(() => console.warn("Firestore read permission denied. Using local config."));
 
     const unsubscribeSnapshot = onSnapshot(docRef, (snapshot) => {
       if (snapshot.exists()) {
-        setConfig(snapshot.data());
+        // Merge to ensure missing fields from old configs don't break the app
+        setConfig({ ...defaultConfig, ...snapshot.data() });
       }
       setLoading(false);
     }, (error) => {
-      console.warn("Firestore listener permission denied. Menggunakan pengaturan default lokal.");
+      console.warn("Firestore listener permission denied. Using local config.");
       setLoading(false);
     });
 
@@ -152,9 +153,9 @@ const ConfigProvider = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-pink-50 text-pink-500 font-serif">
+      <div className="flex items-center justify-center h-[100dvh] w-full bg-[#f8f5f0] text-[#c48b8b]">
         <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}>
-          <Heart size={48} className="fill-current" />
+          <Heart size={48} className="fill-current opacity-80" />
         </motion.div>
       </div>
     );
@@ -173,35 +174,53 @@ export const useAudio = () => useContext(AudioContext);
 const AudioProvider = ({ children }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
-  const audioRef = useRef(new Audio());
+  const audioRef = useRef(null);
   const { config } = useConfig();
   const [userInteracted, setUserInteracted] = useState(false);
 
   useEffect(() => {
-    if (audioRef.current.src !== config.lockscreen.music.audioUrl) {
-       audioRef.current.src = config.lockscreen.music.audioUrl;
-       audioRef.current.loop = true;
-       // Jika sedang play dan URL berubah, play ulang
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+    }
+    const audio = audioRef.current;
+
+    if (audio.src !== config.lockscreen.music.audioUrl) {
+       audio.src = config.lockscreen.music.audioUrl;
+       audio.loop = true;
        if (isPlaying) {
-         audioRef.current.play().catch(e => console.warn("Audio play blocked", e));
+         audio.play().catch(() => setIsPlaying(false));
        }
     }
     
     const updateProgress = () => {
-      if (audioRef.current.duration) {
-        setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
+      if (audio.duration) {
+        setProgress((audio.currentTime / audio.duration) * 100);
       }
     };
-    audioRef.current.addEventListener('timeupdate', updateProgress);
-    return () => audioRef.current.removeEventListener('timeupdate', updateProgress);
+    audio.addEventListener('timeupdate', updateProgress);
+    
+    return () => {
+      audio.removeEventListener('timeupdate', updateProgress);
+    };
   }, [config.lockscreen.music.audioUrl, isPlaying]);
+
+  // Global audio cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+    };
+  }, []);
 
   const togglePlay = () => {
     if (!userInteracted) setUserInteracted(true);
+    const audio = audioRef.current;
     if (isPlaying) {
-      audioRef.current.pause();
+      audio.pause();
     } else {
-      audioRef.current.play().catch(e => console.warn("Audio play blocked", e));
+      audio.play().catch(() => console.warn("Audio play blocked"));
     }
     setIsPlaying(!isPlaying);
   };
@@ -210,6 +229,10 @@ const AudioProvider = ({ children }) => {
     const handleInteraction = () => {
         if (!userInteracted) {
             setUserInteracted(true);
+            // Attempt to autoplay on first interaction if not playing
+            if (!isPlaying && audioRef.current.paused) {
+               audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+            }
         }
     };
     window.addEventListener('click', handleInteraction, { once: true });
@@ -218,7 +241,7 @@ const AudioProvider = ({ children }) => {
         window.removeEventListener('click', handleInteraction);
         window.removeEventListener('touchstart', handleInteraction);
     }
-  }, [userInteracted]);
+  }, [userInteracted, isPlaying]);
 
   return (
     <AudioContext.Provider value={{ isPlaying, togglePlay, progress }}>
@@ -227,10 +250,15 @@ const AudioProvider = ({ children }) => {
   );
 };
 
+// Generic Image Error Handler for Aesthetic Fallbacks
+const handleImageError = (e) => {
+  e.target.src = "https://placehold.co/600x800/f3e6d8/b07d7d?text=Image+Not+Found";
+};
+
 const Input = ({ label, type = "text", ...props }) => (
-  <div className="flex flex-col gap-1 w-full">
-    {label && <label className="text-sm font-medium text-gray-700">{label}</label>}
-    <input type={type} className="w-full px-3 py-2 border rounded-xl bg-white focus:ring-2 focus:ring-pink-300 outline-none transition-all" {...props} />
+  <div className="flex flex-col gap-1.5 w-full">
+    {label && <label className="text-sm font-semibold text-[#8c8279]">{label}</label>}
+    <input type={type} className="w-full px-4 py-2.5 border border-[#e6d9cc] rounded-xl bg-white focus:ring-2 focus:ring-[#d4a3a3] outline-none transition-all font-sans text-[#6b6259]" {...props} />
   </div>
 );
 
@@ -269,23 +297,24 @@ const AdminPanel = ({ isOpen, onClose }) => {
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 50 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
     >
-      <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
-        <div className="flex justify-between items-center p-4 border-b border-gray-100">
-          <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
-            <Settings className="text-pink-500" /> Admin Settings
+      <div className="bg-[#fcf9f2] rounded-[2rem] w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-[#e8d5d5] paper-texture">
+        <div className="flex justify-between items-center p-5 border-b border-[#e8d5d5]/50 bg-white/50 backdrop-blur-md">
+          <h2 className="text-xl font-bold text-[#b07d7d] flex items-center gap-2 font-serif">
+            <Settings className="text-[#d4a3a3]" /> Admin Configurations
           </h2>
-          <button onClick={onClose} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200"><X size={20}/></button>
+          <button aria-label="Close Admin" onClick={onClose} className="p-2 bg-[#f3e6d8] rounded-full hover:bg-[#e8d5d5] text-[#b07d7d] transition-colors"><X size={20}/></button>
         </div>
 
-        <div className="flex overflow-x-auto p-2 bg-gray-50 hide-scrollbar">
+        <div className="flex overflow-x-auto p-3 bg-[#fdfbf7] hide-scrollbar border-b border-[#e8d5d5]/50 gap-2">
           {tabs.map(tab => (
             <button
               key={tab.id}
+              aria-label={`Tab ${tab.label}`}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                activeTab === tab.id ? 'bg-pink-500 text-white shadow-md' : 'text-gray-600 hover:bg-gray-200'
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
+                activeTab === tab.id ? 'bg-[#b07d7d] text-white shadow-md' : 'text-[#8c8279] hover:bg-[#f3e6d8]'
               }`}
             >
               {tab.icon} {tab.label}
@@ -293,16 +322,16 @@ const AdminPanel = ({ isOpen, onClose }) => {
           ))}
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
+        <div className="flex-1 overflow-y-auto p-6 bg-white/30 backdrop-blur-sm relative z-10">
           {activeTab === 'lockscreen' && (
             <div className="space-y-4">
-              <Input label="Background Image URL" value={localConfig.lockscreen.bgUrl} onChange={(e) => handleChange('lockscreen', 'bgUrl', e.target.value)} />
+              <Input label="Background Image URL" value={localConfig.lockscreen.backgroundUrl} onChange={(e) => handleChange('lockscreen', 'backgroundUrl', e.target.value)} />
               <Input label="Teks Tanggal (Misal: Senin, 14 Feb)" value={localConfig.lockscreen.dateText} onChange={(e) => handleChange('lockscreen', 'dateText', e.target.value)} />
               <div className="grid grid-cols-2 gap-4">
                 <Input label="Overlay Opacity (0 - 1)" type="number" step="0.1" value={localConfig.lockscreen.overlayOpacity} onChange={(e) => handleChange('lockscreen', 'overlayOpacity', parseFloat(e.target.value))} />
                 <Input label="Background Blur (px)" type="number" value={localConfig.lockscreen.blur} onChange={(e) => handleChange('lockscreen', 'blur', parseInt(e.target.value))} />
               </div>
-              <h3 className="font-semibold text-gray-700 mt-6 border-b pb-2">Music Player</h3>
+              <h3 className="font-bold text-[#b07d7d] mt-6 border-b border-[#e8d5d5] pb-2 font-serif">Music Player</h3>
               <Input label="Music Title" value={localConfig.lockscreen.music.title} onChange={(e) => setLocalConfig(p => ({...p, lockscreen: {...p.lockscreen, music: {...p.lockscreen.music, title: e.target.value}}}))} />
               <Input label="Artist" value={localConfig.lockscreen.music.artist} onChange={(e) => setLocalConfig(p => ({...p, lockscreen: {...p.lockscreen, music: {...p.lockscreen.music, artist: e.target.value}}}))} />
               <Input label="Cover Image URL" value={localConfig.lockscreen.music.coverUrl} onChange={(e) => setLocalConfig(p => ({...p, lockscreen: {...p.lockscreen, music: {...p.lockscreen.music, coverUrl: e.target.value}}}))} />
@@ -312,25 +341,24 @@ const AdminPanel = ({ isOpen, onClose }) => {
 
           {activeTab === 'pin' && (
             <div className="space-y-4">
-              <Input label="Background Image URL" value={localConfig.pin.bgUrl} onChange={(e) => handleChange('pin', 'bgUrl', e.target.value)} />
-              <Input label="Pertanyaan PIN" value={localConfig.pin.prompt} onChange={(e) => handleChange('pin', 'prompt', e.target.value)} />
-              <Input label="PIN (Angka bebas)" value={localConfig.pin.correctPin} onChange={(e) => handleChange('pin', 'correctPin', e.target.value)} />
-              <Input label="Pesan Error" value={localConfig.pin.errorMsg} onChange={(e) => handleChange('pin', 'errorMsg', e.target.value)} />
-              <Input label="URL Stiker Error (GIF/PNG)" value={localConfig.pin.errorStickerUrl} onChange={(e) => handleChange('pin', 'errorStickerUrl', e.target.value)} />
-              <Input label="Pesan Sukses" value={localConfig.pin.successMsg} onChange={(e) => handleChange('pin', 'successMsg', e.target.value)} />
+              <Input label="PIN Code (Angka bebas)" value={localConfig.pin.code} onChange={(e) => handleChange('pin', 'code', e.target.value)} />
+              <Input label="Teks Instruksi / Hint" value={localConfig.pin.hintText} onChange={(e) => handleChange('pin', 'hintText', e.target.value)} />
+              <Input label="Pesan Saat PIN Salah" value={localConfig.pin.wrongText} onChange={(e) => handleChange('pin', 'wrongText', e.target.value)} />
+              <Input label="URL Stiker Error (GIF/PNG)" value={localConfig.pin.wrongStickerUrl} onChange={(e) => handleChange('pin', 'wrongStickerUrl', e.target.value)} />
+              <Input label="Pesan Saat PIN Benar" value={localConfig.pin.successText} onChange={(e) => handleChange('pin', 'successText', e.target.value)} />
               <Input label="URL Stiker Sukses (GIF/PNG)" value={localConfig.pin.successStickerUrl} onChange={(e) => handleChange('pin', 'successStickerUrl', e.target.value)} />
             </div>
           )}
 
           {activeTab === 'letter' && (
             <div className="space-y-4">
-               <Input label="Photo URL" value={localConfig.letter.photoUrl} onChange={(e) => handleChange('letter', 'photoUrl', e.target.value)} />
-              <Input label="Nama Pasangan (Penerima)" value={localConfig.letter.receiverName} onChange={(e) => handleChange('letter', 'receiverName', e.target.value)} />
+              <Input label="Photo URL" value={localConfig.letter.photoUrl} onChange={(e) => handleChange('letter', 'photoUrl', e.target.value)} />
+              <Input label="Nama Pasangan (Penerima)" value={localConfig.letter.recipient} onChange={(e) => handleChange('letter', 'recipient', e.target.value)} />
               <Input label="Tanggal Surat" value={localConfig.letter.date} onChange={(e) => handleChange('letter', 'date', e.target.value)} />
               <Input label="Judul Surat" value={localConfig.letter.title} onChange={(e) => handleChange('letter', 'title', e.target.value)} />
-              <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-gray-700">Isi Surat</label>
-                <textarea rows={6} className="w-full px-3 py-2 border rounded-xl bg-white focus:ring-2 focus:ring-pink-300 outline-none" value={localConfig.letter.content} onChange={(e) => handleChange('letter', 'content', e.target.value)} />
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-[#8c8279]">Isi Surat</label>
+                <textarea rows={6} className="w-full px-4 py-2.5 border border-[#e6d9cc] rounded-xl bg-white focus:ring-2 focus:ring-[#d4a3a3] outline-none font-sans text-[#6b6259]" value={localConfig.letter.body} onChange={(e) => handleChange('letter', 'body', e.target.value)} />
               </div>
               <Input label="Tanda Tangan" value={localConfig.letter.signature} onChange={(e) => handleChange('letter', 'signature', e.target.value)} />
             </div>
@@ -338,22 +366,26 @@ const AdminPanel = ({ isOpen, onClose }) => {
 
           {activeTab === 'game' && (
              <div className="space-y-4">
-               <Input label="Pertanyaan Game" value={localConfig.game.question} onChange={(e) => handleChange('game', 'question', e.target.value)} />
-               <Input label="Teks Twist 1" value={localConfig.game.twistText1} onChange={(e) => handleChange('game', 'twistText1', e.target.value)} />
-               <Input label="Teks Twist 2" value={localConfig.game.twistText2} onChange={(e) => handleChange('game', 'twistText2', e.target.value)} />
-               <h3 className="font-semibold text-gray-700 mt-6 border-b pb-2">Foto Game (User harus klik semua)</h3>
-               {localConfig.game.photos.map((photo, idx) => (
-                 <div key={idx} className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 space-y-3">
-                    <span className="font-medium text-sm text-gray-500">Foto {idx + 1}</span>
+               <Input label="Judul Game" value={localConfig.game.title} onChange={(e) => handleChange('game', 'title', e.target.value)} />
+               <Input label="Subtitle" value={localConfig.game.subtitle} onChange={(e) => handleChange('game', 'subtitle', e.target.value)} />
+               <div className="flex flex-col gap-1.5 mt-2">
+                 <label className="text-sm font-semibold text-[#8c8279]">Teks Plot Twist (Final)</label>
+                 <textarea rows={3} className="w-full px-4 py-2.5 border border-[#e6d9cc] rounded-xl bg-white focus:ring-2 focus:ring-[#d4a3a3] outline-none font-sans text-[#6b6259]" value={localConfig.game.finalText} onChange={(e) => handleChange('game', 'finalText', e.target.value)} />
+               </div>
+               
+               <h3 className="font-bold text-[#b07d7d] mt-6 border-b border-[#e8d5d5] pb-2 font-serif">Foto Game (Harus di-klik semua)</h3>
+               {localConfig.game.images.map((photo, idx) => (
+                 <div key={idx} className="p-4 bg-white/60 rounded-xl shadow-sm border border-[#e8d5d5] space-y-3">
+                    <span className="font-semibold text-sm text-[#8c8279]">Foto {idx + 1}</span>
                     <Input label="URL Foto" value={photo.url} onChange={(e) => {
-                       const newPhotos = [...localConfig.game.photos];
+                       const newPhotos = [...localConfig.game.images];
                        newPhotos[idx].url = e.target.value;
-                       handleChange('game', 'photos', newPhotos);
+                       handleChange('game', 'images', newPhotos);
                     }} />
                     <Input label="Pesan saat diklik (Salah)" value={photo.msg} onChange={(e) => {
-                        const newPhotos = [...localConfig.game.photos];
+                        const newPhotos = [...localConfig.game.images];
                         newPhotos[idx].msg = e.target.value;
-                        handleChange('game', 'photos', newPhotos);
+                        handleChange('game', 'images', newPhotos);
                     }} />
                  </div>
                ))}
@@ -363,36 +395,38 @@ const AdminPanel = ({ isOpen, onClose }) => {
           {activeTab === 'album' && (
             <div className="space-y-4">
               <Input label="Judul Album" value={localConfig.album.title} onChange={(e) => handleChange('album', 'title', e.target.value)} />
-               <div className="flex justify-between items-center mt-6 border-b pb-2">
-                 <h3 className="font-semibold text-gray-700">Daftar Foto Album</h3>
+               <div className="flex justify-between items-center mt-6 border-b border-[#e8d5d5] pb-2">
+                 <h3 className="font-bold text-[#b07d7d] font-serif">Daftar Foto Album</h3>
                  <button 
+                   aria-label="Add Photo"
                    onClick={() => {
-                     const newPhotos = [...localConfig.album.photos, ''];
-                     handleChange('album', 'photos', newPhotos);
+                     const newPhotos = [...localConfig.album.pages, ''];
+                     handleChange('album', 'pages', newPhotos);
                    }}
-                   className="text-xs bg-pink-100 text-pink-600 px-3 py-1.5 rounded-full font-medium hover:bg-pink-200 transition-colors"
+                   className="text-xs bg-[#f3e6d8] text-[#b07d7d] px-4 py-2 rounded-full font-bold hover:bg-[#e8d5d5] transition-colors shadow-sm"
                  >
                    + Tambah Foto
                  </button>
                </div>
                
                <div className="space-y-3">
-                 {localConfig.album.photos.map((url, idx) => (
-                   <div key={idx} className="flex gap-2 items-center bg-white p-2 rounded-xl shadow-sm border border-gray-100">
-                      <span className="w-6 text-sm text-gray-400 font-medium text-center">{idx+1}</span>
+                 {localConfig.album.pages.map((url, idx) => (
+                   <div key={idx} className="flex gap-2 items-center bg-white/80 p-2 rounded-xl shadow-sm border border-[#e8d5d5]">
+                      <span className="w-8 text-sm text-[#a39a90] font-bold text-center">{idx+1}</span>
                       <Input 
-                        className="flex-1" 
+                        className="flex-1 px-3 py-2 text-sm border border-[#e6d9cc] rounded-lg bg-white outline-none" 
                         placeholder="Masukkan URL foto..."
                         value={url} 
                         onChange={(e) => {
-                          const newPhotos = [...localConfig.album.photos];
+                          const newPhotos = [...localConfig.album.pages];
                           newPhotos[idx] = e.target.value;
-                          handleChange('album', 'photos', newPhotos);
+                          handleChange('album', 'pages', newPhotos);
                       }} />
                       <button 
+                        aria-label="Remove Photo"
                         onClick={() => {
-                          const newPhotos = localConfig.album.photos.filter((_, i) => i !== idx);
-                          handleChange('album', 'photos', newPhotos);
+                          const newPhotos = localConfig.album.pages.filter((_, i) => i !== idx);
+                          handleChange('album', 'pages', newPhotos);
                         }}
                         className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         title="Hapus Foto"
@@ -402,24 +436,24 @@ const AdminPanel = ({ isOpen, onClose }) => {
                    </div>
                  ))}
                </div>
-               <p className="text-xs text-gray-500 mt-2 italic">* Saran: Gunakan perbandingan foto potret (4:5 atau 3:4).</p>
+               <p className="text-xs text-[#a39a90] mt-2 italic font-medium">* Saran: Gunakan perbandingan foto potret (4:5 atau 3:4).</p>
             </div>
           )}
 
           {activeTab === 'whatsapp' && (
              <div className="space-y-4">
-               <Input label="Nomor WhatsApp (Contoh: 62812...)" value={localConfig.whatsapp.number} onChange={(e) => handleChange('whatsapp', 'number', e.target.value)} />
-               <div className="flex flex-col gap-1">
-                <label className="text-sm font-medium text-gray-700">Pesan Default</label>
-                <textarea rows={3} className="w-full px-3 py-2 border rounded-xl bg-white focus:ring-2 focus:ring-pink-300 outline-none" value={localConfig.whatsapp.message} onChange={(e) => handleChange('whatsapp', 'message', e.target.value)} />
+               <Input label="Nomor WhatsApp (Contoh: 62812...)" value={localConfig.whatsapp.phone} onChange={(e) => handleChange('whatsapp', 'phone', e.target.value)} />
+               <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-semibold text-[#8c8279]">Pesan Default</label>
+                <textarea rows={3} className="w-full px-4 py-2.5 border border-[#e6d9cc] rounded-xl bg-white focus:ring-2 focus:ring-[#d4a3a3] outline-none font-sans text-[#6b6259]" value={localConfig.whatsapp.defaultMessage} onChange={(e) => handleChange('whatsapp', 'defaultMessage', e.target.value)} />
               </div>
                <Input label="Teks Tombol" value={localConfig.whatsapp.buttonText} onChange={(e) => handleChange('whatsapp', 'buttonText', e.target.value)} />
              </div>
           )}
         </div>
 
-        <div className="p-4 border-t border-gray-100 flex justify-end">
-          <button onClick={handleSave} className="flex items-center gap-2 bg-pink-500 hover:bg-pink-600 text-white px-6 py-3 rounded-full font-semibold transition-transform active:scale-95 shadow-lg shadow-pink-200">
+        <div className="p-5 border-t border-[#e8d5d5]/50 bg-white/50 backdrop-blur-md flex justify-end">
+          <button aria-label="Save Changes" onClick={handleSave} className="flex items-center gap-2 bg-[#c48b8b] hover:bg-[#b07d7d] text-white px-8 py-3 rounded-full font-bold transition-transform active:scale-95 shadow-lg shadow-[#c48b8b]/40">
             <Save size={18} /> Simpan Perubahan
           </button>
         </div>
@@ -452,14 +486,16 @@ const Lockscreen = ({ nextScene, openAdmin }) => {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0, y: -100 }}
+      exit={{ opacity: 0, y: -100, transition: { duration: 0.8, ease: [0.4, 0, 0.2, 1] } }}
       className="relative w-full h-full overflow-hidden flex flex-col bg-black"
-      style={{
-        backgroundImage: `url(${config.lockscreen.bgUrl})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
     >
+      <img 
+        src={config.lockscreen.backgroundUrl}
+        alt="Lockscreen Background"
+        loading="lazy"
+        onError={handleImageError}
+        className="absolute inset-0 w-full h-full object-cover"
+      />
       <div 
         className="absolute inset-0 transition-all duration-500"
         style={{ 
@@ -470,10 +506,11 @@ const Lockscreen = ({ nextScene, openAdmin }) => {
       />
 
       <button 
+        aria-label="Open Admin Settings"
         onClick={openAdmin}
-        className="absolute top-4 left-4 z-50 p-2 bg-black/20 rounded-full text-white/50 hover:text-white transition-colors"
+        className="absolute top-6 left-6 z-50 p-2.5 bg-black/20 rounded-full text-white/60 hover:text-white transition-colors backdrop-blur-md border border-white/10"
       >
-        <Settings size={20} />
+        <Settings size={22} />
       </button>
 
       <motion.div 
@@ -481,85 +518,85 @@ const Lockscreen = ({ nextScene, openAdmin }) => {
         dragConstraints={{ top: 0, bottom: 0 }}
         dragElastic={0.2}
         onDragEnd={handleDragEnd}
-        className="relative z-10 w-full h-full flex flex-col items-center pt-16 pb-8 cursor-grab active:cursor-grabbing"
+        className="relative z-10 w-full h-full flex flex-col items-center pt-20 pb-8 cursor-grab active:cursor-grabbing"
       >
         <div className="flex flex-col items-center mb-10 w-full select-none pointer-events-none">
-          <span className="text-white/90 text-xl font-medium tracking-wide mb-1 drop-shadow-md">
+          <span className="text-white/90 text-2xl font-medium tracking-wide mb-1 drop-shadow-md">
             {config.lockscreen.dateText}
           </span>
-          <span className="text-white text-7xl sm:text-8xl font-semibold tracking-tighter drop-shadow-lg font-sans">
+          <span className="text-white text-[5.5rem] font-semibold tracking-tighter drop-shadow-lg font-sans leading-none">
             {formatTime(time)}
           </span>
         </div>
 
-        <div className="w-full px-4 mb-8 space-y-3 flex-1 overflow-y-auto hide-scrollbar select-none pointer-events-none">
+        <div className="w-full px-5 mb-8 space-y-3 flex-1 overflow-y-auto hide-scrollbar select-none pointer-events-none">
           {config.lockscreen.notifications.map((notif, idx) => (
             <motion.div 
               key={idx} 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.15 }}
-              className="bg-white/10 backdrop-blur-md rounded-3xl p-4 flex gap-4 shadow-lg border border-white/20"
+              className="bg-black/30 backdrop-blur-xl rounded-[1.5rem] p-4 flex gap-4 shadow-lg border border-white/10"
             >
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center shrink-0 shadow-inner">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#d4a3a3] to-[#b07d7d] flex items-center justify-center shrink-0 shadow-inner border border-white/20">
                 <Heart size={24} className="text-white fill-current" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-baseline mb-1">
-                  <span className="text-white/90 text-sm font-semibold tracking-wide">{notif.app}</span>
-                  <span className="text-white/60 text-xs">{notif.time}</span>
+                <div className="flex justify-between items-baseline mb-0.5">
+                  <span className="text-white/90 text-sm font-semibold tracking-wide uppercase">{notif.app}</span>
+                  <span className="text-white/50 text-xs">{notif.time}</span>
                 </div>
                 <p className="text-white font-semibold text-base truncate">{notif.title}</p>
-                <p className="text-white/80 text-sm line-clamp-2 mt-0.5 leading-snug">{notif.content}</p>
+                <p className="text-white/70 text-sm line-clamp-2 mt-0.5 leading-snug">{notif.content}</p>
               </div>
             </motion.div>
           ))}
         </div>
 
-        <div className="w-full px-4 mt-auto mb-8 pointer-events-auto">
-          <div className="bg-white/10 backdrop-blur-xl rounded-[2rem] p-5 shadow-2xl border border-white/20">
+        <div className="w-full px-5 mt-auto mb-10 pointer-events-auto">
+          <div className="bg-black/40 backdrop-blur-2xl rounded-[2rem] p-5 shadow-2xl border border-white/10">
             <div className="flex items-center gap-4 mb-5">
-              <img src={config.lockscreen.music.coverUrl} alt="Album Art" className="w-16 h-16 rounded-xl object-cover shadow-md" />
+              <img src={config.lockscreen.music.coverUrl} alt="Album Art" loading="lazy" onError={handleImageError} className="w-16 h-16 rounded-xl object-cover shadow-md border border-white/5" />
               <div className="flex-1 min-w-0">
                 <h3 className="text-white font-bold text-lg truncate">{config.lockscreen.music.title}</h3>
-                <p className="text-white/70 text-sm truncate">{config.lockscreen.music.artist}</p>
+                <p className="text-white/60 text-sm truncate">{config.lockscreen.music.artist}</p>
               </div>
             </div>
             
-            <div className="w-full h-1.5 bg-white/20 rounded-full mb-5 overflow-hidden">
+            <div className="w-full h-1.5 bg-white/20 rounded-full mb-6 overflow-hidden">
               <div className="h-full bg-white rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
             </div>
 
-            <div className="flex justify-center items-center gap-10">
-              <button className="text-white/80 hover:text-white transition-colors active:scale-95">
+            <div className="flex justify-center items-center gap-12">
+              <button aria-label="Previous Track" className="text-white/80 hover:text-white transition-colors active:scale-95">
                 <SkipBack size={32} fill="currentColor" />
               </button>
-              <button onClick={togglePlay} className="text-white hover:scale-110 transition-transform active:scale-95">
-                {isPlaying ? <Pause size={44} fill="currentColor" /> : <Play size={44} fill="currentColor" />}
+              <button aria-label="Play/Pause" onClick={togglePlay} className="text-white hover:scale-110 transition-transform active:scale-95">
+                {isPlaying ? <Pause size={48} fill="currentColor" /> : <Play size={48} fill="currentColor" />}
               </button>
-              <button className="text-white/80 hover:text-white transition-colors active:scale-95">
+              <button aria-label="Next Track" className="text-white/80 hover:text-white transition-colors active:scale-95">
                 <SkipForward size={32} fill="currentColor" />
               </button>
             </div>
           </div>
         </div>
 
-        <div className="flex justify-between w-full px-10 mb-6 pointer-events-auto">
-          <button className="w-14 h-14 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white border border-white/10 shadow-lg hover:bg-white/20 transition-colors active:scale-90">
+        <div className="flex justify-between w-full px-12 mb-8 pointer-events-auto">
+          <button aria-label="Flashlight" className="w-14 h-14 rounded-full bg-black/30 backdrop-blur-xl flex items-center justify-center text-white border border-white/10 shadow-lg hover:bg-white/20 transition-colors active:scale-90">
             <Flashlight size={26} />
           </button>
-          <button className="w-14 h-14 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white border border-white/10 shadow-lg hover:bg-white/20 transition-colors active:scale-90">
+          <button aria-label="Camera" className="w-14 h-14 rounded-full bg-black/30 backdrop-blur-xl flex items-center justify-center text-white border border-white/10 shadow-lg hover:bg-white/20 transition-colors active:scale-90">
             <Camera size={26} />
           </button>
         </div>
 
         <motion.div 
           animate={{ y: [0, -10, 0] }}
-          transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-          className="text-white flex flex-col items-center pb-2 pointer-events-auto"
+          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+          className="text-white flex flex-col items-center pb-2 pointer-events-auto cursor-pointer"
           onClick={nextScene}
         >
-          <span className="text-sm font-medium tracking-widest uppercase opacity-90 drop-shadow-md cursor-pointer hover:opacity-100">
+          <span className="text-sm font-semibold tracking-widest uppercase opacity-80 drop-shadow-md hover:opacity-100 transition-opacity">
             Geser ke atas untuk membuka
           </span>
         </motion.div>
@@ -571,26 +608,20 @@ const Lockscreen = ({ nextScene, openAdmin }) => {
 const PinScreen = ({ nextScene }) => {
   const { config } = useConfig();
   const [pin, setPin] = useState('');
-  const [status, setStatus] = useState('typing'); // 'typing', 'error', 'success'
+  const [status, setStatus] = useState('typing'); // typing, error, success
   
-  // Calculate dynamic target length based on config
-  const targetLength = config.pin.correctPin ? config.pin.correctPin.toString().length : 6;
+  const targetLength = config.pin.code ? config.pin.code.toString().length : 6;
 
   const handleKeyPress = (num) => {
     if (pin.length < targetLength && status === 'typing') {
       const newPin = pin + num;
       setPin(newPin);
-      
-      if (newPin.length === targetLength) {
-        verifyPin(newPin);
-      }
+      if (newPin.length === targetLength) verifyPin(newPin);
     }
   };
 
   const handleDelete = () => {
-    if (pin.length > 0 && status === 'typing') {
-      setPin(pin.slice(0, -1));
-    }
+    if (pin.length > 0 && status === 'typing') setPin(pin.slice(0, -1));
   };
 
   const resetPin = () => {
@@ -599,18 +630,14 @@ const PinScreen = ({ nextScene }) => {
   };
 
   const verifyPin = (currentPin) => {
-    if (currentPin === config.pin.correctPin.toString()) {
+    if (currentPin === config.pin.code.toString()) {
       setStatus('success');
-      // Success vibration (if supported)
       if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
         window.navigator.vibrate([100, 50, 100]);
       }
-      setTimeout(() => {
-        nextScene();
-      }, 3500); // Wait for hearts and sticker to show
+      setTimeout(() => nextScene(), 3500); 
     } else {
       setStatus('error');
-      // Error vibration (if supported)
       if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
          window.navigator.vibrate([50, 50, 50]);
       }
@@ -618,9 +645,7 @@ const PinScreen = ({ nextScene }) => {
   };
 
   const dots = Array.from({ length: targetLength }, (_, i) => i);
-
-  // Pre-generate heart particles for success animation
-  const heartParticles = Array.from({ length: 15 }, (_, i) => ({
+  const heartParticles = Array.from({ length: 20 }, (_, i) => ({
     id: i,
     left: `${Math.random() * 90 + 5}%`,
     animationDuration: `${Math.random() * 2 + 1.5}s`,
@@ -630,21 +655,20 @@ const PinScreen = ({ nextScene }) => {
 
   return (
     <motion.div 
-      initial={{ opacity: 0, scale: 1.1 }}
+      initial={{ opacity: 0, scale: 1.05 }}
       animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, filter: 'blur(10px)' }}
+      exit={{ opacity: 0, filter: 'blur(10px)', transition: { duration: 0.6 } }}
       className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden"
     >
       <div 
         className="absolute inset-0 bg-cover bg-center transition-all duration-700"
         style={{ 
-          backgroundImage: `url(${config.pin.bgUrl})`, 
-          filter: `blur(${status === 'typing' ? '20px' : '30px'}) brightness(0.6)` 
+          backgroundImage: `url(${config.lockscreen.backgroundUrl})`, 
+          filter: `blur(${status === 'typing' ? '25px' : '40px'}) brightness(0.5)` 
         }}
       />
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-xl" />
+      <div className="absolute inset-0 bg-black/20 backdrop-blur-md" />
 
-      {/* Success Floating Hearts */}
       <AnimatePresence>
         {status === 'success' && (
           <motion.div 
@@ -660,13 +684,9 @@ const PinScreen = ({ nextScene }) => {
                 style={{ left: particle.left }}
                 initial={{ y: '100vh', scale: 0, opacity: 1 }}
                 animate={{ y: '-20vh', scale: [particle.scale, particle.scale * 1.5, particle.scale], opacity: [0, 1, 0] }}
-                transition={{ 
-                  duration: parseFloat(particle.animationDuration), 
-                  delay: parseFloat(particle.delay),
-                  ease: "easeOut"
-                }}
+                transition={{ duration: parseFloat(particle.animationDuration), delay: parseFloat(particle.delay), ease: "easeOut" }}
               >
-                <Heart size={32} className="fill-pink-500 text-pink-500" />
+                <Heart size={32} className="fill-[#d4a3a3] text-[#d4a3a3]" />
               </motion.div>
             ))}
           </motion.div>
@@ -687,47 +707,47 @@ const PinScreen = ({ nextScene }) => {
               exit={{ opacity: 0, y: -20 }}
               className="flex flex-col items-center w-full"
             >
-              <Lock className="text-white/80 mb-6" size={40} />
+              <Lock className="text-white/90 mb-6" size={44} />
+              <h2 className="text-white text-xl font-medium mb-10 text-center tracking-wide">{config.pin.hintText}</h2>
               
-              <h2 className="text-white text-xl font-medium mb-8 text-center tracking-wide">
-                {config.pin.prompt}
-              </h2>
-
-              <div className="flex gap-4 mb-16 justify-center flex-wrap max-w-xs">
+              <div className="flex gap-5 mb-16 justify-center flex-wrap max-w-[280px]">
                 {dots.map(i => (
                   <div 
                     key={i} 
-                    className={`w-3.5 h-3.5 rounded-full border-[1.5px] transition-all duration-300 ${
+                    className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-300 ${
                       pin.length > i 
-                        ? 'bg-white border-white scale-110 shadow-[0_0_10px_rgba(255,255,255,0.5)]'
+                        ? 'bg-white border-white scale-110 shadow-[0_0_15px_rgba(255,255,255,0.8)]'
                         : 'border-white/50 bg-transparent'
                     }`}
                   />
                 ))}
               </div>
 
-              <div className="grid grid-cols-3 gap-x-6 sm:gap-x-8 gap-y-6">
+              <div className="grid grid-cols-3 gap-x-8 gap-y-6">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
                   <button
                     key={num}
+                    aria-label={`Digit ${num}`}
                     onClick={() => handleKeyPress(num.toString())}
-                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/5 flex items-center justify-center text-white text-3xl font-light hover:bg-white/20 active:bg-white/30 transition-colors backdrop-blur-sm border border-white/10"
+                    className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-white text-4xl font-light hover:bg-white/25 active:bg-white/40 transition-colors backdrop-blur-xl border border-white/20"
                   >
                     {num}
                   </button>
                 ))}
                 <div />
                 <button
+                  aria-label="Digit 0"
                   onClick={() => handleKeyPress('0')}
-                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/5 flex items-center justify-center text-white text-3xl font-light hover:bg-white/20 active:bg-white/30 transition-colors backdrop-blur-sm border border-white/10"
+                  className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-white text-4xl font-light hover:bg-white/25 active:bg-white/40 transition-colors backdrop-blur-xl border border-white/20"
                 >
                   0
                 </button>
                 <button
+                  aria-label="Delete"
                   onClick={handleDelete}
-                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center text-white/80 hover:bg-white/10 active:bg-white/20 transition-colors"
+                  className="w-20 h-20 rounded-full flex items-center justify-center text-white/90 hover:bg-white/10 active:bg-white/20 transition-colors"
                 >
-                  <span className="text-sm font-medium tracking-wider">HAPUS</span>
+                  <span className="text-sm font-semibold tracking-wider">HAPUS</span>
                 </button>
               </div>
             </motion.div>
@@ -737,19 +757,18 @@ const PinScreen = ({ nextScene }) => {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
-              className="flex flex-col items-center bg-black/50 p-8 rounded-3xl backdrop-blur-md border border-red-500/30 shadow-2xl w-full"
+              className="flex flex-col items-center bg-black/40 p-8 rounded-[2rem] backdrop-blur-2xl border border-red-500/40 shadow-2xl w-full text-center"
             >
-              {config.pin.errorStickerUrl ? (
-                 <img src={config.pin.errorStickerUrl} alt="Salah" className="w-40 h-40 object-contain mb-6 drop-shadow-lg" />
+              {config.pin.wrongStickerUrl ? (
+                 <img src={config.pin.wrongStickerUrl} loading="lazy" alt="Salah" className="w-40 h-40 object-contain mb-6 drop-shadow-xl" />
               ) : (
                  <div className="text-7xl mb-6 drop-shadow-md">🙅‍♀️</div>
               )}
-              <h2 className="text-red-400 text-xl md:text-2xl font-bold mb-8 text-center">
-                {config.pin.errorMsg}
-              </h2>
+              <h2 className="text-red-300 text-2xl font-bold mb-10 font-serif leading-snug">{config.pin.wrongText}</h2>
               <button 
+                aria-label="Try Again"
                 onClick={resetPin}
-                className="w-full bg-white/10 hover:bg-white/20 text-white px-8 py-3.5 rounded-full font-semibold tracking-wide border border-white/20 transition-all active:scale-95"
+                className="w-full bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-full font-bold tracking-widest uppercase border border-white/20 transition-all active:scale-95"
               >
                 COBA LAGI
               </button>
@@ -760,16 +779,14 @@ const PinScreen = ({ nextScene }) => {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
-              className="flex flex-col items-center bg-white/10 p-8 rounded-3xl backdrop-blur-md border border-white/20 shadow-2xl w-full"
+              className="flex flex-col items-center bg-white/20 p-10 rounded-[2rem] backdrop-blur-2xl border border-white/30 shadow-2xl w-full text-center"
             >
               {config.pin.successStickerUrl ? (
-                 <img src={config.pin.successStickerUrl} alt="Sukses!" className="w-40 h-40 object-contain mb-6 drop-shadow-lg" />
+                 <img src={config.pin.successStickerUrl} loading="lazy" alt="Sukses" className="w-48 h-48 object-contain mb-6 drop-shadow-xl" />
               ) : (
-                 <div className="text-7xl mb-6 drop-shadow-md">🥰</div>
+                 <div className="text-8xl mb-6 drop-shadow-md">🥰</div>
               )}
-              <h2 className="text-white text-xl md:text-2xl font-bold text-center drop-shadow-md">
-                {config.pin.successMsg}
-              </h2>
+              <h2 className="text-white text-3xl font-bold font-serif leading-snug drop-shadow-md">{config.pin.successText}</h2>
             </motion.div>
           )}
         </AnimatePresence>
@@ -785,13 +802,9 @@ const LoveLetter = ({ nextScene }) => {
 
   const handleOpen = () => {
     setIsOpening(true);
-    // Sequence animasi: amplop buka (0.5s) -> kertas naik (1s) -> transisi ke fullscreen (0.5s)
-    setTimeout(() => {
-      setIsOpened(true);
-    }, 2000);
+    setTimeout(() => setIsOpened(true), 2000);
   };
 
-  // Generate random hearts for background
   const bgHearts = Array.from({ length: 15 }, (_, i) => ({
     id: i,
     left: `${Math.random() * 100}%`,
@@ -804,56 +817,42 @@ const LoveLetter = ({ nextScene }) => {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
-      className="w-full h-full bg-[#fcf9f2] flex flex-col relative overflow-hidden paper-texture"
+      exit={{ opacity: 0, scale: 0.95, filter: 'blur(10px)', transition: { duration: 0.8 } }}
+      className="w-full h-full bg-[#fdfbf7] flex flex-col relative overflow-hidden paper-texture"
     >
-      {/* Aesthetic Background Elements */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-60">
         {bgHearts.map(heart => (
           <motion.div
             key={heart.id}
-            className="absolute text-[#e8d5d5]/60"
+            className="absolute text-[#e8d5d5]/80"
             style={{ left: heart.left, top: heart.top }}
-            animate={{ 
-              y: [-20, 20, -20],
-              x: [-10, 10, -10],
-              rotate: [0, 10, -10, 0],
-              scale: [1, 1.1, 1]
-            }}
-            transition={{
-              duration: parseFloat(heart.animationDuration),
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: parseFloat(heart.animationDelay)
-            }}
+            animate={{ y: [-20, 20, -20], x: [-10, 10, -10], rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
+            transition={{ duration: parseFloat(heart.animationDuration), repeat: Infinity, ease: "easeInOut", delay: parseFloat(heart.animationDelay) }}
           >
             <Heart size={Math.random() * 20 + 10} fill="currentColor" />
           </motion.div>
         ))}
-        {/* Subtle glowing orbs */}
-        <div className="absolute top-[-10%] left-[-10%] w-64 h-64 bg-[#e8d5d5]/30 rounded-full mix-blend-multiply filter blur-[60px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-72 h-72 bg-[#f3e6d8]/40 rounded-full mix-blend-multiply filter blur-[60px]" />
+        <div className="absolute top-[-10%] left-[-10%] w-64 h-64 bg-[#e8d5d5]/40 rounded-full mix-blend-multiply filter blur-[60px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-72 h-72 bg-[#f3e6d8]/50 rounded-full mix-blend-multiply filter blur-[60px]" />
       </div>
       
       {!isOpened ? (
         <div className="flex-1 flex flex-col items-center justify-center p-6 relative z-10">
-          
           <motion.p 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: isOpening ? 0 : 1, y: isOpening ? -30 : 0 }}
-            className="text-[#c48b8b] font-serif italic text-lg mb-12 tracking-wide text-center drop-shadow-sm"
+            className="text-[#c48b8b] font-serif italic text-xl mb-12 tracking-wide text-center drop-shadow-sm font-medium"
           >
             Klik love untuk membuka surat ❤️
           </motion.p>
 
           <div className="relative w-80 h-56 mt-8 perspective-[1000px]">
-            {/* ENVELOPE BACK */}
+            {/* Envelope Back */}
             <div className="absolute inset-0 bg-[#dcbaba] rounded-lg shadow-inner overflow-hidden border border-[#c4a1a1]">
-              {/* Envelope Pattern lines inside */}
               <div className="absolute inset-0 opacity-10 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,#000_10px,#000_20px)]" />
             </div>
 
-            {/* THE LETTER (HIDING INSIDE) */}
+            {/* Letter Inside */}
             <motion.div 
               initial={{ y: 10 }}
               animate={isOpening ? { y: -180, scale: 1.05 } : { y: 10 }}
@@ -861,25 +860,22 @@ const LoveLetter = ({ nextScene }) => {
               className="absolute bottom-2 left-3 right-3 h-48 bg-[#fdfbf7] rounded-md shadow-md border border-stone-200 flex flex-col items-center pt-6 px-4 z-10 paper-texture overflow-hidden"
             >
               <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-sm mb-2">
-                <img src={config.letter.photoUrl} className="w-full h-full object-cover" alt="Couple" />
+                <img src={config.letter.photoUrl} loading="lazy" onError={handleImageError} className="w-full h-full object-cover" alt="Couple" />
               </div>
-              <p className="font-cursive text-[#b07d7d] text-xl font-bold">Untuk {config.letter.receiverName}</p>
+              <p className="font-cursive text-[#b07d7d] text-xl font-bold">Untuk {config.letter.recipient}</p>
               <p className="font-serif text-[10px] text-gray-400 mt-2 text-center line-clamp-3 leading-relaxed">
-                {config.letter.content}
+                {config.letter.body}
               </p>
             </motion.div>
 
-            {/* ENVELOPE FRONT (Left, Right, Bottom flaps simulated with clip-path) */}
+            {/* Envelope Flaps */}
             <div className="absolute inset-0 z-20 overflow-hidden rounded-lg pointer-events-none drop-shadow-2xl">
-               {/* Left flap */}
                <div className="absolute inset-0 bg-[#ebdcdc] origin-left border-r border-white/20" style={{ clipPath: 'polygon(0 0, 50% 50%, 0 100%)' }} />
-               {/* Right flap */}
                <div className="absolute inset-0 bg-[#e8d8d8] origin-right border-l border-white/20" style={{ clipPath: 'polygon(100% 0, 50% 50%, 100% 100%)' }} />
-               {/* Bottom flap */}
                <div className="absolute inset-0 bg-[#e3d1d1] origin-bottom border-t border-white/30" style={{ clipPath: 'polygon(0 100%, 50% 50%, 100% 100%)' }} />
             </div>
 
-            {/* ENVELOPE TOP FLAP */}
+            {/* Top Flap */}
             <motion.div 
               initial={{ rotateX: 0 }}
               animate={isOpening ? { rotateX: 180, zIndex: 0 } : { rotateX: 0, zIndex: 30 }}
@@ -887,7 +883,6 @@ const LoveLetter = ({ nextScene }) => {
               className="absolute top-0 left-0 right-0 h-32 bg-[#e6d5d5] origin-top border-b border-white/40 shadow-[0_10px_20px_rgba(0,0,0,0.1)] rounded-t-lg"
               style={{ clipPath: 'polygon(0 0, 100% 0, 50% 100%)', backfaceVisibility: 'hidden' }}
             />
-            {/* Inside of top flap (visible when opened) */}
             <motion.div 
               initial={{ rotateX: -180, opacity: 0 }}
               animate={isOpening ? { rotateX: 0, opacity: 1, zIndex: 5 } : { rotateX: -180, opacity: 0, zIndex: 0 }}
@@ -896,10 +891,10 @@ const LoveLetter = ({ nextScene }) => {
               style={{ clipPath: 'polygon(0 0, 100% 0, 50% 100%)', backfaceVisibility: 'hidden' }}
             />
 
-            {/* WAX SEAL / HEART BUTTON */}
             <AnimatePresence>
               {!isOpening && (
                 <motion.button 
+                  aria-label="Open Letter"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   exit={{ scale: 0, opacity: 0 }}
@@ -908,10 +903,7 @@ const LoveLetter = ({ nextScene }) => {
                   onClick={handleOpen}
                   className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 w-16 h-16 bg-gradient-to-br from-[#c48b8b] to-[#b07d7d] rounded-full shadow-[0_4px_20px_rgba(176,125,125,0.4)] flex items-center justify-center border-2 border-[#e8d5d5] cursor-pointer"
                 >
-                  <motion.div
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-                  >
+                  <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}>
                     <Heart className="text-white fill-current opacity-90" size={26} />
                   </motion.div>
                 </motion.button>
@@ -926,45 +918,30 @@ const LoveLetter = ({ nextScene }) => {
           transition={{ type: 'spring', damping: 25, stiffness: 80 }}
           className="flex-1 overflow-y-auto hide-scrollbar p-5 md:p-8 relative z-20 flex flex-col items-center pb-32"
         >
-          {/* THE OPENED LETTER */}
           <div className="w-full max-w-md bg-[#fdfbf7] rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.08)] p-6 md:p-10 relative mt-4 mb-8 paper-texture border border-[#ece4d9]">
-            {/* Paper Edge effect */}
             <div className="absolute top-0 bottom-0 left-2 w-px bg-[#e8d5d5]/50" />
             <div className="absolute top-0 bottom-0 left-3 w-px bg-[#e8d5d5]/50" />
 
             <div className="flex justify-between items-start mb-10 mt-2">
-              <h2 className="font-cursive text-3xl text-[#b07d7d] font-bold ml-4">
-                Untuk {config.letter.receiverName} ❤️
-              </h2>
+              <h2 className="font-cursive text-3xl text-[#b07d7d] font-bold ml-4">Untuk {config.letter.recipient} ❤️</h2>
               <span className="font-cursive text-[#a39a90] text-lg rotate-2">{config.letter.date}</span>
             </div>
 
-            {/* Polaroid Photo */}
             <div className="w-full px-2 mb-10">
               <div className="bg-[#fcf9f2] p-3 pb-10 rounded-sm shadow-[0_10px_30px_rgba(0,0,0,0.05)] transform rotate-2 mx-auto max-w-[280px] relative border border-[#ece4d9]">
-                {/* Washi Tape */}
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-6 bg-[#f3e6d8]/60 backdrop-blur-sm -rotate-3 border border-[#e6d9cc]/40 shadow-sm mix-blend-multiply" />
-                <img 
-                  src={config.letter.photoUrl} 
-                  alt="Us" 
-                  className="w-full aspect-square object-cover rounded-sm filter sepia-[0.15] contrast-[1.05]"
-                />
-                <p className="absolute bottom-3 left-0 right-0 text-center font-cursive text-[#8c8279] text-xl">
-                  {config.letter.title}
-                </p>
+                <img src={config.letter.photoUrl} loading="lazy" onError={handleImageError} alt="Us" className="w-full aspect-square object-cover rounded-sm filter sepia-[0.15] contrast-[1.05]" />
+                <p className="absolute bottom-3 left-0 right-0 text-center font-cursive text-[#8c8279] text-xl">{config.letter.title}</p>
               </div>
             </div>
             
-            {/* Letter Body */}
             <div className="relative z-10 px-4">
               <p className="text-[#6b6259] leading-[2.2] whitespace-pre-wrap font-serif text-base tracking-wide text-justify">
-                {config.letter.content}
+                {config.letter.body}
               </p>
             </div>
 
-            {/* Signature */}
             <div className="mt-14 text-right pr-4 relative">
-              {/* Decorative Flower/Leaf */}
               <div className="absolute -bottom-4 left-4 opacity-40 -rotate-12">
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d97777" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 22c4-4 4-10 0-14-4 4-4 10 0 14z"/><path d="M12 8V2"/><path d="M12 8c2.5-1.5 5.5-1.5 8 0"/><path d="M12 8c-2.5-1.5-5.5-1.5-8 0"/>
@@ -975,8 +952,8 @@ const LoveLetter = ({ nextScene }) => {
             </div>
           </div>
           
-          {/* Action Button */}
           <motion.button
+            aria-label="Continue"
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 1 }}
@@ -1017,23 +994,24 @@ const GameScreen = ({ nextScene }) => {
     newSet.add(idx);
     setClickedPhotos(newSet);
 
-    if (newSet.size === config.game.photos.length) {
+    if (newSet.size === config.game.images.length) {
       setTimeout(() => setShowTwist(true), 1000);
     }
   };
 
   useEffect(() => {
     if (showTwist) {
-      const timer = setTimeout(() => nextScene(), 5000);
+      const duration = config.game.duration || 5000;
+      const timer = setTimeout(() => nextScene(), duration);
       return () => clearTimeout(timer);
     }
-  }, [showTwist, nextScene]);
+  }, [showTwist, nextScene, config.game.duration]);
 
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 1.05, filter: 'blur(10px)' }}
+      exit={{ opacity: 0, scale: 1.05, filter: 'blur(10px)', transition: { duration: 0.8 } }}
       className="w-full h-full bg-[#fdfbf7] flex flex-col relative overflow-hidden paper-texture"
     >
       <div className="absolute inset-0 pointer-events-none opacity-40">
@@ -1042,13 +1020,13 @@ const GameScreen = ({ nextScene }) => {
       </div>
 
       <div className="text-center pt-12 pb-6 px-6 z-10">
-        <h2 className="text-2xl font-bold text-[#b07d7d] mb-2 font-serif drop-shadow-sm">{config.game.question}</h2>
-        <p className="text-[#a39a90] font-medium text-sm font-sans tracking-wide">Coba tebak dan klik semua fotonya!</p>
+        <h2 className="text-2xl font-bold text-[#b07d7d] mb-2 font-serif drop-shadow-sm">{config.game.title}</h2>
+        <p className="text-[#a39a90] font-medium text-sm font-sans tracking-wide">{config.game.subtitle}</p>
       </div>
 
       <div className="flex-1 overflow-y-auto hide-scrollbar px-4 pb-12 z-10">
         <div className="grid grid-cols-2 gap-x-4 gap-y-8 max-w-lg mx-auto pb-8">
-          {config.game.photos.map((photo, idx) => {
+          {config.game.images.map((photo, idx) => {
             const isClicked = clickedPhotos.has(idx);
             const isWiggling = wigglingIdx === idx;
             const style = scatterStyles[idx % scatterStyles.length];
@@ -1071,7 +1049,7 @@ const GameScreen = ({ nextScene }) => {
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-5 bg-[#f3e6d8]/60 backdrop-blur-sm -rotate-2 border border-[#e6d9cc]/40 shadow-sm z-20 mix-blend-multiply"></div>
                 
                 <div className="relative w-full aspect-[4/5] overflow-hidden rounded-sm">
-                  <img src={photo.url} alt={`Option ${idx}`} className="w-full h-full object-cover filter contrast-[1.02] sepia-[0.05]" />
+                  <img src={photo.url} loading="lazy" onError={handleImageError} alt={`Option ${idx}`} className="w-full h-full object-cover filter contrast-[1.02] sepia-[0.05]" />
                   
                   <AnimatePresence>
                     {isClicked && (
@@ -1089,7 +1067,7 @@ const GameScreen = ({ nextScene }) => {
                           🤍
                         </motion.span>
                         <p className="text-[#b07d7d] font-bold text-sm drop-shadow-sm font-sans tracking-wide leading-tight">
-                          {photo.msg}
+                          {photo.msg || config.game.wrongText}
                         </p>
                       </motion.div>
                     )}
@@ -1107,7 +1085,7 @@ const GameScreen = ({ nextScene }) => {
              initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
              animate={{ opacity: 1, backdropFilter: "blur(16px)" }}
              exit={{ opacity: 0 }}
-             className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#fcf9f2]/70 p-6 text-center overflow-hidden"
+             className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-[#fcf9f2]/70 p-6 text-center overflow-hidden"
           >
              {Array.from({ length: 30 }).map((_, i) => (
                 <motion.div
@@ -1127,28 +1105,19 @@ const GameScreen = ({ nextScene }) => {
                 </motion.div>
              ))}
 
-             <motion.h2 
-               initial={{ y: 30, opacity: 0 }}
-               animate={{ y: 0, opacity: 1 }}
-               transition={{ delay: 0.5, type: "spring", stiffness: 80 }}
-               className="text-2xl md:text-3xl font-serif text-[#8c8279] mb-6 drop-shadow-sm"
-             >
-               {config.game.twistText1}
-             </motion.h2>
-
              <motion.h1 
                initial={{ scale: 0.8, opacity: 0 }}
                animate={{ scale: 1, opacity: 1 }}
-               transition={{ delay: 1.5, type: "spring", bounce: 0.6 }}
-               className="text-4xl md:text-5xl font-bold font-cursive text-[#c48b8b] leading-tight drop-shadow-md whitespace-pre-wrap"
+               transition={{ delay: 1.0, type: "spring", bounce: 0.6 }}
+               className="text-4xl md:text-5xl font-bold font-cursive text-[#c48b8b] leading-tight drop-shadow-md whitespace-pre-wrap z-10"
              >
-               {config.game.twistText2}
+               {config.game.finalText}
              </motion.h1>
              
              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 3 }}
+                transition={{ delay: 2.5 }}
                 className="absolute bottom-10 text-[#c48b8b] text-sm font-sans tracking-widest uppercase opacity-80 animate-pulse"
              >
                 Memuat kenangan...
@@ -1160,27 +1129,22 @@ const GameScreen = ({ nextScene }) => {
   );
 };
 
-const PhotoAlbum = ({ nextScene }) => {
+const PhotoAlbum = () => {
   const { config } = useConfig();
   const [isOpen, setIsOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0); // 0 is cover, 1 is spread 1, etc.
+  const [currentPage, setCurrentPage] = useState(0); 
   const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
   const [userMessage, setUserMessage] = useState('');
   const [touchStartX, setTouchStartX] = useState(null);
   
-  // Calculate spreads. 2 photos per page = 4 photos per spread.
   const photosPerPage = 2;
-  const photos = config.album.photos;
+  const photos = config.album.pages;
   
-  // Create an array of pages (each page has up to 2 photos)
   const pages = [];
   for (let i = 0; i < photos.length; i += photosPerPage) {
     pages.push(photos.slice(i, i + photosPerPage));
   }
   
-  // A spread is 2 pages (Left and Right).
-  // Spread 0: Left = Page 0, Right = Page 1
-  // Spread 1: Left = Page 2, Right = Page 3
   const spreads = [];
   for (let i = 0; i < pages.length; i += 2) {
     spreads.push({
@@ -1189,17 +1153,11 @@ const PhotoAlbum = ({ nextScene }) => {
     });
   }
 
-  // Total flips required = Cover (1) + Spreads (spreads.length)
   const totalFlips = spreads.length;
 
   const handleNext = () => {
-    if (!isOpen) {
-      setIsOpen(true);
-      return;
-    }
-    if (currentPage <= totalFlips) {
-      setCurrentPage(prev => prev + 1);
-    }
+    if (!isOpen) { setIsOpen(true); return; }
+    if (currentPage <= totalFlips) setCurrentPage(prev => prev + 1);
   };
 
   const handlePrev = () => {
@@ -1210,25 +1168,22 @@ const PhotoAlbum = ({ nextScene }) => {
   };
 
   const handleTouchStart = (e) => setTouchStartX(e.touches[0].clientX);
-  
   const handleTouchEnd = (e) => {
     if (touchStartX === null) return;
-    const touchEndX = e.changedTouches[0].clientX;
-    const diff = touchStartX - touchEndX;
-    if (diff > 50) handleNext(); // Geser ke kiri (Next)
-    else if (diff < -50) handlePrev(); // Geser ke kanan (Prev)
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (diff > 50) handleNext();
+    else if (diff < -50) handlePrev();
     setTouchStartX(null);
   };
 
   const handleSendWA = () => {
-    const baseText = config.whatsapp.message;
+    const baseText = config.whatsapp.defaultMessage;
     const finalMessage = userMessage.trim() ? `${baseText}\n\n${userMessage}` : baseText;
     const text = encodeURIComponent(finalMessage);
-    const num = config.whatsapp.number.replace(/\D/g, '');
+    const num = config.whatsapp.phone.replace(/\D/g, '');
     window.open(`https://wa.me/${num}?text=${text}`, '_blank');
   };
 
-  // Helper to render photos loosely
   const renderPhotoGrid = (pagePhotos, isRight) => (
     <div className="grid grid-cols-1 gap-4 p-4 h-full content-center">
       {pagePhotos.map((photo, idx) => (
@@ -1237,13 +1192,11 @@ const PhotoAlbum = ({ nextScene }) => {
           className="bg-white p-2 pb-6 rounded-sm shadow-[0_5px_15px_rgba(0,0,0,0.1)] border border-[#e6d9cc] relative mx-auto"
           style={{ 
             transform: `rotate(${isRight ? (idx % 2 === 0 ? 3 : -2) : (idx % 2 === 0 ? -3 : 2)}deg) scale(0.95)`,
-            width: '90%',
-            maxWidth: '200px'
+            width: '90%', maxWidth: '200px'
           }}
         >
-          {/* Washi Tape */}
           <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-10 h-3 bg-[#f3e6d8]/80 backdrop-blur-sm -rotate-2 mix-blend-multiply border border-[#e6d9cc]/30" />
-          <img src={photo} alt="Memory" className="w-full aspect-[4/5] object-cover filter contrast-[1.05] sepia-[0.1]" />
+          <img src={photo} loading="lazy" onError={handleImageError} alt="Memory" className="w-full aspect-[4/5] object-cover filter contrast-[1.05] sepia-[0.1]" />
         </div>
       ))}
     </div>
@@ -1258,44 +1211,34 @@ const PhotoAlbum = ({ nextScene }) => {
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Dark vintage ambient background */}
       <div className="absolute inset-0 opacity-30 pointer-events-none film-grain" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150vw] h-[150vw] bg-[radial-gradient(circle,rgba(60,50,45,0.8)_0%,rgba(18,16,14,1)_70%)]" />
       
       <div className="text-white/40 font-serif text-sm absolute top-10 tracking-widest uppercase">
-        {isOpen ? "Tap kanan untuk lanjut, kiri untuk kembali" : "Tap buku untuk membuka"}
+        {isOpen ? "Tap kanan untuk lanjut, kiri kembali" : "Tap buku untuk membuka"}
       </div>
 
-      {/* The 3D Stage */}
       <motion.div 
         className="relative w-[90%] max-w-[320px] aspect-[3/4] perspective-2000"
-        animate={{ 
-          scale: isOpen ? 1 : 0.9,
-          x: isOpen ? '25%' : '0%', // Shift right when open to center the spread
-        }}
+        animate={{ scale: isOpen ? 1 : 0.9, x: isOpen ? '25%' : '0%' }}
         transition={{ type: "spring", stiffness: 45, damping: 15 }}
       >
-        
-        {/* RIGHT SIDE (Back Cover & Final Page laying static at the bottom) */}
         <div className="absolute inset-0 bg-[#241c17] rounded-r-lg shadow-2xl border-l-4 border-[#120e0b] shadow-[20px_20px_40px_rgba(0,0,0,0.8)] preserve-3d book-cover-texture">
-           {/* Final Page Content (Visible when all pages turn left) */}
            <div className="absolute inset-0 bg-[#fdfbf7] ml-2 paper-texture border-l shadow-inner flex flex-col items-center justify-center p-6 text-center">
               <h2 className="font-cursive text-3xl text-[#b07d7d] mb-4">Our Journey<br/>Continues...</h2>
-              <p className="font-serif text-[#8c8279] text-sm mb-10 leading-relaxed">
-                Setiap foto adalah cerita, dan cerita kita belum selesai.
-              </p>
+              <p className="font-serif text-[#8c8279] text-sm mb-10 leading-relaxed">Setiap foto adalah cerita, dan cerita kita belum selesai.</p>
               <button 
+                aria-label="Send Message"
                 onClick={(e) => { e.stopPropagation(); setIsMessageModalOpen(true); }}
-                className="bg-gradient-to-r from-[#d4a3a3] to-[#c48b8b] text-white px-6 py-3 rounded-full font-sans font-semibold tracking-wide shadow-lg shadow-[#d4a3a3]/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                className="bg-gradient-to-r from-[#d4a3a3] to-[#c48b8b] text-white px-6 py-3.5 rounded-full font-sans font-semibold tracking-wide shadow-lg shadow-[#d4a3a3]/40 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
               >
                 KIRIM PESAN 💌
               </button>
            </div>
         </div>
 
-        {/* PAGES SPREADS (Dynamic generation) */}
         {spreads.map((spread, index) => {
-          const pageIndex = index + 1; // spread 0 is pageIndex 1 (since cover is 0)
+          const pageIndex = index + 1; 
           const isFlipped = currentPage > pageIndex;
           
           return (
@@ -1307,19 +1250,15 @@ const PhotoAlbum = ({ nextScene }) => {
               animate={{ rotateY: isFlipped ? -180 : 0 }}
               transition={{ type: "spring", stiffness: 40, damping: 14 }}
               onClick={(e) => {
-                // If clicking right half of the screen go next, left half go prev
                 const rect = e.currentTarget.getBoundingClientRect();
                 const clickX = e.clientX - rect.left;
                 if (clickX > rect.width / 2) handleNext();
                 else handlePrev();
               }}
             >
-              {/* FRONT OF PAGE (Right side content) */}
               <div className="absolute inset-0 backface-hidden bg-[#fdfbf7] ml-1 paper-texture border-l shadow-[inset_10px_0_20px_rgba(0,0,0,0.05)] border-[#e6d9cc]">
                  {renderPhotoGrid(spread.right, true)}
               </div>
-
-              {/* BACK OF PAGE (Left side content, visible when flipped) */}
               <div className="absolute inset-0 backface-hidden bg-[#fdfbf7] mr-1 paper-texture border-r shadow-[inset_-10px_0_20px_rgba(0,0,0,0.05)] border-[#e6d9cc]" style={{ transform: 'rotateY(180deg)' }}>
                  {renderPhotoGrid(spread.left, false)}
               </div>
@@ -1327,25 +1266,17 @@ const PhotoAlbum = ({ nextScene }) => {
           )
         })}
 
-        {/* COVER (The topmost flipping element) */}
         <motion.div
           className="absolute inset-0 origin-left preserve-3d cursor-pointer"
           style={{ zIndex: isOpen ? 5 : 50 }}
           initial={false}
           animate={{ rotateY: isOpen ? -180 : 0 }}
           transition={{ type: "spring", stiffness: 45, damping: 15 }}
-          onClick={(e) => {
-             if (!isOpen) handleNext();
-             else handlePrev();
-          }}
+          onClick={() => isOpen ? handlePrev() : handleNext()}
         >
-          {/* FRONT COVER */}
           <div className="absolute inset-0 backface-hidden bg-[#241c17] rounded-r-lg shadow-[15px_10px_30px_rgba(0,0,0,0.7)] border-l-8 border-[#1a1410] flex flex-col items-center justify-center p-8 book-cover-texture relative overflow-hidden">
-             {/* Gold decorative border */}
              <div className="absolute inset-3 border-2 border-[#d4af37]/40 rounded-sm" />
              <div className="absolute inset-4 border border-[#d4af37]/20 rounded-sm" />
-             
-             {/* Corner ornaments */}
              <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-[#d4af37]/60" />
              <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-[#d4af37]/60" />
              <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-[#d4af37]/60" />
@@ -1356,19 +1287,14 @@ const PhotoAlbum = ({ nextScene }) => {
                  <span key={i} className="block">{word}</span>
                ))}
              </h1>
-             
              <div className="mt-12 w-12 h-[2px] bg-[#d4af37]/50 shadow-[0_0_5px_rgba(212,175,55,0.5)]" />
           </div>
-
-          {/* INSIDE FRONT COVER (Visible when cover is open) */}
           <div className="absolute inset-0 backface-hidden bg-[#362921] rounded-l-lg shadow-inner book-cover-texture border-r-8 border-[#1a1410]" style={{ transform: 'rotateY(180deg)' }}>
              <div className="absolute inset-2 bg-[#fdfbf7] opacity-10 paper-texture m-4 rounded-sm" />
           </div>
         </motion.div>
-
       </motion.div>
       
-      {/* Navigation Areas for mobile ease */}
       {isOpen && (
         <>
           <div className="absolute top-0 bottom-0 left-0 w-1/3 z-50 cursor-pointer" onClick={handlePrev} />
@@ -1376,14 +1302,14 @@ const PhotoAlbum = ({ nextScene }) => {
         </>
       )}
 
-      {/* MESSAGE MODAL OVERLAY */}
+      {/* Message Modal */}
       <AnimatePresence>
         {isMessageModalOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4"
+            className="absolute inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-5"
             onClick={() => setIsMessageModalOpen(false)}
           >
             <motion.div
@@ -1392,9 +1318,10 @@ const PhotoAlbum = ({ nextScene }) => {
               exit={{ scale: 0.9, y: 30 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               className="bg-[#fcf9f2] w-full max-w-sm rounded-[2rem] p-6 shadow-2xl border border-[#e8d5d5] relative paper-texture"
-              onClick={(e) => e.stopPropagation()} // Prevent close on modal click
+              onClick={(e) => e.stopPropagation()} 
             >
               <button 
+                aria-label="Close Modal"
                 onClick={() => setIsMessageModalOpen(false)} 
                 className="absolute top-4 right-4 text-[#a39a90] hover:text-[#b07d7d] p-3 hover:bg-[#e8d5d5]/30 rounded-full transition-colors active:scale-95"
               >
@@ -1412,11 +1339,12 @@ const PhotoAlbum = ({ nextScene }) => {
               <textarea
                 value={userMessage}
                 onChange={(e) => setUserMessage(e.target.value)}
-                placeholder="Halo sayang, makasih yaa..."
+                placeholder="Tulis pesan tambahan di sini..."
                 className="w-full h-32 p-4 rounded-2xl bg-white/70 border border-[#e8d5d5] focus:outline-none focus:ring-2 focus:ring-[#d4a3a3] resize-none mb-6 font-sans text-[#6b6259] shadow-inner text-base"
               />
               
               <button
+                aria-label="Send to WhatsApp"
                 onClick={handleSendWA}
                 className="w-full bg-[#8ba888] hover:bg-[#7a9477] text-white py-4 rounded-full font-sans font-bold tracking-wide flex items-center justify-center gap-3 shadow-[0_10px_25px_rgba(139,168,136,0.3)] transition-all hover:scale-[1.02] active:scale-95"
               >
@@ -1436,7 +1364,26 @@ const MainApp = () => {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   const nextScene = () => setCurrentScene(prev => prev + 1);
-  const prevScene = () => setCurrentScene(prev => Math.max(0, prev - 1));
+
+  // Dynamic SEO Injection
+  useEffect(() => {
+    document.title = "Untuk Kamu, Sayang ❤️";
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.name = "description";
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.content = "An interactive birthday surprise made with love.";
+
+    let favicon = document.querySelector('link[rel="icon"]');
+    if (!favicon) {
+      favicon = document.createElement('link');
+      favicon.rel = "icon";
+      document.head.appendChild(favicon);
+    }
+    favicon.href = "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❤️</text></svg>";
+  }, []);
 
   const renderScene = () => {
     switch (currentScene) {
@@ -1456,7 +1403,6 @@ const MainApp = () => {
         <AnimatePresence mode="wait">
           {renderScene()}
         </AnimatePresence>
-
         <AdminPanel isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} />
       </div>
     </div>
@@ -1474,18 +1420,9 @@ export default function App() {
           .font-sans { font-family: 'Inter', sans-serif; }
           .font-serif { font-family: 'Playfair Display', serif; }
           .font-cursive { font-family: 'Dancing Script', cursive; }
-          .handwriting-style { font-family: 'Playfair Display', serif; font-style: italic; }
-          .paper-texture {
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
-          }
-          .film-grain {
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
-          }
-          .book-cover-texture {
-            background-image: 
-              url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E"),
-              linear-gradient(to right, rgba(0,0,0,0.4) 0%, transparent 5%, transparent 95%, rgba(255,255,255,0.05) 100%);
-          }
+          .paper-texture { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E"); }
+          .film-grain { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; }
+          .book-cover-texture { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E"), linear-gradient(to right, rgba(0,0,0,0.4) 0%, transparent 5%, transparent 95%, rgba(255,255,255,0.05) 100%); }
           .perspective-2000 { perspective: 2000px; }
           .preserve-3d { transform-style: preserve-3d; }
           .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
