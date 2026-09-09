@@ -1,527 +1,1497 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Happy Birthday Okta Cantikkk!</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Settings, Lock, Unlock, Play, Pause, SkipForward, SkipBack, 
+  Camera, Flashlight, Heart, X, Image as ImageIcon, Type, Phone, Save
+} from 'lucide-react';
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, setDoc, onSnapshot, getDoc } from 'firebase/firestore';
+
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-love-app';
+
+const defaultConfig = {
+  lockscreen: {
+    bgUrl: 'https://images.unsplash.com/photo-1518599904199-0ca897819ddb?q=80&w=1080&auto=format&fit=crop',
+    dateText: 'Senin, 14 Februari',
+    overlayOpacity: 0.4,
+    blur: 4,
+    music: {
+      title: 'Beautiful In White',
+      artist: 'Westlife',
+      coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=200&auto=format&fit=crop',
+      audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/16/audio_db6591201e.mp3?filename=lofi-study-112191.mp3'
+    },
+    notifications: [
+      { app: 'Messages', title: 'Sayang 🥺', time: 'now', content: 'Coba geser ke atas deh...' },
+      { app: 'Calendar', title: 'Special Day', time: '1m ago', content: 'Today is the day!' }
+    ]
+  },
+  pin: {
+    prompt: 'Masukkan tanggal lahir',
+    correctPin: '140299',
+    errorMsg: 'Yakin tanggal lahirnya itu? 😂',
+    successMsg: 'Pinter! I love you ❤️',
+    bgUrl: 'https://images.unsplash.com/photo-1494774157365-9e04c6720e47?q=80&w=1080&auto=format&fit=crop',
+    errorStickerUrl: 'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHIzMjZ2NDhqcDJ2bDFidHcyczZocHNhbXZlZDhzcjVoeWhobWZ1ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/WwKco9a8e0qTz9n9F3/giphy.gif',
+    successStickerUrl: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExejcxc3d0b2YwdWNoOW9kcm81OTcyZHAzYm9tMnNla3JsdjIzdWltaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/l4pTdcifPGuRoGnOo/giphy.gif'
+  },
+  letter: {
+    receiverName: 'Cintaku',
+    date: '14 Februari 2024',
+    title: 'Happy Birthday, Cintaku.',
+    content: 'Selamat ulang tahun untuk orang paling spesial dalam hidupku. Terima kasih sudah menjadi alasan bahagiaku setiap hari. Semoga semua mimpimu terwujud, dan semoga kita bisa terus sama-sama bikin memori indah. I love you more than words can say. 💕\n\nScroll ke bawah ya...',
+    photoUrl: 'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=800&auto=format&fit=crop',
+    signature: 'From yours truly.'
+  },
+  game: {
+    question: 'Mana foto yang paling aku suka?',
+    photos: [
+      { url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=400&auto=format&fit=crop', msg: 'HUUUU SALAH 😭😂' },
+      { url: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=400&auto=format&fit=crop', msg: 'Bukan yang ini wleee 😛' },
+      { url: 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=400&auto=format&fit=crop', msg: 'Cantik sih, tapi salah! 🤪' },
+      { url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop', msg: 'Coba lagi sayang 🤭' },
+      { url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop', msg: 'Masih salah hehehe 🙈' },
+      { url: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=400&auto=format&fit=crop', msg: 'Tetot! Salah lagi ❌' }
+    ],
+    twistText1: 'Gak ada di sini...',
+    twistText2: 'karena yang paling aku suka kan\nKAMU ❤️'
+  },
+  album: {
+    title: 'OUR LITTLE MEMORIES',
+    photos: [
+      'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=600&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=600&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=600&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=600&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=600&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1494774157365-9e04c6720e47?q=80&w=600&auto=format&fit=crop'
+    ]
+  },
+  whatsapp: {
+    number: '6289529889634',
+    message: 'Halo sayang! Makasih yaa buat surprisenya, aku suka banget! ❤️',
+    buttonText: 'KIRIM KE WHATSAPP'
+  }
+};
+
+const ConfigContext = createContext();
+export const useConfig = () => useContext(ConfigContext);
+
+const ConfigProvider = ({ children }) => {
+  const [config, setConfig] = useState(defaultConfig);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+          setIsAdmin(true);
+        } else {
+          await signInAnonymously(auth);
+        }
+      } catch (error) {
+        console.warn("Auth warning (can be ignored if running locally):", error);
+        // Continue anyway to allow local default config to load
+      }
+    };
+    initAuth();
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      if (!u) setLoading(false); // Stop loading if auth fails completely
+    });
+    return () => unsubscribeAuth();
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const docRef = doc(db, 'artifacts', appId, 'public', 'siteConfig');
     
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'script': ['"Dancing Script"', 'cursive'],
-                        'sans': ['Poppins', 'sans-serif'],
-                    },
-                    animation: {
-                        'float': 'float 5s ease-in-out infinite',
-                        'float-fast': 'float 3s ease-in-out infinite',
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'bounce-soft': 'bounceSoft 2s ease-in-out infinite',
-                        'shake': 'shake 0.4s ease-in-out',
-                        'slide-up': 'slideUp 0.8s ease-out forwards',
-                    },
-                    keyframes: {
-                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-12px)' } },
-                        'float-fast': { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-6px)' } },
-                        bounceSoft: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-8px)' } },
-                        shake: { '0%, 100%': { transform: 'translateX(0)' }, '25%': { transform: 'translateX(-5px)' }, '50%': { transform: 'translateX(5px)' }, '75%': { transform: 'translateX(-5px)' } },
-                        slideUp: { '0%': { opacity: '0', transform: 'translateY(30px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
-                    }
-                }
+    getDoc(docRef).then(async (snap) => {
+        if (!snap.exists()) {
+            try {
+              await setDoc(docRef, defaultConfig);
+            } catch (err) {
+              console.warn("Firestore write permission denied. Menggunakan pengaturan default lokal.");
             }
         }
-    </script>
-    <style>
-        body { 
-            background: linear-gradient(135deg, #fdfbfb 0%, #fdf2f8 50%, #fef2f2 100%); 
-            overflow: hidden; /* Prevent body scroll, let sections scroll internally */
-            margin: 0; padding: 0;
-            color: #334155;
-        }
-        
-        /* Slide Section Architecture (BULLETPROOF SPA) */
-        .slide-section {
-            display: none; /* Hidden by default */
-            width: 100vw; height: 100vh;
-            overflow-y: auto; overflow-x: hidden;
-            position: absolute; top: 0; left: 0;
-            scrollbar-width: none; -ms-overflow-style: none;
-        }
-        .slide-section::-webkit-scrollbar { display: none; }
-        .slide-section.active { display: flex; } /* Shown when active */
+    }).catch(err => {
+        console.warn("Firestore read permission denied. Menggunakan pengaturan default lokal.");
+    });
 
-        /* Lockscreen Specifics */
-        #lock-screen {
-            background-image: url('1086000897657420165.jpg');
-            background-size: cover; background-position: center;
-            transition: all 0.8s ease-in-out;
-        }
+    const unsubscribeSnapshot = onSnapshot(docRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setConfig(snapshot.data());
+      }
+      setLoading(false);
+    }, (error) => {
+      console.warn("Firestore listener permission denied. Menggunakan pengaturan default lokal.");
+      setLoading(false);
+    });
 
-        /* Glass & Premium UI */
-        .glass-card { 
-            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); 
-            border: 1px solid rgba(255, 255, 255, 1); 
-            box-shadow: 0 15px 35px rgba(225, 29, 72, 0.08); 
-        }
-        .liquid-widget {
-            background: rgba(30, 30, 30, 0.55); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.15); 
-        }
-        .btn-premium {
-            background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%); color: white;
-            box-shadow: 0 8px 20px -4px rgba(225, 29, 72, 0.4); transition: transform 0.3s;
-        }
-        .btn-premium:hover { transform: translateY(-3px); }
-        .btn-outline-premium {
-            background: white; color: #e11d48; border: 2px solid #ffe4e6;
-            box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.05); transition: transform 0.3s;
-        }
-        .btn-outline-premium:hover { transform: translateY(-3px); border-color: #fecdd3; }
+    return () => unsubscribeSnapshot();
+  }, [user]);
 
-        /* Polaroid */
-        .polaroid { 
-            background: white; padding: 12px 12px 35px 12px; 
-            border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+  const updateConfig = async (newConfig) => {
+    if (!user) return;
+    try {
+      await setDoc(doc(db, 'artifacts', appId, 'public', 'siteConfig'), newConfig);
+    } catch (e) {
+      console.error("Error updating config:", e);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-pink-50 text-pink-500 font-serif">
+        <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}>
+          <Heart size={48} className="fill-current" />
+        </motion.div>
+      </div>
+    );
+  }
+
+  return (
+    <ConfigContext.Provider value={{ config, updateConfig, isAdmin }}>
+      {children}
+    </ConfigContext.Provider>
+  );
+};
+
+const AudioContext = createContext();
+export const useAudio = () => useContext(AudioContext);
+
+const AudioProvider = ({ children }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const audioRef = useRef(new Audio());
+  const { config } = useConfig();
+  const [userInteracted, setUserInteracted] = useState(false);
+
+  useEffect(() => {
+    if (audioRef.current.src !== config.lockscreen.music.audioUrl) {
+       audioRef.current.src = config.lockscreen.music.audioUrl;
+       audioRef.current.loop = true;
+       // Jika sedang play dan URL berubah, play ulang
+       if (isPlaying) {
+         audioRef.current.play().catch(e => console.warn("Audio play blocked", e));
+       }
+    }
+    
+    const updateProgress = () => {
+      if (audioRef.current.duration) {
+        setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
+      }
+    };
+    audioRef.current.addEventListener('timeupdate', updateProgress);
+    return () => audioRef.current.removeEventListener('timeupdate', updateProgress);
+  }, [config.lockscreen.music.audioUrl, isPlaying]);
+
+  const togglePlay = () => {
+    if (!userInteracted) setUserInteracted(true);
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(e => console.warn("Audio play blocked", e));
+    }
+    setIsPlaying(!isPlaying);
+  };
+
+  useEffect(() => {
+    const handleInteraction = () => {
+        if (!userInteracted) {
+            setUserInteracted(true);
         }
+    };
+    window.addEventListener('click', handleInteraction, { once: true });
+    window.addEventListener('touchstart', handleInteraction, { once: true });
+    return () => {
+        window.removeEventListener('click', handleInteraction);
+        window.removeEventListener('touchstart', handleInteraction);
+    }
+  }, [userInteracted]);
 
-        /* Fireworks */
-        .firework-particle { position: fixed; bottom: -5vh; left: 50%; z-index: 9999; pointer-events: none; }
-        @keyframes explode { 0% { transform: translate(-50%, 0) scale(0.2); opacity: 1; } 100% { transform: translate(calc(-50% + var(--tx)), var(--ty)) scale(var(--scale)); opacity: 0; } }
-    </style>
-</head>
-<body class="font-sans antialiased">
+  return (
+    <AudioContext.Provider value={{ isPlaying, togglePlay, progress }}>
+      {children}
+    </AudioContext.Provider>
+  );
+};
 
-    <audio id="bg-music" loop>
-        <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=a-soft-piano-and-strings-111322.mp3" type="audio/mpeg">
-    </audio>
+const Input = ({ label, type = "text", ...props }) => (
+  <div className="flex flex-col gap-1 w-full">
+    {label && <label className="text-sm font-medium text-gray-700">{label}</label>}
+    <input type={type} className="w-full px-3 py-2 border rounded-xl bg-white focus:ring-2 focus:ring-pink-300 outline-none transition-all" {...props} />
+  </div>
+);
 
-    <div id="lock-screen" class="fixed inset-0 z-[9999] flex flex-col">
-        <div id="lock-overlay" class="absolute inset-0 bg-black/30 transition-colors duration-500"></div>
-        <div id="lock-blur" class="absolute inset-0 bg-transparent backdrop-blur-none transition-all duration-500"></div>
-        
-        <div id="view-initial" class="relative z-10 flex flex-col h-full pt-16 pb-6 cursor-pointer" onclick="showPinView()">
-            <div class="flex flex-col items-center px-4">
-                <p id="lock-date" class="text-white text-lg font-semibold drop-shadow-md">Mon Nov 3</p>
-                <h1 id="lock-time" class="text-white text-[110px] font-bold leading-none tracking-tight mix-blend-overlay">11:19</h1>
-            </div>
-            
-            <div class="flex flex-col items-center px-5 gap-3 mt-auto mb-10 w-full max-w-sm mx-auto">
-                <div class="liquid-widget w-full rounded-3xl p-4 flex flex-col gap-3">
-                    <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 rounded-lg bg-gray-800 overflow-hidden border border-white/10">
-                            <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?ixlib=rb-4.0.3&w=200&q=80" class="w-full h-full object-cover">
-                        </div>
-                        <div class="flex-grow">
-                            <h3 class="text-white font-semibold text-[15px]">Drama (feat. Drake)</h3>
-                            <p class="text-white/70 text-[13px]">Roy Woods, Drake</p>
-                        </div>
-                    </div>
-                    <div class="flex justify-center gap-8 mt-2 text-white">
-                        <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z"/></svg>
-                        <svg class="w-9 h-9" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                        <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z"/></svg>
-                    </div>
-                </div>
+const AdminPanel = ({ isOpen, onClose }) => {
+  const { config, updateConfig } = useConfig();
+  const [localConfig, setLocalConfig] = useState(config);
+  const [activeTab, setActiveTab] = useState('lockscreen');
 
-                <div class="liquid-widget w-full rounded-2xl p-3 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-rose-400 flex items-center justify-center text-xl shadow-md border border-white/20">💌</div>
-                        <div>
-                            <h4 class="text-white font-medium text-[14px]">Message</h4>
-                            <p class="text-white/70 text-[12px]">You have a special letter</p>
-                        </div>
-                    </div>
-                    <span class="text-white/50 text-[12px]">now</span>
-                </div>
-            </div>
-            
-            <div class="w-32 h-1.5 bg-white/80 rounded-full mx-auto animate-pulse-slow shadow-lg"></div>
+  useEffect(() => { if(isOpen) setLocalConfig(config); }, [isOpen, config]);
+
+  if (!isOpen) return null;
+
+  const handleSave = () => {
+    updateConfig(localConfig);
+    onClose();
+  };
+
+  const handleChange = (section, field, value) => {
+    setLocalConfig(prev => ({
+      ...prev,
+      [section]: { ...prev[section], [field]: value }
+    }));
+  };
+
+  const tabs = [
+    { id: 'lockscreen', icon: <Lock size={16}/>, label: 'Lockscreen' },
+    { id: 'pin', icon: <Unlock size={16}/>, label: 'PIN' },
+    { id: 'letter', icon: <Type size={16}/>, label: 'Surat' },
+    { id: 'game', icon: <Heart size={16}/>, label: 'Game' },
+    { id: 'album', icon: <ImageIcon size={16}/>, label: 'Album' },
+    { id: 'whatsapp', icon: <Phone size={16}/>, label: 'WhatsApp' },
+  ];
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 50 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+    >
+      <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+        <div className="flex justify-between items-center p-4 border-b border-gray-100">
+          <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <Settings className="text-pink-500" /> Admin Settings
+          </h2>
+          <button onClick={onClose} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200"><X size={20}/></button>
         </div>
 
-        <div id="view-pin" class="absolute inset-0 z-20 flex flex-col items-center justify-center pt-8 opacity-0 pointer-events-none transition-opacity duration-500">
-            <img id="pin-cat-sticker" src="download (4).gif" class="w-28 h-28 mb-2 animate-bounce-soft" alt="Waiting Cat">
-            
-            <h2 class="text-white mb-6 text-sm tracking-widest font-semibold drop-shadow-md">MASUKKAN PIN</h2>
-            
-            <div id="pin-dots" class="flex gap-5 mb-10">
-                <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all"></div>
-                <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all"></div>
-                <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all"></div>
-                <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all"></div>
-                <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all"></div>
-                <div class="w-3.5 h-3.5 rounded-full border-2 border-white/80 transition-all"></div>
-            </div>
-
-            <div class="grid grid-cols-3 gap-x-8 gap-y-6">
-                <button onclick="pressPin('1')" class="w-[75px] h-[75px] rounded-full bg-white/10 backdrop-blur-md text-white text-3xl font-light border border-white/20">1</button>
-                <button onclick="pressPin('2')" class="w-[75px] h-[75px] rounded-full bg-white/10 backdrop-blur-md text-white text-3xl font-light border border-white/20">2</button>
-                <button onclick="pressPin('3')" class="w-[75px] h-[75px] rounded-full bg-white/10 backdrop-blur-md text-white text-3xl font-light border border-white/20">3</button>
-                <button onclick="pressPin('4')" class="w-[75px] h-[75px] rounded-full bg-white/10 backdrop-blur-md text-white text-3xl font-light border border-white/20">4</button>
-                <button onclick="pressPin('5')" class="w-[75px] h-[75px] rounded-full bg-white/10 backdrop-blur-md text-white text-3xl font-light border border-white/20">5</button>
-                <button onclick="pressPin('6')" class="w-[75px] h-[75px] rounded-full bg-white/10 backdrop-blur-md text-white text-3xl font-light border border-white/20">6</button>
-                <button onclick="pressPin('7')" class="w-[75px] h-[75px] rounded-full bg-white/10 backdrop-blur-md text-white text-3xl font-light border border-white/20">7</button>
-                <button onclick="pressPin('8')" class="w-[75px] h-[75px] rounded-full bg-white/10 backdrop-blur-md text-white text-3xl font-light border border-white/20">8</button>
-                <button onclick="pressPin('9')" class="w-[75px] h-[75px] rounded-full bg-white/10 backdrop-blur-md text-white text-3xl font-light border border-white/20">9</button>
-                <div></div>
-                <button onclick="pressPin('0')" class="w-[75px] h-[75px] rounded-full bg-white/10 backdrop-blur-md text-white text-3xl font-light border border-white/20">0</button>
-                <button onclick="pressPin('del')" class="w-[75px] h-[75px] rounded-full text-white text-lg font-medium">Hapus</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="app-container" class="relative w-full h-full">
-
-        <div id="slide1" class="slide-section active flex-col items-center justify-center relative">
-            
-            <img src="download (3).gif" class="absolute bottom-[-10px] right-2 w-32 h-32 opacity-80 pointer-events-none" alt="Peeking Cat">
-
-            <div id="intro-wrap" class="w-full flex flex-col items-center text-center px-4 transition-all duration-700">
-                <h1 class="font-script text-5xl md:text-6xl text-[#e11d48] mb-3 drop-shadow-sm font-bold animate-slide-up">Hai, Cantik...</h1>
-                <p class="text-slate-500 mb-12 text-[16px] font-medium tracking-wide animate-slide-up" style="animation-delay: 0.1s;">Ada sesuatu yang spesial buat kamu hari ini.</p>
-                
-                <button onclick="bukaKeajaiban()" class="btn-premium px-10 py-3.5 rounded-full font-semibold relative animate-slide-up" style="animation-delay: 0.2s;">
-                    Buka Suratnya
-                </button>
-
-                <div id="envelope-wrap" class="relative w-64 h-44 mt-16 animate-float-fast transition-all duration-700">
-                    <img src="Mochi Mochi Peach Cat & Friend 2.gif" class="absolute -top-20 -left-8 w-24 h-24 z-50 drop-shadow-lg" alt="Shy Cat">
-                    
-                    <div class="absolute inset-0 bg-rose-300 rounded-lg shadow-xl"></div>
-                    <div class="absolute top-2 left-3 right-3 bottom-2 bg-white rounded-md opacity-80"></div>
-                    <div class="absolute inset-0 bg-rose-400 rounded-lg" style="clip-path: polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%);"></div>
-                    <div class="absolute inset-0 flex justify-center items-center">
-                        <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg animate-pulse-slow text-xl">❤️</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="fullscreen-letter" class="slide-section flex-col items-center bg-white p-4 py-12 md:py-20 z-[50]">
-            <div class="w-full max-w-4xl mx-auto flex flex-col items-center text-center relative h-full">
-                
-                <div class="absolute top-0 right-4 md:right-16 w-24 h-24 md:w-32 md:h-32 rounded-2xl border-[6px] border-rose-50 overflow-hidden shadow-xl transform rotate-[12deg] animate-float z-10">
-                    <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?ixlib=rb-4.0.3" class="w-full h-full object-cover">
-                </div>
-
-                <div class="text-4xl md:text-5xl mb-4 animate-float mt-12">🌸</div>
-                <h2 class="font-script text-5xl md:text-7xl text-[#e11d48] mb-4 font-bold drop-shadow-sm">Selamat Ulang Tahun!</h2>
-                <h3 class="text-2xl md:text-4xl font-semibold text-rose-400 mb-10 tracking-wide">[Nama Panggilan] ❤️</h3>
-                
-                <div class="text-[16px] md:text-xl text-slate-600 leading-relaxed font-medium space-y-6 px-4 md:px-10">
-                    <p>Di hari yang spesial ini, aku cuma mau bilang terima kasih. Terima kasih udah jadi versi terbaik dari diri kamu sendiri.</p>
-                    <p>Kehadiran kamu itu kayak warna pink di langit sore, selalu bikin tenang dan bahagia. Kamu pantes dapetin semua hal manis di dunia ini.</p>
-                </div>
-                
-                <div class="mt-auto pt-16 flex flex-col items-center justify-center cursor-pointer group" onclick="goToSlide('slide2')">
-                    <div class="text-7xl md:text-8xl animate-pulse-slow drop-shadow-2xl transition-transform transform group-hover:scale-110">💖</div>
-                    <p class="font-sans font-bold uppercase tracking-[0.25em] text-rose-400 text-[11px] md:text-sm mt-5">Klik Love Untuk Melanjutkan</p>
-                </div>
-            </div>
-        </div>
-
-        <div id="slide2" class="slide-section flex-col items-center justify-center p-4">
-            <div class="glass-card max-w-lg w-full mx-auto rounded-[2.5rem] p-8 md:p-12 text-center relative">
-                <div class="bg-white/70 p-8 rounded-3xl border border-white/80 shadow-sm relative z-10">
-                    
-                    <img src="download (1).gif" class="w-24 h-24 md:w-32 md:h-32 mx-auto mb-4 animate-float drop-shadow-md" alt="Kiss Cat">
-                    
-                    <h2 class="font-script text-5xl md:text-6xl text-[#e11d48] mb-6 font-bold">Kesayanganku,</h2>
-                    
-                    <div class="text-slate-600 leading-relaxed mb-10 space-y-5 text-[16px] font-medium">
-                        <p>Senyummu adalah alasan kenapa hari ini begitu cerah dan spesial.</p>
-                        <p>Klik tombol di bawah untuk melihat memori manis kita! ❤️</p>
-                    </div>
-                    
-                    <button onclick="goToSlide('slide3')" class="btn-outline-premium px-8 py-3.5 rounded-full font-bold tracking-wide">
-                        Galeri Foto 📸
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div id="slide3" class="slide-section flex-col items-center w-full mx-auto px-4 pt-16 pb-32">
-            
-            <div class="flex justify-center items-center gap-4 mb-16">
-                <img src="Love Couple Sticker - Love Couple Hug - Temukan & Bagikan GIF.jpg" class="w-16 h-16 rounded-full mix-blend-multiply animate-float" alt="Hug 1">
-                <h2 class="font-script text-5xl md:text-6xl text-[#e11d48] text-center font-bold">Momen Cantikmu</h2>
-                <img src="download (2).jpg" class="w-16 h-16 rounded-full mix-blend-multiply animate-float-fast" alt="Hug 2">
-            </div>
-            
-            <div class="relative w-full max-w-lg mx-auto flex flex-col items-center gap-14">
-                <div class="absolute left-1/2 top-0 bottom-0 w-[2px] border-l-[3px] border-dashed border-rose-300 transform -translate-x-1/2 z-0 opacity-60"></div>
-
-                <div class="polaroid w-56 md:w-72 animate-swing z-10">
-                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-3xl drop-shadow-md">🎀</div>
-                    <div class="bg-rose-50 w-full h-52 md:h-64 mb-3 rounded-xl overflow-hidden border border-white">
-                        <img src="https://images.unsplash.com/photo-1518599904199-0ca897819ddb?ixlib=rb-4.0.3" class="w-full h-full object-cover">
-                    </div>
-                    <p class="font-script text-2xl text-center text-slate-700 font-bold">Cantik banget!</p>
-                </div>
-                
-                <div class="polaroid w-56 md:w-72 animate-swing z-10" style="animation-direction: alternate-reverse;">
-                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-3xl drop-shadow-md">📌</div>
-                    <div class="bg-rose-50 w-full h-52 md:h-64 mb-3 rounded-xl overflow-hidden border border-white">
-                        <img src="https://images.unsplash.com/photo-1520627725997-6a2d9894e138?ixlib=rb-4.0.3" class="w-full h-full object-cover">
-                    </div>
-                    <p class="font-script text-2xl text-center text-slate-700 font-bold">Senyum favoritku ✨</p>
-                </div>
-
-                <div class="polaroid w-56 md:w-72 animate-swing z-10">
-                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-3xl drop-shadow-md">🌸</div>
-                    <div class="bg-rose-50 w-full h-52 md:h-64 mb-3 rounded-xl overflow-hidden border border-white">
-                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3" class="w-full h-full object-cover">
-                    </div>
-                    <p class="font-script text-2xl text-center text-slate-700 font-bold">Lucu parah! 🥰</p>
-                </div>
-
-                <div class="polaroid w-56 md:w-72 animate-swing z-10" style="animation-direction: alternate-reverse;">
-                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-3xl drop-shadow-md">💖</div>
-                    <div class="bg-rose-50 w-full h-52 md:h-64 mb-3 rounded-xl overflow-hidden border border-white">
-                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3" class="w-full h-full object-cover">
-                    </div>
-                    <p class="font-script text-2xl text-center text-slate-700 font-bold">Kesayanganku 💕</p>
-                </div>
-
-                <div class="polaroid w-56 md:w-72 animate-swing z-10">
-                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-3xl drop-shadow-md">🎀</div>
-                    <div class="bg-rose-50 w-full h-52 md:h-64 mb-3 rounded-xl overflow-hidden border border-white">
-                        <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-4.0.3" class="w-full h-full object-cover">
-                    </div>
-                    <p class="font-script text-2xl text-center text-slate-700 font-bold">Perfect 💯</p>
-                </div>
-
-                <div class="polaroid w-56 md:w-72 animate-swing z-10" style="animation-direction: alternate-reverse;">
-                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-3xl drop-shadow-md">📌</div>
-                    <div class="bg-rose-50 w-full h-52 md:h-64 mb-3 rounded-xl overflow-hidden border border-white">
-                        <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?ixlib=rb-4.0.3" class="w-full h-full object-cover">
-                    </div>
-                    <p class="font-script text-2xl text-center text-slate-700 font-bold">Memori manis 📸</p>
-                </div>
-
-                <div class="polaroid w-56 md:w-72 animate-swing z-10">
-                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-3xl drop-shadow-md">🌸</div>
-                    <div class="bg-rose-50 w-full h-52 md:h-64 mb-3 rounded-xl overflow-hidden border border-white">
-                        <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?ixlib=rb-4.0.3" class="w-full h-full object-cover">
-                    </div>
-                    <p class="font-script text-2xl text-center text-slate-700 font-bold">My sunshine ☀️</p>
-                </div>
-
-                <div class="polaroid w-56 md:w-72 animate-swing z-10" style="animation-direction: alternate-reverse;">
-                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 text-3xl drop-shadow-md">💖</div>
-                    <div class="bg-rose-50 w-full h-52 md:h-64 mb-3 rounded-xl overflow-hidden border border-white">
-                        <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3" class="w-full h-full object-cover">
-                    </div>
-                    <p class="font-script text-2xl text-center text-slate-700 font-bold">Love u! 🥰</p>
-                </div>
-            </div>
-            
-            <button onclick="goToSlide('slide4')" class="btn-premium block mx-auto mt-16 px-10 py-4 rounded-full font-bold tracking-wide z-10">
-                Terakhir nih... 🎂
+        <div className="flex overflow-x-auto p-2 bg-gray-50 hide-scrollbar">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                activeTab === tab.id ? 'bg-pink-500 text-white shadow-md' : 'text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              {tab.icon} {tab.label}
             </button>
+          ))}
         </div>
 
-        <div id="slide4" class="slide-section flex-col items-center justify-center p-4">
-            
-            <div id="slide4-content" class="w-full max-w-lg flex flex-col items-center text-center transition-all duration-700">
-                <img src="download.gif" class="w-28 h-28 mb-4 animate-bounce-soft drop-shadow-lg" alt="Sparkle Cat">
-                
-                <div class="glass-card rounded-[2.5rem] p-10 mb-10 w-full relative overflow-hidden">
-                    <h2 class="font-script text-5xl md:text-6xl text-[#e11d48] mb-6 font-bold">Make a Wish! ✨</h2>
-                    <p class="text-slate-600 text-[16px] leading-relaxed font-medium">Semoga di umur yang baru ini, kamu semakin bersinar, semakin bahagia, dan semua yang kamu semogakan bisa terwujud satu per satu.</p>
+        <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50">
+          {activeTab === 'lockscreen' && (
+            <div className="space-y-4">
+              <Input label="Background Image URL" value={localConfig.lockscreen.bgUrl} onChange={(e) => handleChange('lockscreen', 'bgUrl', e.target.value)} />
+              <Input label="Teks Tanggal (Misal: Senin, 14 Feb)" value={localConfig.lockscreen.dateText} onChange={(e) => handleChange('lockscreen', 'dateText', e.target.value)} />
+              <div className="grid grid-cols-2 gap-4">
+                <Input label="Overlay Opacity (0 - 1)" type="number" step="0.1" value={localConfig.lockscreen.overlayOpacity} onChange={(e) => handleChange('lockscreen', 'overlayOpacity', parseFloat(e.target.value))} />
+                <Input label="Background Blur (px)" type="number" value={localConfig.lockscreen.blur} onChange={(e) => handleChange('lockscreen', 'blur', parseInt(e.target.value))} />
+              </div>
+              <h3 className="font-semibold text-gray-700 mt-6 border-b pb-2">Music Player</h3>
+              <Input label="Music Title" value={localConfig.lockscreen.music.title} onChange={(e) => setLocalConfig(p => ({...p, lockscreen: {...p.lockscreen, music: {...p.lockscreen.music, title: e.target.value}}}))} />
+              <Input label="Artist" value={localConfig.lockscreen.music.artist} onChange={(e) => setLocalConfig(p => ({...p, lockscreen: {...p.lockscreen, music: {...p.lockscreen.music, artist: e.target.value}}}))} />
+              <Input label="Cover Image URL" value={localConfig.lockscreen.music.coverUrl} onChange={(e) => setLocalConfig(p => ({...p, lockscreen: {...p.lockscreen, music: {...p.lockscreen.music, coverUrl: e.target.value}}}))} />
+              <Input label="Audio File URL (.mp3)" value={localConfig.lockscreen.music.audioUrl} onChange={(e) => setLocalConfig(p => ({...p, lockscreen: {...p.lockscreen, music: {...p.lockscreen.music, audioUrl: e.target.value}}}))} />
+            </div>
+          )}
+
+          {activeTab === 'pin' && (
+            <div className="space-y-4">
+              <Input label="Background Image URL" value={localConfig.pin.bgUrl} onChange={(e) => handleChange('pin', 'bgUrl', e.target.value)} />
+              <Input label="Pertanyaan PIN" value={localConfig.pin.prompt} onChange={(e) => handleChange('pin', 'prompt', e.target.value)} />
+              <Input label="PIN (Angka bebas)" value={localConfig.pin.correctPin} onChange={(e) => handleChange('pin', 'correctPin', e.target.value)} />
+              <Input label="Pesan Error" value={localConfig.pin.errorMsg} onChange={(e) => handleChange('pin', 'errorMsg', e.target.value)} />
+              <Input label="URL Stiker Error (GIF/PNG)" value={localConfig.pin.errorStickerUrl} onChange={(e) => handleChange('pin', 'errorStickerUrl', e.target.value)} />
+              <Input label="Pesan Sukses" value={localConfig.pin.successMsg} onChange={(e) => handleChange('pin', 'successMsg', e.target.value)} />
+              <Input label="URL Stiker Sukses (GIF/PNG)" value={localConfig.pin.successStickerUrl} onChange={(e) => handleChange('pin', 'successStickerUrl', e.target.value)} />
+            </div>
+          )}
+
+          {activeTab === 'letter' && (
+            <div className="space-y-4">
+               <Input label="Photo URL" value={localConfig.letter.photoUrl} onChange={(e) => handleChange('letter', 'photoUrl', e.target.value)} />
+              <Input label="Nama Pasangan (Penerima)" value={localConfig.letter.receiverName} onChange={(e) => handleChange('letter', 'receiverName', e.target.value)} />
+              <Input label="Tanggal Surat" value={localConfig.letter.date} onChange={(e) => handleChange('letter', 'date', e.target.value)} />
+              <Input label="Judul Surat" value={localConfig.letter.title} onChange={(e) => handleChange('letter', 'title', e.target.value)} />
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">Isi Surat</label>
+                <textarea rows={6} className="w-full px-3 py-2 border rounded-xl bg-white focus:ring-2 focus:ring-pink-300 outline-none" value={localConfig.letter.content} onChange={(e) => handleChange('letter', 'content', e.target.value)} />
+              </div>
+              <Input label="Tanda Tangan" value={localConfig.letter.signature} onChange={(e) => handleChange('letter', 'signature', e.target.value)} />
+            </div>
+          )}
+
+          {activeTab === 'game' && (
+             <div className="space-y-4">
+               <Input label="Pertanyaan Game" value={localConfig.game.question} onChange={(e) => handleChange('game', 'question', e.target.value)} />
+               <Input label="Teks Twist 1" value={localConfig.game.twistText1} onChange={(e) => handleChange('game', 'twistText1', e.target.value)} />
+               <Input label="Teks Twist 2" value={localConfig.game.twistText2} onChange={(e) => handleChange('game', 'twistText2', e.target.value)} />
+               <h3 className="font-semibold text-gray-700 mt-6 border-b pb-2">Foto Game (User harus klik semua)</h3>
+               {localConfig.game.photos.map((photo, idx) => (
+                 <div key={idx} className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 space-y-3">
+                    <span className="font-medium text-sm text-gray-500">Foto {idx + 1}</span>
+                    <Input label="URL Foto" value={photo.url} onChange={(e) => {
+                       const newPhotos = [...localConfig.game.photos];
+                       newPhotos[idx].url = e.target.value;
+                       handleChange('game', 'photos', newPhotos);
+                    }} />
+                    <Input label="Pesan saat diklik (Salah)" value={photo.msg} onChange={(e) => {
+                        const newPhotos = [...localConfig.game.photos];
+                        newPhotos[idx].msg = e.target.value;
+                        handleChange('game', 'photos', newPhotos);
+                    }} />
+                 </div>
+               ))}
+             </div>
+          )}
+
+          {activeTab === 'album' && (
+            <div className="space-y-4">
+              <Input label="Judul Album" value={localConfig.album.title} onChange={(e) => handleChange('album', 'title', e.target.value)} />
+               <div className="flex justify-between items-center mt-6 border-b pb-2">
+                 <h3 className="font-semibold text-gray-700">Daftar Foto Album</h3>
+                 <button 
+                   onClick={() => {
+                     const newPhotos = [...localConfig.album.photos, ''];
+                     handleChange('album', 'photos', newPhotos);
+                   }}
+                   className="text-xs bg-pink-100 text-pink-600 px-3 py-1.5 rounded-full font-medium hover:bg-pink-200 transition-colors"
+                 >
+                   + Tambah Foto
+                 </button>
+               </div>
+               
+               <div className="space-y-3">
+                 {localConfig.album.photos.map((url, idx) => (
+                   <div key={idx} className="flex gap-2 items-center bg-white p-2 rounded-xl shadow-sm border border-gray-100">
+                      <span className="w-6 text-sm text-gray-400 font-medium text-center">{idx+1}</span>
+                      <Input 
+                        className="flex-1" 
+                        placeholder="Masukkan URL foto..."
+                        value={url} 
+                        onChange={(e) => {
+                          const newPhotos = [...localConfig.album.photos];
+                          newPhotos[idx] = e.target.value;
+                          handleChange('album', 'photos', newPhotos);
+                      }} />
+                      <button 
+                        onClick={() => {
+                          const newPhotos = localConfig.album.photos.filter((_, i) => i !== idx);
+                          handleChange('album', 'photos', newPhotos);
+                        }}
+                        className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Hapus Foto"
+                      >
+                        <X size={18} />
+                      </button>
+                   </div>
+                 ))}
+               </div>
+               <p className="text-xs text-gray-500 mt-2 italic">* Saran: Gunakan perbandingan foto potret (4:5 atau 3:4).</p>
+            </div>
+          )}
+
+          {activeTab === 'whatsapp' && (
+             <div className="space-y-4">
+               <Input label="Nomor WhatsApp (Contoh: 62812...)" value={localConfig.whatsapp.number} onChange={(e) => handleChange('whatsapp', 'number', e.target.value)} />
+               <div className="flex flex-col gap-1">
+                <label className="text-sm font-medium text-gray-700">Pesan Default</label>
+                <textarea rows={3} className="w-full px-3 py-2 border rounded-xl bg-white focus:ring-2 focus:ring-pink-300 outline-none" value={localConfig.whatsapp.message} onChange={(e) => handleChange('whatsapp', 'message', e.target.value)} />
+              </div>
+               <Input label="Teks Tombol" value={localConfig.whatsapp.buttonText} onChange={(e) => handleChange('whatsapp', 'buttonText', e.target.value)} />
+             </div>
+          )}
+        </div>
+
+        <div className="p-4 border-t border-gray-100 flex justify-end">
+          <button onClick={handleSave} className="flex items-center gap-2 bg-pink-500 hover:bg-pink-600 text-white px-6 py-3 rounded-full font-semibold transition-transform active:scale-95 shadow-lg shadow-pink-200">
+            <Save size={18} /> Simpan Perubahan
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const Lockscreen = ({ nextScene, openAdmin }) => {
+  const { config } = useConfig();
+  const { isPlaying, togglePlay, progress } = useAudio();
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTime = (date) => {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+  };
+
+  const handleDragEnd = (event, info) => {
+    if (info.offset.y < -100) {
+      nextScene();
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, y: -100 }}
+      className="relative w-full h-full overflow-hidden flex flex-col bg-black"
+      style={{
+        backgroundImage: `url(${config.lockscreen.bgUrl})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      <div 
+        className="absolute inset-0 transition-all duration-500"
+        style={{ 
+          backgroundColor: `rgba(0,0,0,${config.lockscreen.overlayOpacity})`,
+          backdropFilter: `blur(${config.lockscreen.blur}px)`,
+          WebkitBackdropFilter: `blur(${config.lockscreen.blur}px)`
+        }} 
+      />
+
+      <button 
+        onClick={openAdmin}
+        className="absolute top-4 left-4 z-50 p-2 bg-black/20 rounded-full text-white/50 hover:text-white transition-colors"
+      >
+        <Settings size={20} />
+      </button>
+
+      <motion.div 
+        drag="y"
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={0.2}
+        onDragEnd={handleDragEnd}
+        className="relative z-10 w-full h-full flex flex-col items-center pt-16 pb-8 cursor-grab active:cursor-grabbing"
+      >
+        <div className="flex flex-col items-center mb-10 w-full select-none pointer-events-none">
+          <span className="text-white/90 text-xl font-medium tracking-wide mb-1 drop-shadow-md">
+            {config.lockscreen.dateText}
+          </span>
+          <span className="text-white text-7xl sm:text-8xl font-semibold tracking-tighter drop-shadow-lg font-sans">
+            {formatTime(time)}
+          </span>
+        </div>
+
+        <div className="w-full px-4 mb-8 space-y-3 flex-1 overflow-y-auto hide-scrollbar select-none pointer-events-none">
+          {config.lockscreen.notifications.map((notif, idx) => (
+            <motion.div 
+              key={idx} 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.15 }}
+              className="bg-white/10 backdrop-blur-md rounded-3xl p-4 flex gap-4 shadow-lg border border-white/20"
+            >
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center shrink-0 shadow-inner">
+                <Heart size={24} className="text-white fill-current" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-baseline mb-1">
+                  <span className="text-white/90 text-sm font-semibold tracking-wide">{notif.app}</span>
+                  <span className="text-white/60 text-xs">{notif.time}</span>
                 </div>
-                
-                <button id="magic-btn" onclick="createMagic()" class="btn-outline-premium px-8 py-4 rounded-full font-bold tracking-wide text-[16px] flex items-center justify-center gap-3 transition-all duration-500">
-                    <span id="magic-text">Klik untuk keajaiban</span> <span id="magic-icon" class="animate-spin-slow">✨</span>
-                </button>
-            </div>
-
-            <div id="final-message" class="absolute inset-0 z-[200] hidden flex-col items-center justify-center opacity-0 transition-opacity duration-1000">
-                <img src="Duke's Wife [Taerin-Eunkook] [End] ✔.gif" class="w-48 h-48 mb-6 animate-float drop-shadow-2xl" alt="Big Heart Cat">
-
-                <h1 class="font-sans font-bold uppercase tracking-[0.25em] text-4xl md:text-5xl lg:text-6xl text-[#e11d48] drop-shadow-lg mb-4 text-center px-4 leading-relaxed">
-                    LOVE YOU<br>OKTA CANTIKKK
-                </h1>
-            </div>
-
+                <p className="text-white font-semibold text-base truncate">{notif.title}</p>
+                <p className="text-white/80 text-sm line-clamp-2 mt-0.5 leading-snug">{notif.content}</p>
+              </div>
+            </motion.div>
+          ))}
         </div>
+
+        <div className="w-full px-4 mt-auto mb-8 pointer-events-auto">
+          <div className="bg-white/10 backdrop-blur-xl rounded-[2rem] p-5 shadow-2xl border border-white/20">
+            <div className="flex items-center gap-4 mb-5">
+              <img src={config.lockscreen.music.coverUrl} alt="Album Art" className="w-16 h-16 rounded-xl object-cover shadow-md" />
+              <div className="flex-1 min-w-0">
+                <h3 className="text-white font-bold text-lg truncate">{config.lockscreen.music.title}</h3>
+                <p className="text-white/70 text-sm truncate">{config.lockscreen.music.artist}</p>
+              </div>
+            </div>
+            
+            <div className="w-full h-1.5 bg-white/20 rounded-full mb-5 overflow-hidden">
+              <div className="h-full bg-white rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+            </div>
+
+            <div className="flex justify-center items-center gap-10">
+              <button className="text-white/80 hover:text-white transition-colors active:scale-95">
+                <SkipBack size={32} fill="currentColor" />
+              </button>
+              <button onClick={togglePlay} className="text-white hover:scale-110 transition-transform active:scale-95">
+                {isPlaying ? <Pause size={44} fill="currentColor" /> : <Play size={44} fill="currentColor" />}
+              </button>
+              <button className="text-white/80 hover:text-white transition-colors active:scale-95">
+                <SkipForward size={32} fill="currentColor" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-between w-full px-10 mb-6 pointer-events-auto">
+          <button className="w-14 h-14 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white border border-white/10 shadow-lg hover:bg-white/20 transition-colors active:scale-90">
+            <Flashlight size={26} />
+          </button>
+          <button className="w-14 h-14 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center text-white border border-white/10 shadow-lg hover:bg-white/20 transition-colors active:scale-90">
+            <Camera size={26} />
+          </button>
+        </div>
+
+        <motion.div 
+          animate={{ y: [0, -10, 0] }}
+          transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+          className="text-white flex flex-col items-center pb-2 pointer-events-auto"
+          onClick={nextScene}
+        >
+          <span className="text-sm font-medium tracking-widest uppercase opacity-90 drop-shadow-md cursor-pointer hover:opacity-100">
+            Geser ke atas untuk membuka
+          </span>
+        </motion.div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+const PinScreen = ({ nextScene }) => {
+  const { config } = useConfig();
+  const [pin, setPin] = useState('');
+  const [status, setStatus] = useState('typing'); // 'typing', 'error', 'success'
+  
+  // Calculate dynamic target length based on config
+  const targetLength = config.pin.correctPin ? config.pin.correctPin.toString().length : 6;
+
+  const handleKeyPress = (num) => {
+    if (pin.length < targetLength && status === 'typing') {
+      const newPin = pin + num;
+      setPin(newPin);
+      
+      if (newPin.length === targetLength) {
+        verifyPin(newPin);
+      }
+    }
+  };
+
+  const handleDelete = () => {
+    if (pin.length > 0 && status === 'typing') {
+      setPin(pin.slice(0, -1));
+    }
+  };
+
+  const resetPin = () => {
+    setPin('');
+    setStatus('typing');
+  };
+
+  const verifyPin = (currentPin) => {
+    if (currentPin === config.pin.correctPin.toString()) {
+      setStatus('success');
+      // Success vibration (if supported)
+      if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate([100, 50, 100]);
+      }
+      setTimeout(() => {
+        nextScene();
+      }, 3500); // Wait for hearts and sticker to show
+    } else {
+      setStatus('error');
+      // Error vibration (if supported)
+      if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+         window.navigator.vibrate([50, 50, 50]);
+      }
+    }
+  };
+
+  const dots = Array.from({ length: targetLength }, (_, i) => i);
+
+  // Pre-generate heart particles for success animation
+  const heartParticles = Array.from({ length: 15 }, (_, i) => ({
+    id: i,
+    left: `${Math.random() * 90 + 5}%`,
+    animationDuration: `${Math.random() * 2 + 1.5}s`,
+    delay: `${Math.random() * 0.5}s`,
+    scale: Math.random() * 0.5 + 0.8,
+  }));
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, scale: 1.1 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, filter: 'blur(10px)' }}
+      className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden"
+    >
+      <div 
+        className="absolute inset-0 bg-cover bg-center transition-all duration-700"
+        style={{ 
+          backgroundImage: `url(${config.pin.bgUrl})`, 
+          filter: `blur(${status === 'typing' ? '20px' : '30px'}) brightness(0.6)` 
+        }}
+      />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-xl" />
+
+      {/* Success Floating Hearts */}
+      <AnimatePresence>
+        {status === 'success' && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-20 pointer-events-none overflow-hidden"
+          >
+            {heartParticles.map(particle => (
+              <motion.div
+                key={particle.id}
+                className="absolute bottom-0"
+                style={{ left: particle.left }}
+                initial={{ y: '100vh', scale: 0, opacity: 1 }}
+                animate={{ y: '-20vh', scale: [particle.scale, particle.scale * 1.5, particle.scale], opacity: [0, 1, 0] }}
+                transition={{ 
+                  duration: parseFloat(particle.animationDuration), 
+                  delay: parseFloat(particle.delay),
+                  ease: "easeOut"
+                }}
+              >
+                <Heart size={32} className="fill-pink-500 text-pink-500" />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.div 
+        animate={status === 'error' ? { x: [-15, 15, -12, 12, -8, 8, -4, 4, 0] } : {}}
+        transition={{ duration: 0.5 }}
+        className="relative z-30 flex flex-col items-center w-full max-w-sm px-8"
+      >
+        <AnimatePresence mode="wait">
+          {status === 'typing' ? (
+            <motion.div 
+              key="typing"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="flex flex-col items-center w-full"
+            >
+              <Lock className="text-white/80 mb-6" size={40} />
+              
+              <h2 className="text-white text-xl font-medium mb-8 text-center tracking-wide">
+                {config.pin.prompt}
+              </h2>
+
+              <div className="flex gap-4 mb-16 justify-center flex-wrap max-w-xs">
+                {dots.map(i => (
+                  <div 
+                    key={i} 
+                    className={`w-3.5 h-3.5 rounded-full border-[1.5px] transition-all duration-300 ${
+                      pin.length > i 
+                        ? 'bg-white border-white scale-110 shadow-[0_0_10px_rgba(255,255,255,0.5)]'
+                        : 'border-white/50 bg-transparent'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <div className="grid grid-cols-3 gap-x-6 sm:gap-x-8 gap-y-6">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+                  <button
+                    key={num}
+                    onClick={() => handleKeyPress(num.toString())}
+                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/5 flex items-center justify-center text-white text-3xl font-light hover:bg-white/20 active:bg-white/30 transition-colors backdrop-blur-sm border border-white/10"
+                  >
+                    {num}
+                  </button>
+                ))}
+                <div />
+                <button
+                  onClick={() => handleKeyPress('0')}
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/5 flex items-center justify-center text-white text-3xl font-light hover:bg-white/20 active:bg-white/30 transition-colors backdrop-blur-sm border border-white/10"
+                >
+                  0
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center text-white/80 hover:bg-white/10 active:bg-white/20 transition-colors"
+                >
+                  <span className="text-sm font-medium tracking-wider">HAPUS</span>
+                </button>
+              </div>
+            </motion.div>
+          ) : status === 'error' ? (
+            <motion.div 
+              key="error"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="flex flex-col items-center bg-black/50 p-8 rounded-3xl backdrop-blur-md border border-red-500/30 shadow-2xl w-full"
+            >
+              {config.pin.errorStickerUrl ? (
+                 <img src={config.pin.errorStickerUrl} alt="Salah" className="w-40 h-40 object-contain mb-6 drop-shadow-lg" />
+              ) : (
+                 <div className="text-7xl mb-6 drop-shadow-md">🙅‍♀️</div>
+              )}
+              <h2 className="text-red-400 text-xl md:text-2xl font-bold mb-8 text-center">
+                {config.pin.errorMsg}
+              </h2>
+              <button 
+                onClick={resetPin}
+                className="w-full bg-white/10 hover:bg-white/20 text-white px-8 py-3.5 rounded-full font-semibold tracking-wide border border-white/20 transition-all active:scale-95"
+              >
+                COBA LAGI
+              </button>
+            </motion.div>
+          ) : (
+            <motion.div 
+              key="success"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="flex flex-col items-center bg-white/10 p-8 rounded-3xl backdrop-blur-md border border-white/20 shadow-2xl w-full"
+            >
+              {config.pin.successStickerUrl ? (
+                 <img src={config.pin.successStickerUrl} alt="Sukses!" className="w-40 h-40 object-contain mb-6 drop-shadow-lg" />
+              ) : (
+                 <div className="text-7xl mb-6 drop-shadow-md">🥰</div>
+              )}
+              <h2 className="text-white text-xl md:text-2xl font-bold text-center drop-shadow-md">
+                {config.pin.successMsg}
+              </h2>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+const LoveLetter = ({ nextScene }) => {
+  const { config } = useConfig();
+  const [isOpening, setIsOpening] = useState(false);
+  const [isOpened, setIsOpened] = useState(false);
+
+  const handleOpen = () => {
+    setIsOpening(true);
+    // Sequence animasi: amplop buka (0.5s) -> kertas naik (1s) -> transisi ke fullscreen (0.5s)
+    setTimeout(() => {
+      setIsOpened(true);
+    }, 2000);
+  };
+
+  // Generate random hearts for background
+  const bgHearts = Array.from({ length: 15 }, (_, i) => ({
+    id: i,
+    left: `${Math.random() * 100}%`,
+    top: `${Math.random() * 100}%`,
+    animationDuration: `${Math.random() * 3 + 3}s`,
+    animationDelay: `${Math.random() * 2}s`,
+  }));
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
+      className="w-full h-full bg-[#fcf9f2] flex flex-col relative overflow-hidden paper-texture"
+    >
+      {/* Aesthetic Background Elements */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {bgHearts.map(heart => (
+          <motion.div
+            key={heart.id}
+            className="absolute text-[#e8d5d5]/60"
+            style={{ left: heart.left, top: heart.top }}
+            animate={{ 
+              y: [-20, 20, -20],
+              x: [-10, 10, -10],
+              rotate: [0, 10, -10, 0],
+              scale: [1, 1.1, 1]
+            }}
+            transition={{
+              duration: parseFloat(heart.animationDuration),
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: parseFloat(heart.animationDelay)
+            }}
+          >
+            <Heart size={Math.random() * 20 + 10} fill="currentColor" />
+          </motion.div>
+        ))}
+        {/* Subtle glowing orbs */}
+        <div className="absolute top-[-10%] left-[-10%] w-64 h-64 bg-[#e8d5d5]/30 rounded-full mix-blend-multiply filter blur-[60px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-72 h-72 bg-[#f3e6d8]/40 rounded-full mix-blend-multiply filter blur-[60px]" />
+      </div>
+      
+      {!isOpened ? (
+        <div className="flex-1 flex flex-col items-center justify-center p-6 relative z-10">
+          
+          <motion.p 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: isOpening ? 0 : 1, y: isOpening ? -30 : 0 }}
+            className="text-[#c48b8b] font-serif italic text-lg mb-12 tracking-wide text-center drop-shadow-sm"
+          >
+            Klik love untuk membuka surat ❤️
+          </motion.p>
+
+          <div className="relative w-80 h-56 mt-8 perspective-[1000px]">
+            {/* ENVELOPE BACK */}
+            <div className="absolute inset-0 bg-[#dcbaba] rounded-lg shadow-inner overflow-hidden border border-[#c4a1a1]">
+              {/* Envelope Pattern lines inside */}
+              <div className="absolute inset-0 opacity-10 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,#000_10px,#000_20px)]" />
+            </div>
+
+            {/* THE LETTER (HIDING INSIDE) */}
+            <motion.div 
+              initial={{ y: 10 }}
+              animate={isOpening ? { y: -180, scale: 1.05 } : { y: 10 }}
+              transition={{ duration: 1.2, delay: 0.4, ease: [0.25, 1, 0.5, 1] }}
+              className="absolute bottom-2 left-3 right-3 h-48 bg-[#fdfbf7] rounded-md shadow-md border border-stone-200 flex flex-col items-center pt-6 px-4 z-10 paper-texture overflow-hidden"
+            >
+              <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-sm mb-2">
+                <img src={config.letter.photoUrl} className="w-full h-full object-cover" alt="Couple" />
+              </div>
+              <p className="font-cursive text-[#b07d7d] text-xl font-bold">Untuk {config.letter.receiverName}</p>
+              <p className="font-serif text-[10px] text-gray-400 mt-2 text-center line-clamp-3 leading-relaxed">
+                {config.letter.content}
+              </p>
+            </motion.div>
+
+            {/* ENVELOPE FRONT (Left, Right, Bottom flaps simulated with clip-path) */}
+            <div className="absolute inset-0 z-20 overflow-hidden rounded-lg pointer-events-none drop-shadow-2xl">
+               {/* Left flap */}
+               <div className="absolute inset-0 bg-[#ebdcdc] origin-left border-r border-white/20" style={{ clipPath: 'polygon(0 0, 50% 50%, 0 100%)' }} />
+               {/* Right flap */}
+               <div className="absolute inset-0 bg-[#e8d8d8] origin-right border-l border-white/20" style={{ clipPath: 'polygon(100% 0, 50% 50%, 100% 100%)' }} />
+               {/* Bottom flap */}
+               <div className="absolute inset-0 bg-[#e3d1d1] origin-bottom border-t border-white/30" style={{ clipPath: 'polygon(0 100%, 50% 50%, 100% 100%)' }} />
+            </div>
+
+            {/* ENVELOPE TOP FLAP */}
+            <motion.div 
+              initial={{ rotateX: 0 }}
+              animate={isOpening ? { rotateX: 180, zIndex: 0 } : { rotateX: 0, zIndex: 30 }}
+              transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+              className="absolute top-0 left-0 right-0 h-32 bg-[#e6d5d5] origin-top border-b border-white/40 shadow-[0_10px_20px_rgba(0,0,0,0.1)] rounded-t-lg"
+              style={{ clipPath: 'polygon(0 0, 100% 0, 50% 100%)', backfaceVisibility: 'hidden' }}
+            />
+            {/* Inside of top flap (visible when opened) */}
+            <motion.div 
+              initial={{ rotateX: -180, opacity: 0 }}
+              animate={isOpening ? { rotateX: 0, opacity: 1, zIndex: 5 } : { rotateX: -180, opacity: 0, zIndex: 0 }}
+              transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+              className="absolute top-0 left-0 right-0 h-32 bg-[#d9c5c5] origin-top rounded-t-lg"
+              style={{ clipPath: 'polygon(0 0, 100% 0, 50% 100%)', backfaceVisibility: 'hidden' }}
+            />
+
+            {/* WAX SEAL / HEART BUTTON */}
+            <AnimatePresence>
+              {!isOpening && (
+                <motion.button 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleOpen}
+                  className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 w-16 h-16 bg-gradient-to-br from-[#c48b8b] to-[#b07d7d] rounded-full shadow-[0_4px_20px_rgba(176,125,125,0.4)] flex items-center justify-center border-2 border-[#e8d5d5] cursor-pointer"
+                >
+                  <motion.div
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                  >
+                    <Heart className="text-white fill-current opacity-90" size={26} />
+                  </motion.div>
+                </motion.button>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      ) : (
+        <motion.div 
+          initial={{ y: '100%', opacity: 0, scale: 0.95, rotate: -1 }}
+          animate={{ y: 0, opacity: 1, scale: 1, rotate: 0 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 80 }}
+          className="flex-1 overflow-y-auto hide-scrollbar p-5 md:p-8 relative z-20 flex flex-col items-center pb-32"
+        >
+          {/* THE OPENED LETTER */}
+          <div className="w-full max-w-md bg-[#fdfbf7] rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.08)] p-6 md:p-10 relative mt-4 mb-8 paper-texture border border-[#ece4d9]">
+            {/* Paper Edge effect */}
+            <div className="absolute top-0 bottom-0 left-2 w-px bg-[#e8d5d5]/50" />
+            <div className="absolute top-0 bottom-0 left-3 w-px bg-[#e8d5d5]/50" />
+
+            <div className="flex justify-between items-start mb-10 mt-2">
+              <h2 className="font-cursive text-3xl text-[#b07d7d] font-bold ml-4">
+                Untuk {config.letter.receiverName} ❤️
+              </h2>
+              <span className="font-cursive text-[#a39a90] text-lg rotate-2">{config.letter.date}</span>
+            </div>
+
+            {/* Polaroid Photo */}
+            <div className="w-full px-2 mb-10">
+              <div className="bg-[#fcf9f2] p-3 pb-10 rounded-sm shadow-[0_10px_30px_rgba(0,0,0,0.05)] transform rotate-2 mx-auto max-w-[280px] relative border border-[#ece4d9]">
+                {/* Washi Tape */}
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-6 bg-[#f3e6d8]/60 backdrop-blur-sm -rotate-3 border border-[#e6d9cc]/40 shadow-sm mix-blend-multiply" />
+                <img 
+                  src={config.letter.photoUrl} 
+                  alt="Us" 
+                  className="w-full aspect-square object-cover rounded-sm filter sepia-[0.15] contrast-[1.05]"
+                />
+                <p className="absolute bottom-3 left-0 right-0 text-center font-cursive text-[#8c8279] text-xl">
+                  {config.letter.title}
+                </p>
+              </div>
+            </div>
+            
+            {/* Letter Body */}
+            <div className="relative z-10 px-4">
+              <p className="text-[#6b6259] leading-[2.2] whitespace-pre-wrap font-serif text-base tracking-wide text-justify">
+                {config.letter.content}
+              </p>
+            </div>
+
+            {/* Signature */}
+            <div className="mt-14 text-right pr-4 relative">
+              {/* Decorative Flower/Leaf */}
+              <div className="absolute -bottom-4 left-4 opacity-40 -rotate-12">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d97777" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 22c4-4 4-10 0-14-4 4-4 10 0 14z"/><path d="M12 8V2"/><path d="M12 8c2.5-1.5 5.5-1.5 8 0"/><path d="M12 8c-2.5-1.5-5.5-1.5-8 0"/>
+                </svg>
+              </div>
+              <p className="font-serif italic text-[#a39a90] text-sm mb-2">With all my love,</p>
+              <p className="font-cursive text-[#c48b8b] text-4xl transform -rotate-2">{config.letter.signature}</p>
+            </div>
+          </div>
+          
+          {/* Action Button */}
+          <motion.button
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 1 }}
+            whileHover={{ scale: 1.02, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={nextScene}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-xl text-[#b07d7d] border border-[#e8d5d5] px-8 py-3.5 rounded-full font-serif font-bold shadow-[0_8px_30px_rgba(176,125,125,0.2)] flex items-center gap-3 z-30 transition-all hover:bg-[#fcf9f2]"
+          >
+            LANJUTKAN <span className="text-xl font-sans font-light">→</span>
+          </motion.button>
+        </motion.div>
+      )}
+    </motion.div>
+  );
+};
+
+const GameScreen = ({ nextScene }) => {
+  const { config } = useConfig();
+  const [clickedPhotos, setClickedPhotos] = useState(new Set());
+  const [showTwist, setShowTwist] = useState(false);
+  const [wigglingIdx, setWigglingIdx] = useState(null);
+
+  const scatterStyles = [
+    { rotate: -4, y: 10, x: -5 },
+    { rotate: 3, y: -5, x: 5 },
+    { rotate: -2, y: 5, x: 2 },
+    { rotate: 5, y: -10, x: -4 },
+    { rotate: -3, y: 15, x: 6 },
+    { rotate: 2, y: 0, x: -6 },
+  ];
+
+  const handleSelect = (idx) => {
+    if (showTwist) return;
+    setWigglingIdx(idx);
+    setTimeout(() => setWigglingIdx(null), 500);
+
+    const newSet = new Set(clickedPhotos);
+    newSet.add(idx);
+    setClickedPhotos(newSet);
+
+    if (newSet.size === config.game.photos.length) {
+      setTimeout(() => setShowTwist(true), 1000);
+    }
+  };
+
+  useEffect(() => {
+    if (showTwist) {
+      const timer = setTimeout(() => nextScene(), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showTwist, nextScene]);
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, scale: 1.05, filter: 'blur(10px)' }}
+      className="w-full h-full bg-[#fdfbf7] flex flex-col relative overflow-hidden paper-texture"
+    >
+      <div className="absolute inset-0 pointer-events-none opacity-40">
+         <div className="absolute top-10 left-10 w-40 h-40 bg-[#f3e6d8] rounded-full mix-blend-multiply filter blur-3xl"></div>
+         <div className="absolute bottom-20 right-10 w-48 h-48 bg-[#e8d5d5] rounded-full mix-blend-multiply filter blur-3xl"></div>
+      </div>
+
+      <div className="text-center pt-12 pb-6 px-6 z-10">
+        <h2 className="text-2xl font-bold text-[#b07d7d] mb-2 font-serif drop-shadow-sm">{config.game.question}</h2>
+        <p className="text-[#a39a90] font-medium text-sm font-sans tracking-wide">Coba tebak dan klik semua fotonya!</p>
+      </div>
+
+      <div className="flex-1 overflow-y-auto hide-scrollbar px-4 pb-12 z-10">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-8 max-w-lg mx-auto pb-8">
+          {config.game.photos.map((photo, idx) => {
+            const isClicked = clickedPhotos.has(idx);
+            const isWiggling = wigglingIdx === idx;
+            const style = scatterStyles[idx % scatterStyles.length];
+
+            return (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: isWiggling ? 1.03 : 1, 
+                  rotate: isWiggling ? [0, -5, 5, -5, 5, 0] : style.rotate,
+                  y: style.y,
+                  x: style.x
+                }}
+                transition={{ duration: isWiggling ? 0.4 : 0.6, type: "spring", delay: isWiggling ? 0 : idx * 0.1 }}
+                onClick={() => handleSelect(idx)}
+                className="relative bg-white p-2.5 pb-8 rounded-sm shadow-[0_8px_20px_rgba(0,0,0,0.06)] cursor-pointer transform-gpu hover:shadow-[0_15px_30px_rgba(0,0,0,0.1)] border border-[#f3e6d8] transition-shadow duration-300"
+              >
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-5 bg-[#f3e6d8]/60 backdrop-blur-sm -rotate-2 border border-[#e6d9cc]/40 shadow-sm z-20 mix-blend-multiply"></div>
+                
+                <div className="relative w-full aspect-[4/5] overflow-hidden rounded-sm">
+                  <img src={photo.url} alt={`Option ${idx}`} className="w-full h-full object-cover filter contrast-[1.02] sepia-[0.05]" />
+                  
+                  <AnimatePresence>
+                    {isClicked && (
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="absolute inset-0 flex flex-col items-center justify-center bg-[#fdfbf7]/70 backdrop-blur-[4px] p-3 text-center border border-[#e8d5d5]/50"
+                      >
+                        <motion.span 
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1, rotate: [0, -10, 10, 0] }}
+                          transition={{ type: "spring", delay: 0.1 }}
+                          className="text-4xl mb-2 drop-shadow-sm opacity-90"
+                        >
+                          🤍
+                        </motion.span>
+                        <p className="text-[#b07d7d] font-bold text-sm drop-shadow-sm font-sans tracking-wide leading-tight">
+                          {photo.msg}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {showTwist && (
+          <motion.div 
+             initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+             animate={{ opacity: 1, backdropFilter: "blur(16px)" }}
+             exit={{ opacity: 0 }}
+             className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#fcf9f2]/70 p-6 text-center overflow-hidden"
+          >
+             {Array.from({ length: 30 }).map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute"
+                  initial={{ x: "50%", y: "50%", opacity: 1, scale: 0 }}
+                  animate={{ 
+                    x: `${Math.random() * 200 - 100}vw`,
+                    y: `${Math.random() * 200 - 100}vh`,
+                    opacity: [1, 1, 0],
+                    scale: Math.random() * 1.5 + 0.5,
+                    rotate: Math.random() * 360
+                  }}
+                  transition={{ duration: Math.random() * 2.5 + 3, ease: "easeOut" }}
+                >
+                  <Heart size={32} className="text-[#d4a3a3] fill-[#e8d5d5] opacity-80" />
+                </motion.div>
+             ))}
+
+             <motion.h2 
+               initial={{ y: 30, opacity: 0 }}
+               animate={{ y: 0, opacity: 1 }}
+               transition={{ delay: 0.5, type: "spring", stiffness: 80 }}
+               className="text-2xl md:text-3xl font-serif text-[#8c8279] mb-6 drop-shadow-sm"
+             >
+               {config.game.twistText1}
+             </motion.h2>
+
+             <motion.h1 
+               initial={{ scale: 0.8, opacity: 0 }}
+               animate={{ scale: 1, opacity: 1 }}
+               transition={{ delay: 1.5, type: "spring", bounce: 0.6 }}
+               className="text-4xl md:text-5xl font-bold font-cursive text-[#c48b8b] leading-tight drop-shadow-md whitespace-pre-wrap"
+             >
+               {config.game.twistText2}
+             </motion.h1>
+             
+             <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 3 }}
+                className="absolute bottom-10 text-[#c48b8b] text-sm font-sans tracking-widest uppercase opacity-80 animate-pulse"
+             >
+                Memuat kenangan...
+             </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
+
+const PhotoAlbum = ({ nextScene }) => {
+  const { config } = useConfig();
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0); // 0 is cover, 1 is spread 1, etc.
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+  const [userMessage, setUserMessage] = useState('');
+  const [touchStartX, setTouchStartX] = useState(null);
+  
+  // Calculate spreads. 2 photos per page = 4 photos per spread.
+  const photosPerPage = 2;
+  const photos = config.album.photos;
+  
+  // Create an array of pages (each page has up to 2 photos)
+  const pages = [];
+  for (let i = 0; i < photos.length; i += photosPerPage) {
+    pages.push(photos.slice(i, i + photosPerPage));
+  }
+  
+  // A spread is 2 pages (Left and Right).
+  // Spread 0: Left = Page 0, Right = Page 1
+  // Spread 1: Left = Page 2, Right = Page 3
+  const spreads = [];
+  for (let i = 0; i < pages.length; i += 2) {
+    spreads.push({
+      left: pages[i] || [],
+      right: pages[i + 1] || []
+    });
+  }
+
+  // Total flips required = Cover (1) + Spreads (spreads.length)
+  const totalFlips = spreads.length;
+
+  const handleNext = () => {
+    if (!isOpen) {
+      setIsOpen(true);
+      return;
+    }
+    if (currentPage <= totalFlips) {
+      setCurrentPage(prev => prev + 1);
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentPage > 0) {
+      setCurrentPage(prev => prev - 1);
+      if (currentPage === 1) setIsOpen(false);
+    }
+  };
+
+  const handleTouchStart = (e) => setTouchStartX(e.touches[0].clientX);
+  
+  const handleTouchEnd = (e) => {
+    if (touchStartX === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+    if (diff > 50) handleNext(); // Geser ke kiri (Next)
+    else if (diff < -50) handlePrev(); // Geser ke kanan (Prev)
+    setTouchStartX(null);
+  };
+
+  const handleSendWA = () => {
+    const baseText = config.whatsapp.message;
+    const finalMessage = userMessage.trim() ? `${baseText}\n\n${userMessage}` : baseText;
+    const text = encodeURIComponent(finalMessage);
+    const num = config.whatsapp.number.replace(/\D/g, '');
+    window.open(`https://wa.me/${num}?text=${text}`, '_blank');
+  };
+
+  // Helper to render photos loosely
+  const renderPhotoGrid = (pagePhotos, isRight) => (
+    <div className="grid grid-cols-1 gap-4 p-4 h-full content-center">
+      {pagePhotos.map((photo, idx) => (
+        <div 
+          key={idx} 
+          className="bg-white p-2 pb-6 rounded-sm shadow-[0_5px_15px_rgba(0,0,0,0.1)] border border-[#e6d9cc] relative mx-auto"
+          style={{ 
+            transform: `rotate(${isRight ? (idx % 2 === 0 ? 3 : -2) : (idx % 2 === 0 ? -3 : 2)}deg) scale(0.95)`,
+            width: '90%',
+            maxWidth: '200px'
+          }}
+        >
+          {/* Washi Tape */}
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-10 h-3 bg-[#f3e6d8]/80 backdrop-blur-sm -rotate-2 mix-blend-multiply border border-[#e6d9cc]/30" />
+          <img src={photo} alt="Memory" className="w-full aspect-[4/5] object-cover filter contrast-[1.05] sepia-[0.1]" />
+        </div>
+      ))}
     </div>
+  );
 
-    <script>
-        // ==========================================
-        // 1. LOGIKA LOCK SCREEN & AUDIO
-        // ==========================================
-        let currentPin = '';
-        const correctPin = '121212'; 
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, filter: 'blur(10px)' }}
+      className="w-full h-full bg-[#12100e] flex flex-col items-center justify-center relative overflow-hidden"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Dark vintage ambient background */}
+      <div className="absolute inset-0 opacity-30 pointer-events-none film-grain" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150vw] h-[150vw] bg-[radial-gradient(circle,rgba(60,50,45,0.8)_0%,rgba(18,16,14,1)_70%)]" />
+      
+      <div className="text-white/40 font-serif text-sm absolute top-10 tracking-widest uppercase">
+        {isOpen ? "Tap kanan untuk lanjut, kiri untuk kembali" : "Tap buku untuk membuka"}
+      </div>
 
-        function showPinView() {
-            // Mainkan musik saat pertama klik
-            const audio = document.getElementById('bg-music');
-            if(audio.paused) audio.play().catch(e => console.log(e));
+      {/* The 3D Stage */}
+      <motion.div 
+        className="relative w-[90%] max-w-[320px] aspect-[3/4] perspective-2000"
+        animate={{ 
+          scale: isOpen ? 1 : 0.9,
+          x: isOpen ? '25%' : '0%', // Shift right when open to center the spread
+        }}
+        transition={{ type: "spring", stiffness: 45, damping: 15 }}
+      >
+        
+        {/* RIGHT SIDE (Back Cover & Final Page laying static at the bottom) */}
+        <div className="absolute inset-0 bg-[#241c17] rounded-r-lg shadow-2xl border-l-4 border-[#120e0b] shadow-[20px_20px_40px_rgba(0,0,0,0.8)] preserve-3d book-cover-texture">
+           {/* Final Page Content (Visible when all pages turn left) */}
+           <div className="absolute inset-0 bg-[#fdfbf7] ml-2 paper-texture border-l shadow-inner flex flex-col items-center justify-center p-6 text-center">
+              <h2 className="font-cursive text-3xl text-[#b07d7d] mb-4">Our Journey<br/>Continues...</h2>
+              <p className="font-serif text-[#8c8279] text-sm mb-10 leading-relaxed">
+                Setiap foto adalah cerita, dan cerita kita belum selesai.
+              </p>
+              <button 
+                onClick={(e) => { e.stopPropagation(); setIsMessageModalOpen(true); }}
+                className="bg-gradient-to-r from-[#d4a3a3] to-[#c48b8b] text-white px-6 py-3 rounded-full font-sans font-semibold tracking-wide shadow-lg shadow-[#d4a3a3]/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+              >
+                KIRIM PESAN 💌
+              </button>
+           </div>
+        </div>
 
-            document.getElementById('view-initial').style.opacity = '0';
-            document.getElementById('view-initial').style.pointerEvents = 'none';
-            
-            document.getElementById('lock-overlay').classList.add('bg-black/50');
-            document.getElementById('lock-blur').classList.add('backdrop-blur-xl');
-            
-            const pinView = document.getElementById('view-pin');
-            pinView.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-12');
-        }
+        {/* PAGES SPREADS (Dynamic generation) */}
+        {spreads.map((spread, index) => {
+          const pageIndex = index + 1; // spread 0 is pageIndex 1 (since cover is 0)
+          const isFlipped = currentPage > pageIndex;
+          
+          return (
+            <motion.div
+              key={`spread-${index}`}
+              className="absolute inset-0 origin-left preserve-3d cursor-pointer"
+              style={{ zIndex: isFlipped ? pageIndex + 10 : 40 - pageIndex }}
+              initial={false}
+              animate={{ rotateY: isFlipped ? -180 : 0 }}
+              transition={{ type: "spring", stiffness: 40, damping: 14 }}
+              onClick={(e) => {
+                // If clicking right half of the screen go next, left half go prev
+                const rect = e.currentTarget.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                if (clickX > rect.width / 2) handleNext();
+                else handlePrev();
+              }}
+            >
+              {/* FRONT OF PAGE (Right side content) */}
+              <div className="absolute inset-0 backface-hidden bg-[#fdfbf7] ml-1 paper-texture border-l shadow-[inset_10px_0_20px_rgba(0,0,0,0.05)] border-[#e6d9cc]">
+                 {renderPhotoGrid(spread.right, true)}
+              </div>
 
-        function updateTime() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            
-            document.getElementById('lock-time').innerText = `${hours}:${minutes}`;
-            document.getElementById('lock-date').innerText = `${days[now.getDay()]} ${months[now.getMonth()]} ${now.getDate()}`;
-        }
-        setInterval(updateTime, 1000); updateTime();
+              {/* BACK OF PAGE (Left side content, visible when flipped) */}
+              <div className="absolute inset-0 backface-hidden bg-[#fdfbf7] mr-1 paper-texture border-r shadow-[inset_-10px_0_20px_rgba(0,0,0,0.05)] border-[#e6d9cc]" style={{ transform: 'rotateY(180deg)' }}>
+                 {renderPhotoGrid(spread.left, false)}
+              </div>
+            </motion.div>
+          )
+        })}
 
-        function pressPin(num) {
-            if (num === 'del') {
-                currentPin = currentPin.slice(0, -1);
-            } else if (currentPin.length < 6) {
-                currentPin += num;
-            }
-            updateDots();
-            if (currentPin.length === 6) setTimeout(checkPin, 100);
-        }
+        {/* COVER (The topmost flipping element) */}
+        <motion.div
+          className="absolute inset-0 origin-left preserve-3d cursor-pointer"
+          style={{ zIndex: isOpen ? 5 : 50 }}
+          initial={false}
+          animate={{ rotateY: isOpen ? -180 : 0 }}
+          transition={{ type: "spring", stiffness: 45, damping: 15 }}
+          onClick={(e) => {
+             if (!isOpen) handleNext();
+             else handlePrev();
+          }}
+        >
+          {/* FRONT COVER */}
+          <div className="absolute inset-0 backface-hidden bg-[#241c17] rounded-r-lg shadow-[15px_10px_30px_rgba(0,0,0,0.7)] border-l-8 border-[#1a1410] flex flex-col items-center justify-center p-8 book-cover-texture relative overflow-hidden">
+             {/* Gold decorative border */}
+             <div className="absolute inset-3 border-2 border-[#d4af37]/40 rounded-sm" />
+             <div className="absolute inset-4 border border-[#d4af37]/20 rounded-sm" />
+             
+             {/* Corner ornaments */}
+             <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-[#d4af37]/60" />
+             <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-[#d4af37]/60" />
+             <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-[#d4af37]/60" />
+             <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-[#d4af37]/60" />
 
-        function updateDots() {
-            const dots = document.querySelectorAll('#pin-dots div');
-            dots.forEach((dot, index) => {
-                if(index < currentPin.length) {
-                    dot.classList.add('bg-white'); dot.classList.remove('border-2', 'border-white/80');
-                } else {
-                    dot.classList.remove('bg-white'); dot.classList.add('border-2', 'border-white/80');
-                }
-            });
-        }
+             <h1 className="text-[#d4af37] font-serif font-bold text-3xl text-center leading-snug tracking-wider" style={{ textShadow: '1px 2px 2px rgba(0,0,0,0.8), 0 0 10px rgba(212,175,55,0.2)' }}>
+               {config.album.title.split(' ').map((word, i) => (
+                 <span key={i} className="block">{word}</span>
+               ))}
+             </h1>
+             
+             <div className="mt-12 w-12 h-[2px] bg-[#d4af37]/50 shadow-[0_0_5px_rgba(212,175,55,0.5)]" />
+          </div>
 
-        function checkPin() {
-            const sticker = document.getElementById('pin-cat-sticker');
+          {/* INSIDE FRONT COVER (Visible when cover is open) */}
+          <div className="absolute inset-0 backface-hidden bg-[#362921] rounded-l-lg shadow-inner book-cover-texture border-r-8 border-[#1a1410]" style={{ transform: 'rotateY(180deg)' }}>
+             <div className="absolute inset-2 bg-[#fdfbf7] opacity-10 paper-texture m-4 rounded-sm" />
+          </div>
+        </motion.div>
 
-            if (currentPin === correctPin) {
-                // PIN BENAR
-                const lockScreen = document.getElementById('lock-screen');
-                lockScreen.style.opacity = '0';
-                lockScreen.style.pointerEvents = 'none';
-                
-                setTimeout(() => {
-                    lockScreen.style.display = 'none';
-                }, 1000);
-            } else {
-                // PIN SALAH -> Kucing Marah
-                const originalSrc = sticker.src;
-                // Nama file asli sesuai permintaan
-                sticker.src = "Cute Gif GIF – Cute Gif Angry Cat – discover and share GIFs.jpg";
-                
-                const dotsContainer = document.getElementById('pin-dots');
-                dotsContainer.classList.add('animate-shake');
-                
-                setTimeout(() => {
-                    dotsContainer.classList.remove('animate-shake');
-                    currentPin = ''; updateDots();
-                    sticker.src = originalSrc; 
-                }, 800);
-            }
-        }
+      </motion.div>
+      
+      {/* Navigation Areas for mobile ease */}
+      {isOpen && (
+        <>
+          <div className="absolute top-0 bottom-0 left-0 w-1/3 z-50 cursor-pointer" onClick={handlePrev} />
+          <div className="absolute top-0 bottom-0 right-0 w-1/3 z-50 cursor-pointer" onClick={handleNext} />
+        </>
+      )}
 
-        // ==========================================
-        // 2. LOGIKA NAVIGASI SPA ANTI-CRASH
-        // ==========================================
-        function bukaKeajaiban() {
-            // Sembunyikan Intro & Amplop
-            document.getElementById('intro-wrap').classList.add('opacity-0', 'scale-90');
-            document.getElementById('envelope-wrap').classList.add('opacity-0', 'scale-50');
-            
-            setTimeout(() => {
-                goToSlide('fullscreen-letter');
-            }, 600);
-        }
+      {/* MESSAGE MODAL OVERLAY */}
+      <AnimatePresence>
+        {isMessageModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4"
+            onClick={() => setIsMessageModalOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 30 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 30 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="bg-[#fcf9f2] w-full max-w-sm rounded-[2rem] p-6 shadow-2xl border border-[#e8d5d5] relative paper-texture"
+              onClick={(e) => e.stopPropagation()} // Prevent close on modal click
+            >
+              <button 
+                onClick={() => setIsMessageModalOpen(false)} 
+                className="absolute top-4 right-4 text-[#a39a90] hover:text-[#b07d7d] p-3 hover:bg-[#e8d5d5]/30 rounded-full transition-colors active:scale-95"
+              >
+                <X size={20} />
+              </button>
+              
+              <div className="flex flex-col items-center mt-2 mb-6">
+                 <div className="w-12 h-12 bg-[#e8d5d5]/50 rounded-full flex items-center justify-center mb-3">
+                   <Heart size={24} className="text-[#c48b8b] fill-[#c48b8b]" />
+                 </div>
+                 <h3 className="text-2xl font-cursive font-bold text-[#b07d7d] text-center">Kirim Pesan 💌</h3>
+                 <p className="text-[#8c8279] text-sm text-center font-sans mt-1">Tulis pesan manismu untukku...</p>
+              </div>
 
-        function goToSlide(targetId) {
-            // Matikan semua slide
-            document.querySelectorAll('.slide-section').forEach(slide => {
-                slide.classList.remove('active');
-                slide.classList.remove('animate-slide-up');
-            });
-            
-            // Nyalakan slide yang dituju dengan animasi masuk
-            const target = document.getElementById(targetId);
-            target.classList.add('active', 'animate-slide-up');
-            target.scrollTop = 0; 
-        }
+              <textarea
+                value={userMessage}
+                onChange={(e) => setUserMessage(e.target.value)}
+                placeholder="Halo sayang, makasih yaa..."
+                className="w-full h-32 p-4 rounded-2xl bg-white/70 border border-[#e8d5d5] focus:outline-none focus:ring-2 focus:ring-[#d4a3a3] resize-none mb-6 font-sans text-[#6b6259] shadow-inner text-base"
+              />
+              
+              <button
+                onClick={handleSendWA}
+                className="w-full bg-[#8ba888] hover:bg-[#7a9477] text-white py-4 rounded-full font-sans font-bold tracking-wide flex items-center justify-center gap-3 shadow-[0_10px_25px_rgba(139,168,136,0.3)] transition-all hover:scale-[1.02] active:scale-95"
+              >
+                <Phone size={20} fill="currentColor" />
+                {config.whatsapp.buttonText}
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
 
-        // ==========================================
-        // 3. LOGIKA KEMBANG API 1X LEDAKAN (HALUS)
-        // ==========================================
-        function createMagic() {
-            const btn = document.getElementById('magic-btn');
-            const content = document.getElementById('slide4-content');
-            const finalMsg = document.getElementById('final-message');
-            
-            // Animasi Tombol Mengecil (Dynamic Island Effect)
-            btn.innerHTML = '';
-            btn.style.width = '64px';
-            btn.style.borderRadius = '50px';
-            btn.style.backgroundColor = 'black';
-            btn.style.borderColor = 'black';
-            btn.style.pointerEvents = 'none';
-            
-            setTimeout(() => {
-                btn.style.opacity = '0';
-                content.classList.add('scale-50', 'opacity-0');
-            }, 500);
-            
-            setTimeout(() => {
-                content.style.display = 'none';
-                finalMsg.style.display = 'flex';
-                
-                setTimeout(() => {
-                    finalMsg.classList.remove('opacity-0');
-                    fireworkMagic();
-                }, 50);
-            }, 1000);
-        }
+const MainApp = () => {
+  const [currentScene, setCurrentScene] = useState(0);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
 
-        function fireworkParticle() {
-            const heart = document.createElement('div');
-            heart.classList.add('firework-particle');
-            
-            // HANYA EMOJI BUNGA DAN CINTA
-            const emojis = ['💖', '💕', '💗', '🌸', '✨'];
-            heart.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
-            
-            heart.style.left = (Math.random() * 100) + 'vw';
-            heart.style.fontSize = (Math.random() * 1.5 + 1) + 'rem';
+  const nextScene = () => setCurrentScene(prev => prev + 1);
+  const prevScene = () => setCurrentScene(prev => Math.max(0, prev - 1));
 
-            const tx = (Math.random() * 40 - 20) + 'vw';
-            const ty = -(Math.random() * 80 + 20) + 'vh';
-            const scale = (Math.random() * 1.5 + 1);
+  const renderScene = () => {
+    switch (currentScene) {
+      case 0: return <Lockscreen key="lock" nextScene={nextScene} openAdmin={() => setIsAdminOpen(true)} />;
+      case 1: return <PinScreen key="pin" nextScene={nextScene} />;
+      case 2: return <LoveLetter key="letter" nextScene={nextScene} />;
+      case 3: return <GameScreen key="game" nextScene={nextScene} />;
+      case 4: return <PhotoAlbum key="album" nextScene={nextScene} />;
+      default: return null;
+    }
+  };
 
-            heart.style.setProperty('--tx', tx);
-            heart.style.setProperty('--ty', ty);
-            heart.style.setProperty('--scale', scale);
+  return (
+    <div className="w-full h-screen h-[100dvh] bg-[#f8f5f0] flex justify-center overflow-hidden font-sans">
+      <div className="w-full h-full max-w-md relative bg-[#fdfbf7] overflow-hidden shadow-2xl">
+        <div className="film-grain"></div>
+        <AnimatePresence mode="wait">
+          {renderScene()}
+        </AnimatePresence>
 
-            const duration = Math.random() * 1.5 + 1.5;
-            heart.style.animation = `explode ${duration}s cubic-bezier(0.25, 1, 0.5, 1) forwards`;
+        <AdminPanel isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} />
+      </div>
+    </div>
+  );
+};
 
-            document.body.appendChild(heart);
-            setTimeout(() => heart.remove(), duration * 1000);
-        }
-
-        function fireworkMagic() {
-            // Meledak serentak 1 KALI saja (total 50 partikel)
-            for(let i=0; i<50; i++) {
-                setTimeout(fireworkParticle, i * 15);
-            }
-        }
-    </script>
-</body>
-</html>
+export default function App() {
+  return (
+    <ConfigProvider>
+      <AudioProvider>
+        <style dangerouslySetInnerHTML={{__html: `
+          .hide-scrollbar::-webkit-scrollbar { display: none; }
+          .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+          @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
+          .font-sans { font-family: 'Inter', sans-serif; }
+          .font-serif { font-family: 'Playfair Display', serif; }
+          .font-cursive { font-family: 'Dancing Script', cursive; }
+          .handwriting-style { font-family: 'Playfair Display', serif; font-style: italic; }
+          .paper-texture {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
+          }
+          .film-grain {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+          }
+          .book-cover-texture {
+            background-image: 
+              url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E"),
+              linear-gradient(to right, rgba(0,0,0,0.4) 0%, transparent 5%, transparent 95%, rgba(255,255,255,0.05) 100%);
+          }
+          .perspective-2000 { perspective: 2000px; }
+          .preserve-3d { transform-style: preserve-3d; }
+          .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+        `}} />
+        <MainApp />
+      </AudioProvider>
+    </ConfigProvider>
+  );
+}
