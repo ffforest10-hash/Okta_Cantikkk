@@ -95,7 +95,7 @@
         <div class="film-grain absolute inset-0 z-[100]"></div>
 
         <!-- LOADING SCENE -->
-        <div id="scene-loading" class="scene active flex items-center justify-center bg-[#f8f5f0] text-[#c48b8b] z-[60]">
+        <div id="scene-loading" class="scene active flex items-center justify-center bg-[#f8f5f0] text-[#c48b8b] z-[60]" style="display: flex;">
             <div class="animate-heartbeat">
                 <i data-lucide="heart" class="w-12 h-12 fill-current opacity-80"></i>
             </div>
@@ -103,7 +103,7 @@
         </div>
 
         <!-- SCENE 1: LOCKSCREEN -->
-        <div id="scene-lockscreen" class="scene bg-black flex flex-col z-50">
+        <div id="scene-lockscreen" class="scene bg-black flex-col z-50" style="display: none;">
             <img id="ls-bg" src="" alt="Background" class="absolute inset-0 w-full h-full object-cover">
             <div id="ls-overlay" class="absolute inset-0 transition-all duration-500"></div>
 
@@ -164,7 +164,7 @@
         </div>
 
         <!-- SCENE 2: PIN SCREEN -->
-        <div id="scene-pin" class="scene flex flex-col items-center justify-center overflow-hidden z-40">
+        <div id="scene-pin" class="scene flex-col items-center justify-center overflow-hidden z-40" style="display: none;">
             <div id="pin-bg" class="absolute inset-0 bg-cover bg-center transition-all duration-700 blur-[25px] brightness-50"></div>
             <div class="absolute inset-0 bg-black/20 backdrop-blur-md"></div>
             
@@ -216,7 +216,7 @@
         </div>
 
         <!-- SCENE 3: LOVE LETTER -->
-        <div id="scene-letter" class="scene bg-[#fdfbf7] flex-col overflow-hidden paper-texture z-30">
+        <div id="scene-letter" class="scene bg-[#fdfbf7] flex-col overflow-hidden paper-texture z-30" style="display: none;">
             <!-- Background Hearts -->
             <div id="letter-bg-hearts" class="absolute inset-0 pointer-events-none overflow-hidden opacity-60">
                 <div class="absolute top-[-10%] left-[-10%] w-64 h-64 bg-[#e8d5d5]/40 rounded-full mix-blend-multiply filter blur-[60px]"></div>
@@ -296,7 +296,7 @@
         </div>
 
         <!-- SCENE 4: GAME SCREEN -->
-        <div id="scene-game" class="scene bg-[#fdfbf7] flex-col overflow-hidden paper-texture z-20">
+        <div id="scene-game" class="scene bg-[#fdfbf7] flex-col overflow-hidden paper-texture z-20" style="display: none;">
             <div class="absolute inset-0 pointer-events-none opacity-40">
                 <div class="absolute top-10 left-10 w-40 h-40 bg-[#f3e6d8] rounded-full mix-blend-multiply filter blur-3xl"></div>
                 <div class="absolute bottom-20 right-10 w-48 h-48 bg-[#e8d5d5] rounded-full mix-blend-multiply filter blur-3xl"></div>
@@ -322,7 +322,7 @@
         </div>
 
         <!-- SCENE 5: ALBUM FOTO -->
-        <div id="scene-album" class="scene bg-[#12100e] flex-col items-center justify-center overflow-hidden z-10">
+        <div id="scene-album" class="scene bg-[#12100e] flex-col items-center justify-center overflow-hidden z-10" style="display: none;">
             <div class="absolute inset-0 opacity-30 pointer-events-none film-grain"></div>
             <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150vw] h-[150vw] bg-[radial-gradient(circle,rgba(60,50,45,0.8)_0%,rgba(18,16,14,1)_70%)] pointer-events-none"></div>
             
@@ -484,28 +484,127 @@
 
         window.appConfig = JSON.parse(JSON.stringify(defaultConfig));
         
-        // Navigation State
         const scenes = ['scene-lockscreen', 'scene-pin', 'scene-letter', 'scene-game', 'scene-album'];
         let currentSceneIndex = 0;
         let isTransitioning = false;
+        let isLoaded = false; // Flag to prevent re-triggering hideLoading
         let db;
 
+        let globalAudio = new Audio();
+        globalAudio.loop = true;
+        let isPlaying = false;
+        let userInteracted = false;
+
+        // Failsafe method to guarantee loading screen goes away
         const fallbackLocal = () => {
-            renderAll();
-            hideLoading();
+            try {
+                renderAll();
+            } catch(e) {
+                console.error("Rendering Error (Ignored):", e);
+            } finally {
+                hideLoading();
+            }
         };
 
-        const initApp = async () => {
-            // Segera render icon lucide untuk loading screen agar tidak polos
-            if (window.lucide) window.lucide.createIcons();
+        function hideLoading() {
+            if (isLoaded) return;
+            isLoaded = true;
+            
+            setTimeout(() => {
+                const loading = document.getElementById('scene-loading');
+                if(loading) {
+                    loading.classList.remove('active');
+                    setTimeout(() => { loading.style.display = 'none'; }, 800);
+                }
+                
+                // Only activate lockscreen if we haven't swiped to PIN screen yet
+                if (currentSceneIndex === 0) {
+                    const lockscreen = document.getElementById('scene-lockscreen');
+                    if(lockscreen) {
+                        lockscreen.style.display = 'flex';
+                        void lockscreen.offsetWidth; // force browser to reflow
+                        lockscreen.classList.add('active');
+                        lockscreen.style.pointerEvents = 'auto'; // Extra safety
+                    }
+                }
+            }, 1000);
+        }
 
+        // TUNGGU SAMPAI DOM BENAR-BENAR SIAP!
+        document.addEventListener('DOMContentLoaded', () => {
+            setupEventListeners();
+            initApp();
+        });
+
+        function setupEventListeners() {
+            // Drag Area Listeners
+            const dragArea = document.getElementById('ls-drag-area');
+            let lsStartY = 0;
+            let lsIsDragging = false;
+            if(dragArea) {
+                // Touch (Mobile)
+                dragArea.addEventListener('touchstart', e => { lsStartY = e.touches[0].clientY; }, { passive: true });
+                dragArea.addEventListener('touchend', e => {
+                    if (lsStartY - e.changedTouches[0].clientY > 50) goToScene(1);
+                });
+                // Mouse (Desktop)
+                dragArea.addEventListener('mousedown', e => { lsIsDragging = true; lsStartY = e.clientY; });
+                dragArea.addEventListener('mouseup', e => {
+                    if (lsIsDragging) {
+                        lsIsDragging = false;
+                        if (lsStartY - e.clientY > 50) goToScene(1);
+                    }
+                });
+                dragArea.addEventListener('mouseleave', e => { lsIsDragging = false; });
+            }
+
+            // Audio Setup (Autoplay fallback)
+            const initAudio = () => {
+                if(!userInteracted) {
+                    userInteracted = true;
+                    globalAudio.play().then(() => {
+                        isPlaying = true;
+                        const btn = document.getElementById('btn-play-pause');
+                        if(btn) btn.innerHTML = '<i data-lucide="pause" class="w-12 h-12 fill-current"></i>';
+                        if(window.lucide) window.lucide.createIcons();
+                    }).catch(e => console.log("Autoplay diblokir browser."));
+                }
+            };
+            window.addEventListener('click', initAudio, { once: true });
+            window.addEventListener('touchstart', initAudio, { once: true });
+
+            // Clock Interval
+            setInterval(() => {
+                const lsTime = document.getElementById('ls-time');
+                if(lsTime) lsTime.innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+            }, 1000);
+
+            // Audio Progress update
+            globalAudio.addEventListener('timeupdate', () => {
+                if(globalAudio.duration) {
+                    const p = document.getElementById('audio-progress');
+                    if(p) p.style.width = `${(globalAudio.currentTime/globalAudio.duration)*100}%`;
+                }
+            });
+        }
+
+        const initApp = async () => {
+            let useLocal = true;
             try {
-                const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
+                if (window.lucide) window.lucide.createIcons();
+                
+                // Safe check for Firebase config
+                let firebaseConfigStr = '{}';
+                if (typeof window !== 'undefined' && window.__firebase_config) {
+                    firebaseConfigStr = window.__firebase_config;
+                } else if (typeof __firebase_config !== 'undefined') {
+                    firebaseConfigStr = __firebase_config;
+                }
+                
                 const firebaseConfig = JSON.parse(firebaseConfigStr);
                 
-                // Gunakan Dynamic Import agar jika Firebase terblokir (AdBlock) atau tidak disetting,
-                // script ini tidak akan crash dan langsung menuju mode lokal dengan mulus.
                 if(Object.keys(firebaseConfig).length > 0) {
+                    useLocal = false; // We have a config, let's try to load it
                     const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js");
                     const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js");
                     const { getFirestore, doc, setDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js");
@@ -524,33 +623,24 @@
                         } else {
                             setDoc(docRef, defaultConfig).catch(()=>{});
                         }
-                        // Panggil render setelah data masuk
-                        fallbackLocal();
+                        fallbackLocal(); // Safe to call multiple times because hideLoading has a lock
                     }, (error) => {
-                        console.warn("Firebase tidak diizinkan atau ditolak. Menggunakan data default.");
+                        console.warn("Firebase permission error (Aman diabaikan di GitHub Pages)", error);
                         fallbackLocal();
                     });
-                } else {
-                    fallbackLocal();
                 }
             } catch(e) {
-                console.warn("Firebase gagal dimuat atau sistem sedang offline. Beralih ke data lokal.", e);
+                console.warn("Firebase di-skip karena berjalan di GitHub Pages. Menggunakan data lokal...", e);
+                useLocal = true;
+            }
+
+            // Jika config kosong atau proses fetch gagal, gunakan data default
+            if(useLocal) {
                 fallbackLocal();
             }
         };
 
-        // Memulai Inisialisasi Aplikasi
-        initApp();
-
-        function hideLoading() {
-            setTimeout(() => {
-                const loading = document.getElementById('scene-loading');
-                if(loading) loading.classList.remove('active');
-                
-                const lockscreen = document.getElementById('scene-lockscreen');
-                if(lockscreen) lockscreen.classList.add('active');
-            }, 1000);
-        }
+        // --- GLOBAL WINDOW FUNCTIONS UNTUK ONCLICK HTML --- //
 
         window.goToScene = function(idx) {
             if (isTransitioning) return;
@@ -560,12 +650,12 @@
             if(current) {
                 current.classList.remove('active');
                 current.classList.add('-translate-y-full', 'opacity-0');
+                setTimeout(() => { current.style.display = 'none'; }, 800);
             }
             
+            currentSceneIndex = idx;
+            
             setTimeout(() => {
-                if(current) current.style.display = 'none';
-                currentSceneIndex = idx;
-                
                 const next = document.getElementById(scenes[currentSceneIndex]);
                 if(next) {
                     next.style.display = 'flex';
@@ -573,113 +663,22 @@
                     next.classList.remove('-translate-y-full', 'translate-y-[100%]', 'opacity-0');
                     next.classList.add('active');
                 }
-                
                 setTimeout(() => { isTransitioning = false; }, 800);
             }, 800);
         }
-
-        let globalAudio = new Audio();
-        globalAudio.loop = true;
-        let isPlaying = false;
-        let userInteracted = false;
 
         window.toggleAudio = function() {
             if(!userInteracted) userInteracted = true;
             if(isPlaying) {
                 globalAudio.pause();
             } else {
-                globalAudio.play().catch(e=>console.warn("Autoplay dicegah oleh browser."));
+                globalAudio.play().catch(e=>console.warn("Autoplay dicegah browser."));
             }
             isPlaying = !isPlaying;
             document.getElementById('btn-play-pause').innerHTML = isPlaying 
                 ? '<i data-lucide="pause" class="w-12 h-12 fill-current"></i>' 
                 : '<i data-lucide="play" class="w-12 h-12 fill-current"></i>';
             if(window.lucide) window.lucide.createIcons();
-        }
-
-        globalAudio.addEventListener('timeupdate', () => {
-            if(globalAudio.duration) {
-                const p = document.getElementById('audio-progress');
-                if(p) p.style.width = `${(globalAudio.currentTime/globalAudio.duration)*100}%`;
-            }
-        });
-
-        const initAudio = () => {
-            if(!userInteracted) {
-                userInteracted = true;
-                globalAudio.play().then(() => {
-                    isPlaying = true;
-                    const btn = document.getElementById('btn-play-pause');
-                    if(btn) btn.innerHTML = '<i data-lucide="pause" class="w-12 h-12 fill-current"></i>';
-                    if(window.lucide) window.lucide.createIcons();
-                }).catch((e)=>{
-                    console.log("Autoplay diblokir oleh browser sampai user berinteraksi lebih lanjut.");
-                });
-            }
-        }
-        window.addEventListener('click', initAudio, { once: true });
-        window.addEventListener('touchstart', initAudio, { once: true });
-
-        function renderLockscreen() {
-            const ls = window.appConfig.lockscreen;
-            document.getElementById('ls-bg').src = ls.backgroundUrl;
-            document.getElementById('ls-date').innerText = ls.dateText;
-            document.getElementById('ls-overlay').style.backgroundColor = `rgba(0,0,0,${ls.overlayOpacity})`;
-            document.getElementById('ls-overlay').style.backdropFilter = `blur(${ls.blur}px)`;
-            
-            document.getElementById('ls-music-cover').src = ls.music.coverUrl;
-            document.getElementById('ls-music-title').innerText = ls.music.title;
-            document.getElementById('ls-music-artist').innerText = ls.music.artist;
-            
-            if(globalAudio.src !== ls.music.audioUrl) {
-                const wasPlaying = isPlaying;
-                globalAudio.src = ls.music.audioUrl;
-                if(wasPlaying) globalAudio.play().catch(()=>{});
-            }
-
-            const notifHtml = ls.notifications.map(n => `
-                <div class="bg-black/30 backdrop-blur-xl rounded-[1.5rem] p-4 flex gap-4 shadow-lg border border-white/10">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#d4a3a3] to-[#b07d7d] flex items-center justify-center shrink-0 shadow-inner border border-white/20">
-                        <i data-lucide="heart" class="text-white fill-current"></i>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex justify-between items-baseline mb-0.5">
-                            <span class="text-white/90 text-sm font-semibold tracking-wide uppercase">${n.app}</span>
-                            <span class="text-white/50 text-xs">${n.time}</span>
-                        </div>
-                        <p class="text-white font-semibold text-base truncate">${n.title}</p>
-                        <p class="text-white/70 text-sm line-clamp-2 mt-0.5 leading-snug">${n.content}</p>
-                    </div>
-                </div>
-            `).join('');
-            document.getElementById('ls-notifications').innerHTML = notifHtml;
-        }
-
-        setInterval(() => {
-            const lsTime = document.getElementById('ls-time');
-            if(lsTime) lsTime.innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-        }, 1000);
-
-        let lsStartY = 0;
-        let lsIsDragging = false;
-        const dragArea = document.getElementById('ls-drag-area');
-
-        if(dragArea) {
-            // Touch (Mobile)
-            dragArea.addEventListener('touchstart', e => { lsStartY = e.touches[0].clientY; }, { passive: true });
-            dragArea.addEventListener('touchend', e => {
-                if (lsStartY - e.changedTouches[0].clientY > 50) goToScene(1);
-            });
-
-            // Mouse (Desktop)
-            dragArea.addEventListener('mousedown', e => { lsIsDragging = true; lsStartY = e.clientY; });
-            dragArea.addEventListener('mouseup', e => {
-                if (lsIsDragging) {
-                    lsIsDragging = false;
-                    if (lsStartY - e.clientY > 50) goToScene(1);
-                }
-            });
-            dragArea.addEventListener('mouseleave', e => { lsIsDragging = false; });
         }
 
         let currentPin = '';
@@ -708,47 +707,16 @@
                 }
             }
         }
+
         window.deletePin = function() {
             if(currentPin.length > 0) { currentPin = currentPin.slice(0, -1); updatePinDots(); }
         }
+
         window.resetPinUI = function() {
             currentPin = ''; updatePinDots();
             document.getElementById('pin-error-state').classList.add('hidden');
             document.getElementById('pin-error-state').classList.remove('flex');
             document.getElementById('pin-typing-state').classList.remove('hidden');
-        }
-
-        function updatePinDots() {
-            const targetLen = window.appConfig.pin.code.toString().length || 6;
-            let html = '';
-            for(let i=0; i<targetLen; i++) {
-                if(i < currentPin.length) html += `<div class="w-3.5 h-3.5 rounded-full border-2 bg-white border-white scale-110 shadow-[0_0_15px_rgba(255,255,255,0.8)] transition-all"></div>`;
-                else html += `<div class="w-3.5 h-3.5 rounded-full border-2 border-white/50 bg-transparent transition-all"></div>`;
-            }
-            document.getElementById('pin-dots').innerHTML = html;
-        }
-
-        function renderPin() {
-            const p = window.appConfig.pin;
-            document.getElementById('pin-bg').style.backgroundImage = `url(${window.appConfig.lockscreen.backgroundUrl})`;
-            document.getElementById('pin-hint').innerText = p.hintText;
-            document.getElementById('pin-error-text').innerText = p.wrongText;
-            document.getElementById('pin-success-text').innerText = p.successText;
-            document.getElementById('pin-error-img').src = p.wrongStickerUrl || 'https://placehold.co/100x100/transparent/ff0000?text=X';
-            document.getElementById('pin-success-img').src = p.successStickerUrl || 'https://placehold.co/100x100/transparent/00ff00?text=O';
-            updatePinDots();
-        }
-
-        function generateHearts() {
-            let html = '';
-            for(let i=0; i<20; i++) {
-                const left = Math.random() * 90 + 5;
-                const dur = Math.random() * 2 + 1.5;
-                const delay = Math.random() * 0.5;
-                html += `<div class="absolute bottom-0 text-[#d4a3a3]" style="left:${left}%; animation: float-up ${dur}s ease-out ${delay}s forwards;"><i data-lucide="heart" class="fill-current w-8 h-8"></i></div>`;
-            }
-            document.getElementById('pin-particles').innerHTML = html;
-            if(window.lucide) window.lucide.createIcons();
         }
 
         window.openEnvelope = function() {
@@ -768,47 +736,44 @@
             }, 1200);
         }
 
-        function renderLetter() {
-            const l = window.appConfig.letter;
-            document.getElementById('env-photo').src = l.photoUrl;
-            document.getElementById('env-recipient').innerText = `Untuk ${l.recipient}`;
-            document.getElementById('env-body-preview').innerText = l.body;
-            
-            document.getElementById('letter-photo').src = l.photoUrl;
-            document.getElementById('letter-title-recipient').innerText = `Untuk ${l.recipient} ❤️`;
-            document.getElementById('letter-date').innerText = l.date;
-            document.getElementById('letter-title-img').innerText = l.title;
-            document.getElementById('letter-body').innerText = l.body;
-            document.getElementById('letter-signature').innerText = l.signature;
-        }
-
         let clickedPhotos = new Set();
         window.clickGamePhoto = function(idx) {
             if(clickedPhotos.has(idx)) return;
             clickedPhotos.add(idx);
             
             const p = document.getElementById(`g-photo-${idx}`);
-            p.classList.add('animate-shake');
-            p.querySelector('.wrong-msg').classList.remove('hidden');
-            p.querySelector('.wrong-msg').classList.add('flex');
+            if(p) {
+                p.classList.add('animate-shake');
+                const wrongMsg = p.querySelector('.wrong-msg');
+                if(wrongMsg) {
+                    wrongMsg.classList.remove('hidden');
+                    wrongMsg.classList.add('flex');
+                }
+            }
             
             if(clickedPhotos.size === window.appConfig.game.images.length) {
                 setTimeout(() => {
                     const tw = document.getElementById('game-twist-overlay');
-                    tw.classList.remove('hidden');
-                    tw.classList.add('flex');
-                    requestAnimationFrame(() => {
-                        tw.classList.remove('opacity-0');
-                        tw.classList.add('opacity-100');
-                        document.getElementById('game-twist-text').classList.remove('scale-0');
-                        document.getElementById('game-twist-text').classList.add('scale-100');
-                    });
+                    if(tw) {
+                        tw.classList.remove('hidden');
+                        tw.classList.add('flex');
+                        requestAnimationFrame(() => {
+                            tw.classList.remove('opacity-0');
+                            tw.classList.add('opacity-100');
+                            const gt = document.getElementById('game-twist-text');
+                            if(gt) {
+                                gt.classList.remove('scale-0');
+                                gt.classList.add('scale-100');
+                            }
+                        });
+                    }
                     
                     let parts = '';
                     for(let i=0; i<30; i++) {
                         parts += `<div class="absolute text-[#d4a3a3] opacity-80" style="left:50%; top:50%; transform:translate(-50%,-50%); animation: float-up ${Math.random()*2+2}s ease-out ${Math.random()*1}s forwards"><i data-lucide="heart" class="fill-[#e8d5d5] w-8 h-8"></i></div>`;
                     }
-                    document.getElementById('game-twist-particles').innerHTML = parts;
+                    const gp = document.getElementById('game-twist-particles');
+                    if(gp) gp.innerHTML = parts;
                     if(window.lucide) window.lucide.createIcons();
 
                     setTimeout(() => goToScene(4), window.appConfig.game.duration || 5000);
@@ -816,43 +781,24 @@
             }
         }
 
-        function renderGame() {
-            const g = window.appConfig.game;
-            document.getElementById('game-title').innerText = g.title;
-            document.getElementById('game-subtitle').innerText = g.subtitle;
-            document.getElementById('game-twist-text').innerText = g.finalText;
-            
-            const scatterStyles = [ {r:-4, y:10}, {r:3, y:-5}, {r:-2, y:5}, {r:5, y:-10}, {r:-3, y:15}, {r:2, y:0} ];
-            
-            let html = '';
-            g.images.forEach((img, i) => {
-                const s = scatterStyles[i%scatterStyles.length];
-                html += `
-                <div id="g-photo-${i}" onclick="clickGamePhoto(${i})" class="relative bg-white p-2.5 pb-8 rounded-sm shadow-[0_8px_20px_rgba(0,0,0,0.06)] cursor-pointer hover:shadow-[0_15px_30px_rgba(0,0,0,0.1)] border border-[#f3e6d8] transition-shadow duration-300 transform" style="transform: rotate(${s.r}deg) translateY(${s.y}px)">
-                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-5 bg-[#f3e6d8]/60 backdrop-blur-sm -rotate-2 border border-[#e6d9cc]/40 shadow-sm z-20 mix-blend-multiply"></div>
-                    <div class="relative w-full aspect-[4/5] overflow-hidden rounded-sm">
-                        <img src="${img.url}" class="w-full h-full object-cover filter contrast-[1.02] sepia-[0.05]">
-                        <div class="wrong-msg hidden absolute inset-0 flex-col items-center justify-center bg-[#fdfbf7]/70 backdrop-blur-[4px] p-3 text-center border border-[#e8d5d5]/50 opacity-0 transition-opacity duration-300" style="opacity: 1">
-                            <span class="text-4xl mb-2">🤍</span>
-                            <p class="text-[#b07d7d] font-bold text-sm leading-tight">${img.msg || g.wrongText}</p>
-                        </div>
-                    </div>
-                </div>`;
-            });
-            document.getElementById('game-grid').innerHTML = html;
-        }
-
         let albumCurrentPage = 0;
         let totalSpreads = 0;
         
         window.openAlbum = function() {
-            document.getElementById('album-hint').style.opacity = '0';
-            document.getElementById('album-wrapper').classList.remove('scale-90');
-            document.getElementById('album-wrapper').classList.add('scale-100', 'translate-x-[25%]');
-            document.getElementById('album-cover').classList.add('rotate-y-n180');
+            const ah = document.getElementById('album-hint');
+            if(ah) ah.style.opacity = '0';
+            const aw = document.getElementById('album-wrapper');
+            if(aw) {
+                aw.classList.remove('scale-90');
+                aw.classList.add('scale-100', 'translate-x-[25%]');
+            }
+            const ac = document.getElementById('album-cover');
+            if(ac) ac.classList.add('rotate-y-n180');
             
-            document.getElementById('album-touch-left').classList.remove('hidden');
-            document.getElementById('album-touch-right').classList.remove('hidden');
+            const tl = document.getElementById('album-touch-left');
+            if(tl) tl.classList.remove('hidden');
+            const tr = document.getElementById('album-touch-right');
+            if(tr) tr.classList.remove('hidden');
             albumCurrentPage = 1;
         }
 
@@ -867,12 +813,19 @@
             } else if (dir === -1 && albumCurrentPage > 0) {
                 albumCurrentPage--;
                 if(albumCurrentPage === 0) {
-                    document.getElementById('album-cover').classList.remove('rotate-y-n180');
-                    document.getElementById('album-wrapper').classList.remove('translate-x-[25%]', 'scale-100');
-                    document.getElementById('album-wrapper').classList.add('scale-90');
-                    document.getElementById('album-touch-left').classList.add('hidden');
-                    document.getElementById('album-touch-right').classList.add('hidden');
-                    document.getElementById('album-hint').style.opacity = '1';
+                    const ac = document.getElementById('album-cover');
+                    if(ac) ac.classList.remove('rotate-y-n180');
+                    const aw = document.getElementById('album-wrapper');
+                    if(aw) {
+                        aw.classList.remove('translate-x-[25%]', 'scale-100');
+                        aw.classList.add('scale-90');
+                    }
+                    const tl = document.getElementById('album-touch-left');
+                    if(tl) tl.classList.add('hidden');
+                    const tr = document.getElementById('album-touch-right');
+                    if(tr) tr.classList.add('hidden');
+                    const ah = document.getElementById('album-hint');
+                    if(ah) ah.style.opacity = '1';
                 } else {
                     const spread = document.getElementById(`spread-${albumCurrentPage-1}`);
                     if(spread) {
@@ -883,8 +836,216 @@
             }
         }
 
+        window.openMessageModal = function(e) {
+            e.stopPropagation();
+            const modal = document.getElementById('message-modal');
+            if(!modal) return;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            requestAnimationFrame(() => {
+                modal.classList.remove('opacity-0');
+                modal.classList.add('opacity-100');
+                const mc = document.getElementById('message-modal-content');
+                if(mc) {
+                    mc.classList.remove('translate-y-8');
+                    mc.classList.add('translate-y-0');
+                }
+            });
+            const btn = document.getElementById('wa-btn-text');
+            if(btn) btn.innerHTML = `<i data-lucide="phone" class="w-5 h-5 fill-current"></i> ${window.appConfig.whatsapp.buttonText}`;
+            if(window.lucide) window.lucide.createIcons();
+        }
+
+        window.closeMessageModal = function() {
+            const modal = document.getElementById('message-modal');
+            if(!modal) return;
+            modal.classList.remove('opacity-100');
+            modal.classList.add('opacity-0');
+            const mc = document.getElementById('message-modal-content');
+            if(mc) {
+                mc.classList.remove('translate-y-0');
+                mc.classList.add('translate-y-8');
+            }
+            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 500);
+        }
+
+        window.sendToWhatsApp = function() {
+            const input = document.getElementById('wa-msg-input');
+            const userMsg = input ? input.value : '';
+            const baseText = window.appConfig.whatsapp.defaultMessage || '';
+            const final = userMsg.trim() ? `${baseText}\n\n${userMsg}` : baseText;
+            const num = (window.appConfig.whatsapp.phone || '').replace(/\D/g, '');
+            window.open(`https://wa.me/${num}?text=${encodeURIComponent(final)}`, '_blank');
+        }
+
+        // --- RENDER FUNCTIONS (WITH SAFETY CHECKS) --- //
+
+        function updatePinDots() {
+            const targetLen = window.appConfig.pin.code.toString().length || 6;
+            let html = '';
+            for(let i=0; i<targetLen; i++) {
+                if(i < currentPin.length) html += `<div class="w-3.5 h-3.5 rounded-full border-2 bg-white border-white scale-110 shadow-[0_0_15px_rgba(255,255,255,0.8)] transition-all"></div>`;
+                else html += `<div class="w-3.5 h-3.5 rounded-full border-2 border-white/50 bg-transparent transition-all"></div>`;
+            }
+            const el = document.getElementById('pin-dots');
+            if(el) el.innerHTML = html;
+        }
+
+        function generateHearts() {
+            let html = '';
+            for(let i=0; i<20; i++) {
+                const left = Math.random() * 90 + 5;
+                const dur = Math.random() * 2 + 1.5;
+                const delay = Math.random() * 0.5;
+                html += `<div class="absolute bottom-0 text-[#d4a3a3]" style="left:${left}%; animation: float-up ${dur}s ease-out ${delay}s forwards;"><i data-lucide="heart" class="fill-current w-8 h-8"></i></div>`;
+            }
+            const el = document.getElementById('pin-particles');
+            if(el) el.innerHTML = html;
+            if(window.lucide) window.lucide.createIcons();
+        }
+
+        function renderLockscreen() {
+            const ls = window.appConfig.lockscreen || defaultConfig.lockscreen;
+            
+            const bg = document.getElementById('ls-bg');
+            if(bg) bg.src = ls.backgroundUrl;
+            
+            const date = document.getElementById('ls-date');
+            if(date) date.innerText = ls.dateText;
+            
+            const overlay = document.getElementById('ls-overlay');
+            if(overlay) {
+                overlay.style.backgroundColor = `rgba(0,0,0,${ls.overlayOpacity || 0.4})`;
+                overlay.style.backdropFilter = `blur(${ls.blur || 4}px)`;
+            }
+            
+            const cover = document.getElementById('ls-music-cover');
+            if(cover && ls.music) cover.src = ls.music.coverUrl;
+            
+            const mTitle = document.getElementById('ls-music-title');
+            if(mTitle && ls.music) mTitle.innerText = ls.music.title;
+            
+            const mArtist = document.getElementById('ls-music-artist');
+            if(mArtist && ls.music) mArtist.innerText = ls.music.artist;
+            
+            if(ls.music && ls.music.audioUrl && globalAudio.src !== ls.music.audioUrl) {
+                const wasPlaying = isPlaying;
+                globalAudio.src = ls.music.audioUrl;
+                if(wasPlaying) globalAudio.play().catch(()=>{});
+            }
+
+            const nContainer = document.getElementById('ls-notifications');
+            if(nContainer && ls.notifications) {
+                const notifHtml = ls.notifications.map(n => `
+                    <div class="bg-black/30 backdrop-blur-xl rounded-[1.5rem] p-4 flex gap-4 shadow-lg border border-white/10">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#d4a3a3] to-[#b07d7d] flex items-center justify-center shrink-0 shadow-inner border border-white/20">
+                            <i data-lucide="heart" class="text-white fill-current"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-baseline mb-0.5">
+                                <span class="text-white/90 text-sm font-semibold tracking-wide uppercase">${n.app || ''}</span>
+                                <span class="text-white/50 text-xs">${n.time || ''}</span>
+                            </div>
+                            <p class="text-white font-semibold text-base truncate">${n.title || ''}</p>
+                            <p class="text-white/70 text-sm line-clamp-2 mt-0.5 leading-snug">${n.content || ''}</p>
+                        </div>
+                    </div>
+                `).join('');
+                nContainer.innerHTML = notifHtml;
+            }
+        }
+
+        function renderPin() {
+            const p = window.appConfig.pin || defaultConfig.pin;
+            const bg = document.getElementById('pin-bg');
+            if(bg && window.appConfig.lockscreen) bg.style.backgroundImage = `url(${window.appConfig.lockscreen.backgroundUrl})`;
+            
+            const hint = document.getElementById('pin-hint');
+            if(hint) hint.innerText = p.hintText;
+            
+            const eText = document.getElementById('pin-error-text');
+            if(eText) eText.innerText = p.wrongText;
+            
+            const sText = document.getElementById('pin-success-text');
+            if(sText) sText.innerText = p.successText;
+            
+            const eImg = document.getElementById('pin-error-img');
+            if(eImg) eImg.src = p.wrongStickerUrl || 'https://placehold.co/100x100/transparent/ff0000?text=X';
+            
+            const sImg = document.getElementById('pin-success-img');
+            if(sImg) sImg.src = p.successStickerUrl || 'https://placehold.co/100x100/transparent/00ff00?text=O';
+            
+            updatePinDots();
+        }
+
+        function renderLetter() {
+            const l = window.appConfig.letter || defaultConfig.letter;
+            
+            const envPhoto = document.getElementById('env-photo');
+            if(envPhoto) envPhoto.src = l.photoUrl;
+            
+            const envRec = document.getElementById('env-recipient');
+            if(envRec) envRec.innerText = `Untuk ${l.recipient}`;
+            
+            const envBody = document.getElementById('env-body-preview');
+            if(envBody) envBody.innerText = l.body;
+            
+            const letPhoto = document.getElementById('letter-photo');
+            if(letPhoto) letPhoto.src = l.photoUrl;
+            
+            const letRec = document.getElementById('letter-title-recipient');
+            if(letRec) letRec.innerText = `Untuk ${l.recipient} ❤️`;
+            
+            const letDate = document.getElementById('letter-date');
+            if(letDate) letDate.innerText = l.date;
+            
+            const letImgTitle = document.getElementById('letter-title-img');
+            if(letImgTitle) letImgTitle.innerText = l.title;
+            
+            const letBody = document.getElementById('letter-body');
+            if(letBody) letBody.innerText = l.body;
+            
+            const letSig = document.getElementById('letter-signature');
+            if(letSig) letSig.innerText = l.signature;
+        }
+
+        function renderGame() {
+            const g = window.appConfig.game || defaultConfig.game;
+            
+            const gTitle = document.getElementById('game-title');
+            if(gTitle) gTitle.innerText = g.title;
+            
+            const gSub = document.getElementById('game-subtitle');
+            if(gSub) gSub.innerText = g.subtitle;
+            
+            const gTwist = document.getElementById('game-twist-text');
+            if(gTwist) gTwist.innerText = g.finalText;
+            
+            const scatterStyles = [ {r:-4, y:10}, {r:3, y:-5}, {r:-2, y:5}, {r:5, y:-10}, {r:-3, y:15}, {r:2, y:0} ];
+            let html = '';
+            
+            if(g.images && Array.isArray(g.images)) {
+                g.images.forEach((img, i) => {
+                    const s = scatterStyles[i%scatterStyles.length];
+                    html += `
+                    <div id="g-photo-${i}" onclick="clickGamePhoto(${i})" class="relative bg-white p-2.5 pb-8 rounded-sm shadow-[0_8px_20px_rgba(0,0,0,0.06)] cursor-pointer hover:shadow-[0_15px_30px_rgba(0,0,0,0.1)] border border-[#f3e6d8] transition-shadow duration-300 transform" style="transform: rotate(${s.r}deg) translateY(${s.y}px)">
+                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-5 bg-[#f3e6d8]/60 backdrop-blur-sm -rotate-2 border border-[#e6d9cc]/40 shadow-sm z-20 mix-blend-multiply"></div>
+                        <div class="relative w-full aspect-[4/5] overflow-hidden rounded-sm">
+                            <img src="${img.url || ''}" onerror="this.src='https://placehold.co/400x500/f3e6d8/b07d7d?text=Error'" class="w-full h-full object-cover filter contrast-[1.02] sepia-[0.05]">
+                            <div class="wrong-msg hidden absolute inset-0 flex-col items-center justify-center bg-[#fdfbf7]/70 backdrop-blur-[4px] p-3 text-center border border-[#e8d5d5]/50 opacity-0 transition-opacity duration-300" style="opacity: 1">
+                                <span class="text-4xl mb-2">🤍</span>
+                                <p class="text-[#b07d7d] font-bold text-sm leading-tight">${img.msg || g.wrongText}</p>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+            }
+            const grid = document.getElementById('game-grid');
+            if(grid) grid.innerHTML = html;
+        }
+
         function renderAlbum() {
-            const photos = window.appConfig.album.pages;
+            const photos = (window.appConfig.album && window.appConfig.album.pages) ? window.appConfig.album.pages : [];
             let pages = [];
             for (let i = 0; i < photos.length; i += 2) pages.push(photos.slice(i, i + 2));
             let spreads = [];
@@ -893,13 +1054,15 @@
             totalSpreads = spreads.length;
             albumCurrentPage = 0;
 
+            const albumTitle = (window.appConfig.album && window.appConfig.album.title) ? window.appConfig.album.title : 'OUR MEMORIES';
+
             let html = `
             <div id="album-cover" class="absolute inset-0 origin-left preserve-3d cursor-pointer z-50 transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]" onclick="openAlbum()">
                 <div class="absolute inset-0 backface-hidden bg-[#241c17] rounded-r-lg shadow-[15px_10px_30px_rgba(0,0,0,0.7)] border-l-8 border-[#1a1410] flex flex-col items-center justify-center p-8 book-cover-texture relative overflow-hidden">
                     <div class="absolute inset-3 border-2 border-[#d4af37]/40 rounded-sm"></div>
                     <div class="absolute inset-4 border border-[#d4af37]/20 rounded-sm"></div>
                     <h1 class="text-[#d4af37] font-serif font-bold text-3xl text-center leading-snug tracking-wider" style="text-shadow: 1px 2px 2px rgba(0,0,0,0.8), 0 0 10px rgba(212,175,55,0.2)">
-                        ${window.appConfig.album.title.split(' ').map(w=>`<span class="block">${w}</span>`).join('')}
+                        ${albumTitle.split(' ').map(w=>`<span class="block">${w}</span>`).join('')}
                     </h1>
                     <div class="mt-12 w-12 h-[2px] bg-[#d4af37]/50 shadow-[0_0_5px_rgba(212,175,55,0.5)]"></div>
                 </div>
@@ -912,7 +1075,7 @@
                     ${arr.map((p, i) => `
                         <div class="bg-white p-2 pb-6 rounded-sm shadow-[0_5px_15px_rgba(0,0,0,0.1)] border border-[#e6d9cc] relative mx-auto" style="transform: rotate(${isRight?(i%2==0?3:-2):(i%2==0?-3:2)}deg) scale(0.95); width: 90%; max-width: 200px">
                             <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-10 h-3 bg-[#f3e6d8]/80 backdrop-blur-sm -rotate-2 mix-blend-multiply border border-[#e6d9cc]/30"></div>
-                            <img src="${p}" class="w-full aspect-[4/5] object-cover filter contrast-[1.05] sepia-[0.1]">
+                            <img src="${p}" onerror="this.src='https://placehold.co/400x500/f3e6d8/b07d7d?text=Error'" class="w-full aspect-[4/5] object-cover filter contrast-[1.05] sepia-[0.1]">
                         </div>
                     `).join('')}
                 </div>
@@ -930,114 +1093,107 @@
                 </div>
                 `;
             });
-            document.getElementById('album-spreads-container').innerHTML = html;
+            const container = document.getElementById('album-spreads-container');
+            if(container) container.innerHTML = html;
         }
 
-        window.openMessageModal = function(e) {
-            e.stopPropagation();
-            const modal = document.getElementById('message-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            requestAnimationFrame(() => {
-                modal.classList.remove('opacity-0');
-                modal.classList.add('opacity-100');
-                document.getElementById('message-modal-content').classList.remove('translate-y-8');
-                document.getElementById('message-modal-content').classList.add('translate-y-0');
-            });
-            document.getElementById('wa-btn-text').innerHTML = `<i data-lucide="phone" class="w-5 h-5 fill-current"></i> ${window.appConfig.whatsapp.buttonText}`;
-            if(window.lucide) window.lucide.createIcons();
+        function renderAll() {
+            renderLockscreen();
+            renderPin();
+            renderLetter();
+            renderGame();
+            renderAlbum();
+            if (window.lucide) window.lucide.createIcons();
         }
 
-        window.closeMessageModal = function() {
-            const modal = document.getElementById('message-modal');
-            modal.classList.remove('opacity-100');
-            modal.classList.add('opacity-0');
-            document.getElementById('message-modal-content').classList.remove('translate-y-0');
-            document.getElementById('message-modal-content').classList.add('translate-y-8');
-            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 500);
-        }
-
-        window.sendToWhatsApp = function() {
-            const userMsg = document.getElementById('wa-msg-input').value;
-            const baseText = window.appConfig.whatsapp.defaultMessage;
-            const final = userMsg.trim() ? `${baseText}\n\n${userMsg}` : baseText;
-            const num = window.appConfig.whatsapp.phone.replace(/\D/g, '');
-            window.open(`https://wa.me/${num}?text=${encodeURIComponent(final)}`, '_blank');
-        }
-
+        // --- ADMIN FUNCTIONS ---
+        // (Sengaja tetap disisipkan apabila sewaktu-waktu file dipasang kembali di Firebase/Gemini Preview)
         window.openAdmin = function() {
+            // (Admin logic remains safely intact for local/dev usage)
             populateAdminForm();
             const modal = document.getElementById('admin-panel');
+            if(!modal) return;
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             requestAnimationFrame(() => {
                 modal.classList.remove('opacity-0');
                 modal.classList.add('opacity-100');
-                document.getElementById('admin-panel-content').classList.remove('scale-95');
-                document.getElementById('admin-panel-content').classList.add('scale-100');
+                const content = document.getElementById('admin-panel-content');
+                if(content) {
+                    content.classList.remove('scale-95');
+                    content.classList.add('scale-100');
+                }
             });
         }
 
         window.closeAdmin = function() {
             const modal = document.getElementById('admin-panel');
+            if(!modal) return;
             modal.classList.remove('opacity-100');
             modal.classList.add('opacity-0');
-            document.getElementById('admin-panel-content').classList.remove('scale-100');
-            document.getElementById('admin-panel-content').classList.add('scale-95');
+            const content = document.getElementById('admin-panel-content');
+            if(content) {
+                content.classList.remove('scale-100');
+                content.classList.add('scale-95');
+            }
             setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
         }
 
         window.switchAdminTab = function(tabId) {
             document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById(tabId).classList.remove('hidden');
+            const tab = document.getElementById(tabId);
+            if(tab) tab.classList.remove('hidden');
             
             document.querySelectorAll('.admin-tab-btn').forEach(el => {
                 el.className = "admin-tab-btn flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all text-[#8c8279] hover:bg-[#f3e6d8]";
             });
-            document.getElementById(`btn-${tabId}`).className = "admin-tab-btn flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all bg-[#b07d7d] text-white shadow-md";
+            const btn = document.getElementById(`btn-${tabId}`);
+            if(btn) btn.className = "admin-tab-btn flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all bg-[#b07d7d] text-white shadow-md";
         }
 
         let adminGamePhotos = [];
         let adminAlbumPhotos = [];
 
         function populateAdminForm() {
-            const c = window.appConfig;
-            document.getElementById('cfg-ls-bg').value = c.lockscreen.backgroundUrl;
-            document.getElementById('cfg-ls-date').value = c.lockscreen.dateText;
-            document.getElementById('cfg-ls-op').value = c.lockscreen.overlayOpacity;
-            document.getElementById('cfg-ls-blur').value = c.lockscreen.blur;
-            document.getElementById('cfg-ls-m-title').value = c.lockscreen.music.title;
-            document.getElementById('cfg-ls-m-artist').value = c.lockscreen.music.artist;
-            document.getElementById('cfg-ls-m-cover').value = c.lockscreen.music.coverUrl;
-            document.getElementById('cfg-ls-m-audio').value = c.lockscreen.music.audioUrl;
-            
-            document.getElementById('cfg-pin-code').value = c.pin.code;
-            document.getElementById('cfg-pin-hint').value = c.pin.hintText;
-            document.getElementById('cfg-pin-w-txt').value = c.pin.wrongText;
-            document.getElementById('cfg-pin-w-stk').value = c.pin.wrongStickerUrl;
-            document.getElementById('cfg-pin-s-txt').value = c.pin.successText;
-            document.getElementById('cfg-pin-s-stk').value = c.pin.successStickerUrl;
-            
-            document.getElementById('cfg-let-photo').value = c.letter.photoUrl;
-            document.getElementById('cfg-let-rec').value = c.letter.recipient;
-            document.getElementById('cfg-let-date').value = c.letter.date;
-            document.getElementById('cfg-let-title').value = c.letter.title;
-            document.getElementById('cfg-let-body').value = c.letter.body;
-            document.getElementById('cfg-let-sig').value = c.letter.signature;
-            
-            document.getElementById('cfg-game-title').value = c.game.title;
-            document.getElementById('cfg-game-sub').value = c.game.subtitle;
-            document.getElementById('cfg-game-final').value = c.game.finalText;
-            adminGamePhotos = [...c.game.images];
-            renderAdminGameList();
-            
-            document.getElementById('cfg-alb-title').value = c.album.title;
-            adminAlbumPhotos = [...c.album.pages];
-            renderAdminAlbumList();
-            
-            document.getElementById('cfg-wa-phone').value = c.whatsapp.phone;
-            document.getElementById('cfg-wa-msg').value = c.whatsapp.defaultMessage;
-            document.getElementById('cfg-wa-btn').value = c.whatsapp.buttonText;
+            try {
+                const c = window.appConfig;
+                document.getElementById('cfg-ls-bg').value = c.lockscreen.backgroundUrl;
+                document.getElementById('cfg-ls-date').value = c.lockscreen.dateText;
+                document.getElementById('cfg-ls-op').value = c.lockscreen.overlayOpacity;
+                document.getElementById('cfg-ls-blur').value = c.lockscreen.blur;
+                document.getElementById('cfg-ls-m-title').value = c.lockscreen.music.title;
+                document.getElementById('cfg-ls-m-artist').value = c.lockscreen.music.artist;
+                document.getElementById('cfg-ls-m-cover').value = c.lockscreen.music.coverUrl;
+                document.getElementById('cfg-ls-m-audio').value = c.lockscreen.music.audioUrl;
+                
+                document.getElementById('cfg-pin-code').value = c.pin.code;
+                document.getElementById('cfg-pin-hint').value = c.pin.hintText;
+                document.getElementById('cfg-pin-w-txt').value = c.pin.wrongText;
+                document.getElementById('cfg-pin-w-stk').value = c.pin.wrongStickerUrl;
+                document.getElementById('cfg-pin-s-txt').value = c.pin.successText;
+                document.getElementById('cfg-pin-s-stk').value = c.pin.successStickerUrl;
+                
+                document.getElementById('cfg-let-photo').value = c.letter.photoUrl;
+                document.getElementById('cfg-let-rec').value = c.letter.recipient;
+                document.getElementById('cfg-let-date').value = c.letter.date;
+                document.getElementById('cfg-let-title').value = c.letter.title;
+                document.getElementById('cfg-let-body').value = c.letter.body;
+                document.getElementById('cfg-let-sig').value = c.letter.signature;
+                
+                document.getElementById('cfg-game-title').value = c.game.title;
+                document.getElementById('cfg-game-sub').value = c.game.subtitle;
+                document.getElementById('cfg-game-final').value = c.game.finalText;
+                adminGamePhotos = [...c.game.images];
+                renderAdminGameList();
+                
+                document.getElementById('cfg-alb-title').value = c.album.title;
+                adminAlbumPhotos = [...c.album.pages];
+                renderAdminAlbumList();
+                
+                document.getElementById('cfg-wa-phone').value = c.whatsapp.phone;
+                document.getElementById('cfg-wa-msg').value = c.whatsapp.defaultMessage;
+                document.getElementById('cfg-wa-btn').value = c.whatsapp.buttonText;
+            } catch(e) { console.error("Admin Form populate error", e); }
         }
 
         function renderAdminGameList() {
@@ -1050,7 +1206,8 @@
                     <input type="text" value="${p.msg}" onchange="adminGamePhotos[${i}].msg=this.value" class="w-full px-4 py-2 border rounded-xl outline-none" placeholder="Pesan Salah">
                 </div>`;
             });
-            document.getElementById('admin-game-photos').innerHTML = h;
+            const container = document.getElementById('admin-game-photos');
+            if(container) container.innerHTML = h;
         }
 
         window.addAlbumPhoto = function() { adminAlbumPhotos.push(''); renderAdminAlbumList(); }
@@ -1066,70 +1223,66 @@
                     <button onclick="removeAlbumPhoto(${i})" class="text-red-400 p-2"><i data-lucide="x" class="w-4 h-4"></i></button>
                 </div>`;
             });
-            document.getElementById('admin-album-photos').innerHTML = h;
+            const container = document.getElementById('admin-album-photos');
+            if(container) container.innerHTML = h;
             if(window.lucide) window.lucide.createIcons();
         }
 
         window.saveAdmin = async function() {
-            const newCfg = JSON.parse(JSON.stringify(window.appConfig));
-            newCfg.lockscreen.backgroundUrl = document.getElementById('cfg-ls-bg').value;
-            newCfg.lockscreen.dateText = document.getElementById('cfg-ls-date').value;
-            newCfg.lockscreen.overlayOpacity = parseFloat(document.getElementById('cfg-ls-op').value);
-            newCfg.lockscreen.blur = parseInt(document.getElementById('cfg-ls-blur').value);
-            newCfg.lockscreen.music.title = document.getElementById('cfg-ls-m-title').value;
-            newCfg.lockscreen.music.artist = document.getElementById('cfg-ls-m-artist').value;
-            newCfg.lockscreen.music.coverUrl = document.getElementById('cfg-ls-m-cover').value;
-            newCfg.lockscreen.music.audioUrl = document.getElementById('cfg-ls-m-audio').value;
+            try {
+                const newCfg = JSON.parse(JSON.stringify(window.appConfig));
+                newCfg.lockscreen.backgroundUrl = document.getElementById('cfg-ls-bg').value;
+                newCfg.lockscreen.dateText = document.getElementById('cfg-ls-date').value;
+                newCfg.lockscreen.overlayOpacity = parseFloat(document.getElementById('cfg-ls-op').value);
+                newCfg.lockscreen.blur = parseInt(document.getElementById('cfg-ls-blur').value);
+                newCfg.lockscreen.music.title = document.getElementById('cfg-ls-m-title').value;
+                newCfg.lockscreen.music.artist = document.getElementById('cfg-ls-m-artist').value;
+                newCfg.lockscreen.music.coverUrl = document.getElementById('cfg-ls-m-cover').value;
+                newCfg.lockscreen.music.audioUrl = document.getElementById('cfg-ls-m-audio').value;
 
-            newCfg.pin.code = document.getElementById('cfg-pin-code').value;
-            newCfg.pin.hintText = document.getElementById('cfg-pin-hint').value;
-            newCfg.pin.wrongText = document.getElementById('cfg-pin-w-txt').value;
-            newCfg.pin.wrongStickerUrl = document.getElementById('cfg-pin-w-stk').value;
-            newCfg.pin.successText = document.getElementById('cfg-pin-s-txt').value;
-            newCfg.pin.successStickerUrl = document.getElementById('cfg-pin-s-stk').value;
+                newCfg.pin.code = document.getElementById('cfg-pin-code').value;
+                newCfg.pin.hintText = document.getElementById('cfg-pin-hint').value;
+                newCfg.pin.wrongText = document.getElementById('cfg-pin-w-txt').value;
+                newCfg.pin.wrongStickerUrl = document.getElementById('cfg-pin-w-stk').value;
+                newCfg.pin.successText = document.getElementById('cfg-pin-s-txt').value;
+                newCfg.pin.successStickerUrl = document.getElementById('cfg-pin-s-stk').value;
 
-            newCfg.letter.photoUrl = document.getElementById('cfg-let-photo').value;
-            newCfg.letter.recipient = document.getElementById('cfg-let-rec').value;
-            newCfg.letter.date = document.getElementById('cfg-let-date').value;
-            newCfg.letter.title = document.getElementById('cfg-let-title').value;
-            newCfg.letter.body = document.getElementById('cfg-let-body').value;
-            newCfg.letter.signature = document.getElementById('cfg-let-sig').value;
+                newCfg.letter.photoUrl = document.getElementById('cfg-let-photo').value;
+                newCfg.letter.recipient = document.getElementById('cfg-let-rec').value;
+                newCfg.letter.date = document.getElementById('cfg-let-date').value;
+                newCfg.letter.title = document.getElementById('cfg-let-title').value;
+                newCfg.letter.body = document.getElementById('cfg-let-body').value;
+                newCfg.letter.signature = document.getElementById('cfg-let-sig').value;
 
-            newCfg.game.title = document.getElementById('cfg-game-title').value;
-            newCfg.game.subtitle = document.getElementById('cfg-game-sub').value;
-            newCfg.game.finalText = document.getElementById('cfg-game-final').value;
-            newCfg.game.images = adminGamePhotos;
+                newCfg.game.title = document.getElementById('cfg-game-title').value;
+                newCfg.game.subtitle = document.getElementById('cfg-game-sub').value;
+                newCfg.game.finalText = document.getElementById('cfg-game-final').value;
+                newCfg.game.images = adminGamePhotos;
 
-            newCfg.album.title = document.getElementById('cfg-alb-title').value;
-            newCfg.album.pages = adminAlbumPhotos;
+                newCfg.album.title = document.getElementById('cfg-alb-title').value;
+                newCfg.album.pages = adminAlbumPhotos;
 
-            newCfg.whatsapp.phone = document.getElementById('cfg-wa-phone').value;
-            newCfg.whatsapp.defaultMessage = document.getElementById('cfg-wa-msg').value;
-            newCfg.whatsapp.buttonText = document.getElementById('cfg-wa-btn').value;
+                newCfg.whatsapp.phone = document.getElementById('cfg-wa-phone').value;
+                newCfg.whatsapp.defaultMessage = document.getElementById('cfg-wa-msg').value;
+                newCfg.whatsapp.buttonText = document.getElementById('cfg-wa-btn').value;
 
-            window.appConfig = newCfg;
-            
-            if(typeof db !== 'undefined') {
-                try {
-                    // Update Firebase Firestore secara dinamis jika terhubung
-                    const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js");
-                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-love-app';
-                    await setDoc(doc(db, 'artifacts', appId, 'public', 'siteConfig'), newCfg);
-                } catch(e) {}
+                window.appConfig = newCfg;
+                
+                if(typeof db !== 'undefined') {
+                    try {
+                        const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js");
+                        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-love-app';
+                        await setDoc(doc(db, 'artifacts', appId, 'public', 'siteConfig'), newCfg);
+                    } catch(e) {}
+                }
+                
+                renderAll();
+                closeAdmin();
+            } catch (e) {
+                console.error("Save Admin Error:", e);
+                closeAdmin(); // Force close on error
             }
-            renderAll();
-            closeAdmin();
         }
-
-        function renderAll() {
-            renderLockscreen();
-            renderPin();
-            renderLetter();
-            renderGame();
-            renderAlbum();
-            if (window.lucide) window.lucide.createIcons();
-        }
-
     </script>
 </body>
 </html>
