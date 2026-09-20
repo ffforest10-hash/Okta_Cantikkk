@@ -1,1434 +1,1120 @@
-import React, { useState, useEffect, useRef, createContext, useContext } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Settings, Lock, Unlock, Play, Pause, SkipForward, SkipBack, 
-  Camera, Flashlight, Heart, X, Image as ImageIcon, Type, Phone, Save
-} from 'lucide-react';
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, doc, setDoc, onSnapshot, getDoc } from 'firebase/firestore';
-
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-love-app';
-
-// Updated Data Structure exactly as requested
-const defaultConfig = {
-  lockscreen: {
-    backgroundUrl: 'https://images.unsplash.com/photo-1518599904199-0ca897819ddb?q=80&w=1080&auto=format&fit=crop',
-    dateText: 'Senin, 14 Februari',
-    overlayOpacity: 0.4,
-    blur: 4,
-    music: {
-      title: 'Beautiful In White',
-      artist: 'Westlife',
-      coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=200&auto=format&fit=crop',
-      audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/16/audio_db6591201e.mp3?filename=lofi-study-112191.mp3'
-    },
-    notifications: [
-      { app: 'Messages', title: 'Sayang 🥺', time: 'now', content: 'Coba geser ke atas deh...' },
-      { app: 'Calendar', title: 'Special Day', time: '1m ago', content: 'Today is the day!' }
-    ]
-  },
-  pin: {
-    code: '140299',
-    hintText: 'Masukkan tanggal lahir',
-    wrongText: 'Yakin tanggal lahirnya itu? 😂',
-    successText: 'Pinter! I love you ❤️',
-    wrongStickerUrl: 'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHIzMjZ2NDhqcDJ2bDFidHcyczZocHNhbXZlZDhzcjVoeWhobWZ1ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/WwKco9a8e0qTz9n9F3/giphy.gif',
-    successStickerUrl: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExejcxc3d0b2YwdWNoOW9kcm81OTcyZHAzYm9tMnNla3JsdjIzdWltaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/l4pTdcifPGuRoGnOo/giphy.gif'
-  },
-  letter: {
-    title: 'Happy Birthday, Cintaku.',
-    recipient: 'Cintaku',
-    body: 'Selamat ulang tahun untuk orang paling spesial dalam hidupku. Terima kasih sudah menjadi alasan bahagiaku setiap hari. Semoga semua mimpimu terwujud, dan semoga kita bisa terus sama-sama bikin memori indah. I love you more than words can say. 💕\n\nScroll ke bawah ya...',
-    signature: 'From yours truly.',
-    date: '14 Februari 2024',
-    photoUrl: 'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=800&auto=format&fit=crop',
-    decoration: ''
-  },
-  game: {
-    title: 'MANA YANG PALING AKU SUKA? ❤️',
-    subtitle: 'Coba tebak dengan benar...',
-    images: [
-      { url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=400&auto=format&fit=crop', msg: 'HUUUU SALAH 😭😂' },
-      { url: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=400&auto=format&fit=crop', msg: 'Bukan yang ini wleee 😛' },
-      { url: 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=400&auto=format&fit=crop', msg: 'Cantik sih, tapi salah! 🤪' },
-      { url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop', msg: 'Coba lagi sayang 🤭' },
-      { url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop', msg: 'Masih salah hehehe 🙈' },
-      { url: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=400&auto=format&fit=crop', msg: 'Tetot! Salah lagi ❌' }
-    ],
-    wrongText: 'HUUUU SALAH 😭😂',
-    finalText: 'Gak ada di sini...\nkarena yang paling aku suka kan\nKAMU ❤️',
-    duration: 5000
-  },
-  album: {
-    title: 'OUR LITTLE MEMORIES',
-    coverImage: '',
-    pages: [
-      'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=600&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=600&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=600&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=600&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=600&auto=format&fit=crop',
-      'https://images.unsplash.com/photo-1494774157365-9e04c6720e47?q=80&w=600&auto=format&fit=crop'
-    ]
-  },
-  whatsapp: {
-    phone: '6289529889634',
-    defaultMessage: 'Halo sayang! Makasih yaa buat surprisenya, aku suka banget! ❤️',
-    buttonText: 'KIRIM KE WHATSAPP'
-  }
-};
-
-const ConfigContext = createContext();
-export const useConfig = () => useContext(ConfigContext);
-
-const ConfigProvider = ({ children }) => {
-  const [config, setConfig] = useState(defaultConfig);
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-          setIsAdmin(true);
-        } else {
-          await signInAnonymously(auth);
-        }
-      } catch (error) {
-        console.warn("Auth warning:", error);
-      }
-    };
-    initAuth();
-
-    const unsubscribeAuth = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      if (!u) setLoading(false);
-    });
-    return () => unsubscribeAuth();
-  }, []);
-
-  useEffect(() => {
-    if (!user) return;
-    const docRef = doc(db, 'artifacts', appId, 'public', 'siteConfig');
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Untuk Kamu, Sayang ❤️</title>
+    <meta name="description" content="An interactive birthday surprise made with love.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❤️</text></svg>">
     
-    getDoc(docRef).then(async (snap) => {
-        if (!snap.exists()) {
-            try {
-              await setDoc(docRef, defaultConfig);
-            } catch (err) {
-              console.warn("Firestore write permission denied. Using local config.");
-            }
-        }
-    }).catch(() => console.warn("Firestore read permission denied. Using local config."));
-
-    const unsubscribeSnapshot = onSnapshot(docRef, (snapshot) => {
-      if (snapshot.exists()) {
-        // Merge to ensure missing fields from old configs don't break the app
-        setConfig({ ...defaultConfig, ...snapshot.data() });
-      }
-      setLoading(false);
-    }, (error) => {
-      console.warn("Firestore listener permission denied. Using local config.");
-      setLoading(false);
-    });
-
-    return () => unsubscribeSnapshot();
-  }, [user]);
-
-  const updateConfig = async (newConfig) => {
-    if (!user) return;
-    try {
-      await setDoc(doc(db, 'artifacts', appId, 'public', 'siteConfig'), newConfig);
-    } catch (e) {
-      console.error("Error updating config:", e);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[100dvh] w-full bg-[#f8f5f0] text-[#c48b8b]">
-        <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}>
-          <Heart size={48} className="fill-current opacity-80" />
-        </motion.div>
-      </div>
-    );
-  }
-
-  return (
-    <ConfigContext.Provider value={{ config, updateConfig, isAdmin }}>
-      {children}
-    </ConfigContext.Provider>
-  );
-};
-
-const AudioContext = createContext();
-export const useAudio = () => useContext(AudioContext);
-
-const AudioProvider = ({ children }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const audioRef = useRef(null);
-  const { config } = useConfig();
-  const [userInteracted, setUserInteracted] = useState(false);
-
-  useEffect(() => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio();
-    }
-    const audio = audioRef.current;
-
-    if (audio.src !== config.lockscreen.music.audioUrl) {
-       audio.src = config.lockscreen.music.audioUrl;
-       audio.loop = true;
-       if (isPlaying) {
-         audio.play().catch(() => setIsPlaying(false));
-       }
-    }
+    <!-- Load Tailwind CSS via CDN (JIT compiler included) -->
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    const updateProgress = () => {
-      if (audio.duration) {
-        setProgress((audio.currentTime / audio.duration) * 100);
-      }
-    };
-    audio.addEventListener('timeupdate', updateProgress);
+    <!-- Load Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     
-    return () => {
-      audio.removeEventListener('timeupdate', updateProgress);
-    };
-  }, [config.lockscreen.music.audioUrl, isPlaying]);
+    <style>
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
+        
+        .font-sans { font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-cursive { font-family: 'Dancing Script', cursive; }
+        
+        /* Textures */
+        .paper-texture { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E"); }
+        .film-grain { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; }
+        .book-cover-texture { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E"), linear-gradient(to right, rgba(0,0,0,0.4) 0%, transparent 5%, transparent 95%, rgba(255,255,255,0.05) 100%); }
+        
+        /* 3D Elements */
+        .perspective-2000 { perspective: 2000px; }
+        .preserve-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .rotate-y-n180 { transform: rotateY(-180deg); }
 
-  // Global audio cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = "";
-      }
-    };
-  }, []);
-
-  const togglePlay = () => {
-    if (!userInteracted) setUserInteracted(true);
-    const audio = audioRef.current;
-    if (isPlaying) {
-      audio.pause();
-    } else {
-      audio.play().catch(() => console.warn("Audio play blocked"));
-    }
-    setIsPlaying(!isPlaying);
-  };
-
-  useEffect(() => {
-    const handleInteraction = () => {
-        if (!userInteracted) {
-            setUserInteracted(true);
-            // Attempt to autoplay on first interaction if not playing
-            if (!isPlaying && audioRef.current.paused) {
-               audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
-            }
+        /* Scene Transitions */
+        .scene { 
+            position: absolute; inset: 0; 
+            opacity: 0; pointer-events: none; 
+            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), filter 0.8s ease; 
         }
-    };
-    window.addEventListener('click', handleInteraction, { once: true });
-    window.addEventListener('touchstart', handleInteraction, { once: true });
-    return () => {
-        window.removeEventListener('click', handleInteraction);
-        window.removeEventListener('touchstart', handleInteraction);
-    }
-  }, [userInteracted, isPlaying]);
+        .scene.active { 
+            opacity: 1; pointer-events: auto; transform: translateY(0); filter: blur(0); 
+        }
+        
+        /* Animations */
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .animate-heartbeat { animation: heartbeat 2s infinite ease-in-out; }
 
-  return (
-    <AudioContext.Provider value={{ isPlaying, togglePlay, progress }}>
-      {children}
-    </AudioContext.Provider>
-  );
-};
+        @keyframes float-up {
+            0% { transform: translateY(100vh) scale(0); opacity: 1; }
+            50% { opacity: 1; }
+            100% { transform: translateY(-20vh) scale(1.5); opacity: 0; }
+        }
 
-// Generic Image Error Handler for Aesthetic Fallbacks
-const handleImageError = (e) => {
-  e.target.src = "https://placehold.co/600x800/f3e6d8/b07d7d?text=Image+Not+Found";
-};
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+            20%, 40%, 60%, 80% { transform: translateX(8px); }
+        }
+        .animate-shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
 
-const Input = ({ label, type = "text", ...props }) => (
-  <div className="flex flex-col gap-1.5 w-full">
-    {label && <label className="text-sm font-semibold text-[#8c8279]">{label}</label>}
-    <input type={type} className="w-full px-4 py-2.5 border border-[#e6d9cc] rounded-xl bg-white focus:ring-2 focus:ring-[#d4a3a3] outline-none transition-all font-sans text-[#6b6259]" {...props} />
-  </div>
-);
+        @keyframes bounce-subtle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-bounce-subtle { animation: bounce-subtle 2s infinite ease-in-out; }
 
-const AdminPanel = ({ isOpen, onClose }) => {
-  const { config, updateConfig } = useConfig();
-  const [localConfig, setLocalConfig] = useState(config);
-  const [activeTab, setActiveTab] = useState('lockscreen');
+        @keyframes pulse-opacity {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+        .animate-pulse-opacity { animation: pulse-opacity 2s infinite ease-in-out; }
 
-  useEffect(() => { if(isOpen) setLocalConfig(config); }, [isOpen, config]);
+        /* Envelope specific */
+        .envelope-flap-top { transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s 0.2s; transform-origin: top; }
+        .letter-paper { transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1); }
+        .envelope-open .envelope-flap-top-front { transform: rotateX(180deg); z-index: 0 !important; }
+        .envelope-open .envelope-flap-top-back { transform: rotateX(0deg) !important; opacity: 1 !important; z-index: 5 !important; }
+        .envelope-open .letter-paper { transform: translateY(-180px) scale(1.05); }
 
-  if (!isOpen) return null;
+    </style>
+</head>
+<body class="w-full h-screen h-[100dvh] bg-[#f8f5f0] flex justify-center overflow-hidden font-sans">
+    
+    <div id="app-container" class="w-full h-full max-w-md relative bg-[#fdfbf7] overflow-hidden shadow-2xl">
+        <div class="film-grain absolute inset-0 z-[100]"></div>
 
-  const handleSave = () => {
-    updateConfig(localConfig);
-    onClose();
-  };
-
-  const handleChange = (section, field, value) => {
-    setLocalConfig(prev => ({
-      ...prev,
-      [section]: { ...prev[section], [field]: value }
-    }));
-  };
-
-  const tabs = [
-    { id: 'lockscreen', icon: <Lock size={16}/>, label: 'Lockscreen' },
-    { id: 'pin', icon: <Unlock size={16}/>, label: 'PIN' },
-    { id: 'letter', icon: <Type size={16}/>, label: 'Surat' },
-    { id: 'game', icon: <Heart size={16}/>, label: 'Game' },
-    { id: 'album', icon: <ImageIcon size={16}/>, label: 'Album' },
-    { id: 'whatsapp', icon: <Phone size={16}/>, label: 'WhatsApp' },
-  ];
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 50 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-    >
-      <div className="bg-[#fcf9f2] rounded-[2rem] w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl border border-[#e8d5d5] paper-texture">
-        <div className="flex justify-between items-center p-5 border-b border-[#e8d5d5]/50 bg-white/50 backdrop-blur-md">
-          <h2 className="text-xl font-bold text-[#b07d7d] flex items-center gap-2 font-serif">
-            <Settings className="text-[#d4a3a3]" /> Admin Configurations
-          </h2>
-          <button aria-label="Close Admin" onClick={onClose} className="p-2 bg-[#f3e6d8] rounded-full hover:bg-[#e8d5d5] text-[#b07d7d] transition-colors"><X size={20}/></button>
+        <!-- LOADING SCENE -->
+        <div id="scene-loading" class="scene active flex items-center justify-center bg-[#f8f5f0] text-[#c48b8b] z-[60]">
+            <div class="animate-heartbeat">
+                <i data-lucide="heart" class="w-12 h-12 fill-current opacity-80"></i>
+            </div>
         </div>
 
-        <div className="flex overflow-x-auto p-3 bg-[#fdfbf7] hide-scrollbar border-b border-[#e8d5d5]/50 gap-2">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              aria-label={`Tab ${tab.label}`}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
-                activeTab === tab.id ? 'bg-[#b07d7d] text-white shadow-md' : 'text-[#8c8279] hover:bg-[#f3e6d8]'
-              }`}
-            >
-              {tab.icon} {tab.label}
+        <!-- SCENE 1: LOCKSCREEN -->
+        <div id="scene-lockscreen" class="scene bg-black flex flex-col z-50">
+            <img id="ls-bg" src="" alt="Background" class="absolute inset-0 w-full h-full object-cover">
+            <div id="ls-overlay" class="absolute inset-0 transition-all duration-500"></div>
+
+            <button onclick="openAdmin()" class="absolute top-6 left-6 z-[60] p-2.5 bg-black/20 rounded-full text-white/60 hover:text-white transition-colors backdrop-blur-md border border-white/10">
+                <i data-lucide="settings" class="w-5 h-5"></i>
             </button>
-          ))}
-        </div>
 
-        <div className="flex-1 overflow-y-auto p-6 bg-white/30 backdrop-blur-sm relative z-10">
-          {activeTab === 'lockscreen' && (
-            <div className="space-y-4">
-              <Input label="Background Image URL" value={localConfig.lockscreen.backgroundUrl} onChange={(e) => handleChange('lockscreen', 'backgroundUrl', e.target.value)} />
-              <Input label="Teks Tanggal (Misal: Senin, 14 Feb)" value={localConfig.lockscreen.dateText} onChange={(e) => handleChange('lockscreen', 'dateText', e.target.value)} />
-              <div className="grid grid-cols-2 gap-4">
-                <Input label="Overlay Opacity (0 - 1)" type="number" step="0.1" value={localConfig.lockscreen.overlayOpacity} onChange={(e) => handleChange('lockscreen', 'overlayOpacity', parseFloat(e.target.value))} />
-                <Input label="Background Blur (px)" type="number" value={localConfig.lockscreen.blur} onChange={(e) => handleChange('lockscreen', 'blur', parseInt(e.target.value))} />
-              </div>
-              <h3 className="font-bold text-[#b07d7d] mt-6 border-b border-[#e8d5d5] pb-2 font-serif">Music Player</h3>
-              <Input label="Music Title" value={localConfig.lockscreen.music.title} onChange={(e) => setLocalConfig(p => ({...p, lockscreen: {...p.lockscreen, music: {...p.lockscreen.music, title: e.target.value}}}))} />
-              <Input label="Artist" value={localConfig.lockscreen.music.artist} onChange={(e) => setLocalConfig(p => ({...p, lockscreen: {...p.lockscreen, music: {...p.lockscreen.music, artist: e.target.value}}}))} />
-              <Input label="Cover Image URL" value={localConfig.lockscreen.music.coverUrl} onChange={(e) => setLocalConfig(p => ({...p, lockscreen: {...p.lockscreen, music: {...p.lockscreen.music, coverUrl: e.target.value}}}))} />
-              <Input label="Audio File URL (.mp3)" value={localConfig.lockscreen.music.audioUrl} onChange={(e) => setLocalConfig(p => ({...p, lockscreen: {...p.lockscreen, music: {...p.lockscreen.music, audioUrl: e.target.value}}}))} />
-            </div>
-          )}
-
-          {activeTab === 'pin' && (
-            <div className="space-y-4">
-              <Input label="PIN Code (Angka bebas)" value={localConfig.pin.code} onChange={(e) => handleChange('pin', 'code', e.target.value)} />
-              <Input label="Teks Instruksi / Hint" value={localConfig.pin.hintText} onChange={(e) => handleChange('pin', 'hintText', e.target.value)} />
-              <Input label="Pesan Saat PIN Salah" value={localConfig.pin.wrongText} onChange={(e) => handleChange('pin', 'wrongText', e.target.value)} />
-              <Input label="URL Stiker Error (GIF/PNG)" value={localConfig.pin.wrongStickerUrl} onChange={(e) => handleChange('pin', 'wrongStickerUrl', e.target.value)} />
-              <Input label="Pesan Saat PIN Benar" value={localConfig.pin.successText} onChange={(e) => handleChange('pin', 'successText', e.target.value)} />
-              <Input label="URL Stiker Sukses (GIF/PNG)" value={localConfig.pin.successStickerUrl} onChange={(e) => handleChange('pin', 'successStickerUrl', e.target.value)} />
-            </div>
-          )}
-
-          {activeTab === 'letter' && (
-            <div className="space-y-4">
-              <Input label="Photo URL" value={localConfig.letter.photoUrl} onChange={(e) => handleChange('letter', 'photoUrl', e.target.value)} />
-              <Input label="Nama Pasangan (Penerima)" value={localConfig.letter.recipient} onChange={(e) => handleChange('letter', 'recipient', e.target.value)} />
-              <Input label="Tanggal Surat" value={localConfig.letter.date} onChange={(e) => handleChange('letter', 'date', e.target.value)} />
-              <Input label="Judul Surat" value={localConfig.letter.title} onChange={(e) => handleChange('letter', 'title', e.target.value)} />
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-[#8c8279]">Isi Surat</label>
-                <textarea rows={6} className="w-full px-4 py-2.5 border border-[#e6d9cc] rounded-xl bg-white focus:ring-2 focus:ring-[#d4a3a3] outline-none font-sans text-[#6b6259]" value={localConfig.letter.body} onChange={(e) => handleChange('letter', 'body', e.target.value)} />
-              </div>
-              <Input label="Tanda Tangan" value={localConfig.letter.signature} onChange={(e) => handleChange('letter', 'signature', e.target.value)} />
-            </div>
-          )}
-
-          {activeTab === 'game' && (
-             <div className="space-y-4">
-               <Input label="Judul Game" value={localConfig.game.title} onChange={(e) => handleChange('game', 'title', e.target.value)} />
-               <Input label="Subtitle" value={localConfig.game.subtitle} onChange={(e) => handleChange('game', 'subtitle', e.target.value)} />
-               <div className="flex flex-col gap-1.5 mt-2">
-                 <label className="text-sm font-semibold text-[#8c8279]">Teks Plot Twist (Final)</label>
-                 <textarea rows={3} className="w-full px-4 py-2.5 border border-[#e6d9cc] rounded-xl bg-white focus:ring-2 focus:ring-[#d4a3a3] outline-none font-sans text-[#6b6259]" value={localConfig.game.finalText} onChange={(e) => handleChange('game', 'finalText', e.target.value)} />
-               </div>
-               
-               <h3 className="font-bold text-[#b07d7d] mt-6 border-b border-[#e8d5d5] pb-2 font-serif">Foto Game (Harus di-klik semua)</h3>
-               {localConfig.game.images.map((photo, idx) => (
-                 <div key={idx} className="p-4 bg-white/60 rounded-xl shadow-sm border border-[#e8d5d5] space-y-3">
-                    <span className="font-semibold text-sm text-[#8c8279]">Foto {idx + 1}</span>
-                    <Input label="URL Foto" value={photo.url} onChange={(e) => {
-                       const newPhotos = [...localConfig.game.images];
-                       newPhotos[idx].url = e.target.value;
-                       handleChange('game', 'images', newPhotos);
-                    }} />
-                    <Input label="Pesan saat diklik (Salah)" value={photo.msg} onChange={(e) => {
-                        const newPhotos = [...localConfig.game.images];
-                        newPhotos[idx].msg = e.target.value;
-                        handleChange('game', 'images', newPhotos);
-                    }} />
-                 </div>
-               ))}
-             </div>
-          )}
-
-          {activeTab === 'album' && (
-            <div className="space-y-4">
-              <Input label="Judul Album" value={localConfig.album.title} onChange={(e) => handleChange('album', 'title', e.target.value)} />
-               <div className="flex justify-between items-center mt-6 border-b border-[#e8d5d5] pb-2">
-                 <h3 className="font-bold text-[#b07d7d] font-serif">Daftar Foto Album</h3>
-                 <button 
-                   aria-label="Add Photo"
-                   onClick={() => {
-                     const newPhotos = [...localConfig.album.pages, ''];
-                     handleChange('album', 'pages', newPhotos);
-                   }}
-                   className="text-xs bg-[#f3e6d8] text-[#b07d7d] px-4 py-2 rounded-full font-bold hover:bg-[#e8d5d5] transition-colors shadow-sm"
-                 >
-                   + Tambah Foto
-                 </button>
-               </div>
-               
-               <div className="space-y-3">
-                 {localConfig.album.pages.map((url, idx) => (
-                   <div key={idx} className="flex gap-2 items-center bg-white/80 p-2 rounded-xl shadow-sm border border-[#e8d5d5]">
-                      <span className="w-8 text-sm text-[#a39a90] font-bold text-center">{idx+1}</span>
-                      <Input 
-                        className="flex-1 px-3 py-2 text-sm border border-[#e6d9cc] rounded-lg bg-white outline-none" 
-                        placeholder="Masukkan URL foto..."
-                        value={url} 
-                        onChange={(e) => {
-                          const newPhotos = [...localConfig.album.pages];
-                          newPhotos[idx] = e.target.value;
-                          handleChange('album', 'pages', newPhotos);
-                      }} />
-                      <button 
-                        aria-label="Remove Photo"
-                        onClick={() => {
-                          const newPhotos = localConfig.album.pages.filter((_, i) => i !== idx);
-                          handleChange('album', 'pages', newPhotos);
-                        }}
-                        className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Hapus Foto"
-                      >
-                        <X size={18} />
-                      </button>
-                   </div>
-                 ))}
-               </div>
-               <p className="text-xs text-[#a39a90] mt-2 italic font-medium">* Saran: Gunakan perbandingan foto potret (4:5 atau 3:4).</p>
-            </div>
-          )}
-
-          {activeTab === 'whatsapp' && (
-             <div className="space-y-4">
-               <Input label="Nomor WhatsApp (Contoh: 62812...)" value={localConfig.whatsapp.phone} onChange={(e) => handleChange('whatsapp', 'phone', e.target.value)} />
-               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-semibold text-[#8c8279]">Pesan Default</label>
-                <textarea rows={3} className="w-full px-4 py-2.5 border border-[#e6d9cc] rounded-xl bg-white focus:ring-2 focus:ring-[#d4a3a3] outline-none font-sans text-[#6b6259]" value={localConfig.whatsapp.defaultMessage} onChange={(e) => handleChange('whatsapp', 'defaultMessage', e.target.value)} />
-              </div>
-               <Input label="Teks Tombol" value={localConfig.whatsapp.buttonText} onChange={(e) => handleChange('whatsapp', 'buttonText', e.target.value)} />
-             </div>
-          )}
-        </div>
-
-        <div className="p-5 border-t border-[#e8d5d5]/50 bg-white/50 backdrop-blur-md flex justify-end">
-          <button aria-label="Save Changes" onClick={handleSave} className="flex items-center gap-2 bg-[#c48b8b] hover:bg-[#b07d7d] text-white px-8 py-3 rounded-full font-bold transition-transform active:scale-95 shadow-lg shadow-[#c48b8b]/40">
-            <Save size={18} /> Simpan Perubahan
-          </button>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
-const Lockscreen = ({ nextScene, openAdmin }) => {
-  const { config } = useConfig();
-  const { isPlaying, togglePlay, progress } = useAudio();
-  const [time, setTime] = useState(new Date());
-
-  useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const formatTime = (date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-  };
-
-  const handleDragEnd = (event, info) => {
-    if (info.offset.y < -100) {
-      nextScene();
-    }
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0, y: -100, transition: { duration: 0.8, ease: [0.4, 0, 0.2, 1] } }}
-      className="relative w-full h-full overflow-hidden flex flex-col bg-black"
-    >
-      <img 
-        src={config.lockscreen.backgroundUrl}
-        alt="Lockscreen Background"
-        loading="lazy"
-        onError={handleImageError}
-        className="absolute inset-0 w-full h-full object-cover"
-      />
-      <div 
-        className="absolute inset-0 transition-all duration-500"
-        style={{ 
-          backgroundColor: `rgba(0,0,0,${config.lockscreen.overlayOpacity})`,
-          backdropFilter: `blur(${config.lockscreen.blur}px)`,
-          WebkitBackdropFilter: `blur(${config.lockscreen.blur}px)`
-        }} 
-      />
-
-      <button 
-        aria-label="Open Admin Settings"
-        onClick={openAdmin}
-        className="absolute top-6 left-6 z-50 p-2.5 bg-black/20 rounded-full text-white/60 hover:text-white transition-colors backdrop-blur-md border border-white/10"
-      >
-        <Settings size={22} />
-      </button>
-
-      <motion.div 
-        drag="y"
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={0.2}
-        onDragEnd={handleDragEnd}
-        className="relative z-10 w-full h-full flex flex-col items-center pt-20 pb-8 cursor-grab active:cursor-grabbing"
-      >
-        <div className="flex flex-col items-center mb-10 w-full select-none pointer-events-none">
-          <span className="text-white/90 text-2xl font-medium tracking-wide mb-1 drop-shadow-md">
-            {config.lockscreen.dateText}
-          </span>
-          <span className="text-white text-[5.5rem] font-semibold tracking-tighter drop-shadow-lg font-sans leading-none">
-            {formatTime(time)}
-          </span>
-        </div>
-
-        <div className="w-full px-5 mb-8 space-y-3 flex-1 overflow-y-auto hide-scrollbar select-none pointer-events-none">
-          {config.lockscreen.notifications.map((notif, idx) => (
-            <motion.div 
-              key={idx} 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.15 }}
-              className="bg-black/30 backdrop-blur-xl rounded-[1.5rem] p-4 flex gap-4 shadow-lg border border-white/10"
-            >
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#d4a3a3] to-[#b07d7d] flex items-center justify-center shrink-0 shadow-inner border border-white/20">
-                <Heart size={24} className="text-white fill-current" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-baseline mb-0.5">
-                  <span className="text-white/90 text-sm font-semibold tracking-wide uppercase">{notif.app}</span>
-                  <span className="text-white/50 text-xs">{notif.time}</span>
+            <!-- Drag Area -->
+            <div id="ls-drag-area" class="relative z-10 w-full h-full flex flex-col items-center pt-20 pb-8 cursor-grab active:cursor-grabbing">
+                <!-- Clock -->
+                <div class="flex flex-col items-center mb-10 w-full select-none pointer-events-none">
+                    <span id="ls-date" class="text-white/90 text-2xl font-medium tracking-wide mb-1 drop-shadow-md"></span>
+                    <span id="ls-time" class="text-white text-[5.5rem] font-semibold tracking-tighter drop-shadow-lg font-sans leading-none"></span>
                 </div>
-                <p className="text-white font-semibold text-base truncate">{notif.title}</p>
-                <p className="text-white/70 text-sm line-clamp-2 mt-0.5 leading-snug">{notif.content}</p>
-              </div>
-            </motion.div>
-          ))}
+
+                <!-- Notifications -->
+                <div id="ls-notifications" class="w-full px-5 mb-8 space-y-3 flex-1 overflow-y-auto hide-scrollbar select-none pointer-events-none">
+                    <!-- Injected via JS -->
+                </div>
+
+                <!-- Music Player -->
+                <div class="w-full px-5 mt-auto mb-10 pointer-events-auto">
+                    <div class="bg-black/40 backdrop-blur-2xl rounded-[2rem] p-5 shadow-2xl border border-white/10">
+                        <div class="flex items-center gap-4 mb-5">
+                            <img id="ls-music-cover" src="" onerror="this.src='https://placehold.co/100x100/f3e6d8/b07d7d?text=Music'" alt="Album Art" class="w-16 h-16 rounded-xl object-cover shadow-md border border-white/5">
+                            <div class="flex-1 min-w-0">
+                                <h3 id="ls-music-title" class="text-white font-bold text-lg truncate"></h3>
+                                <p id="ls-music-artist" class="text-white/60 text-sm truncate"></p>
+                            </div>
+                        </div>
+                        <div class="w-full h-1.5 bg-white/20 rounded-full mb-6 overflow-hidden">
+                            <div id="audio-progress" class="h-full bg-white rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <div class="flex justify-center items-center gap-12">
+                            <button class="text-white/80 active:scale-95"><i data-lucide="skip-back" class="w-8 h-8 fill-current"></i></button>
+                            <button onclick="toggleAudio()" class="text-white hover:scale-110 active:scale-95 transition-transform" id="btn-play-pause">
+                                <i data-lucide="play" class="w-12 h-12 fill-current"></i>
+                            </button>
+                            <button class="text-white/80 active:scale-95"><i data-lucide="skip-forward" class="w-8 h-8 fill-current"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Buttons -->
+                <div class="flex justify-between w-full px-12 mb-8 pointer-events-auto">
+                    <button class="w-14 h-14 rounded-full bg-black/30 backdrop-blur-xl flex items-center justify-center text-white border border-white/10 shadow-lg active:scale-90"><i data-lucide="flashlight" class="w-6 h-6"></i></button>
+                    <button class="w-14 h-14 rounded-full bg-black/30 backdrop-blur-xl flex items-center justify-center text-white border border-white/10 shadow-lg active:scale-90"><i data-lucide="camera" class="w-6 h-6"></i></button>
+                </div>
+
+                <div class="text-white flex flex-col items-center pb-2 pointer-events-auto cursor-pointer animate-bounce-subtle" onclick="goToScene(1)">
+                    <span class="text-sm font-semibold tracking-widest uppercase opacity-80 drop-shadow-md">Geser ke atas untuk membuka</span>
+                </div>
+            </div>
         </div>
 
-        <div className="w-full px-5 mt-auto mb-10 pointer-events-auto">
-          <div className="bg-black/40 backdrop-blur-2xl rounded-[2rem] p-5 shadow-2xl border border-white/10">
-            <div className="flex items-center gap-4 mb-5">
-              <img src={config.lockscreen.music.coverUrl} alt="Album Art" loading="lazy" onError={handleImageError} className="w-16 h-16 rounded-xl object-cover shadow-md border border-white/5" />
-              <div className="flex-1 min-w-0">
-                <h3 className="text-white font-bold text-lg truncate">{config.lockscreen.music.title}</h3>
-                <p className="text-white/60 text-sm truncate">{config.lockscreen.music.artist}</p>
-              </div>
-            </div>
+        <!-- SCENE 2: PIN SCREEN -->
+        <div id="scene-pin" class="scene flex flex-col items-center justify-center overflow-hidden z-40">
+            <div id="pin-bg" class="absolute inset-0 bg-cover bg-center transition-all duration-700 blur-[25px] brightness-50"></div>
+            <div class="absolute inset-0 bg-black/20 backdrop-blur-md"></div>
             
-            <div className="w-full h-1.5 bg-white/20 rounded-full mb-6 overflow-hidden">
-              <div className="h-full bg-white rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
-            </div>
+            <!-- Success Particles Container -->
+            <div id="pin-particles" class="absolute inset-0 z-20 pointer-events-none overflow-hidden hidden"></div>
 
-            <div className="flex justify-center items-center gap-12">
-              <button aria-label="Previous Track" className="text-white/80 hover:text-white transition-colors active:scale-95">
-                <SkipBack size={32} fill="currentColor" />
-              </button>
-              <button aria-label="Play/Pause" onClick={togglePlay} className="text-white hover:scale-110 transition-transform active:scale-95">
-                {isPlaying ? <Pause size={48} fill="currentColor" /> : <Play size={48} fill="currentColor" />}
-              </button>
-              <button aria-label="Next Track" className="text-white/80 hover:text-white transition-colors active:scale-95">
-                <SkipForward size={32} fill="currentColor" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-between w-full px-12 mb-8 pointer-events-auto">
-          <button aria-label="Flashlight" className="w-14 h-14 rounded-full bg-black/30 backdrop-blur-xl flex items-center justify-center text-white border border-white/10 shadow-lg hover:bg-white/20 transition-colors active:scale-90">
-            <Flashlight size={26} />
-          </button>
-          <button aria-label="Camera" className="w-14 h-14 rounded-full bg-black/30 backdrop-blur-xl flex items-center justify-center text-white border border-white/10 shadow-lg hover:bg-white/20 transition-colors active:scale-90">
-            <Camera size={26} />
-          </button>
-        </div>
-
-        <motion.div 
-          animate={{ y: [0, -10, 0] }}
-          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-          className="text-white flex flex-col items-center pb-2 pointer-events-auto cursor-pointer"
-          onClick={nextScene}
-        >
-          <span className="text-sm font-semibold tracking-widest uppercase opacity-80 drop-shadow-md hover:opacity-100 transition-opacity">
-            Geser ke atas untuk membuka
-          </span>
-        </motion.div>
-      </motion.div>
-    </motion.div>
-  );
-};
-
-const PinScreen = ({ nextScene }) => {
-  const { config } = useConfig();
-  const [pin, setPin] = useState('');
-  const [status, setStatus] = useState('typing'); // typing, error, success
-  
-  const targetLength = config.pin.code ? config.pin.code.toString().length : 6;
-
-  const handleKeyPress = (num) => {
-    if (pin.length < targetLength && status === 'typing') {
-      const newPin = pin + num;
-      setPin(newPin);
-      if (newPin.length === targetLength) verifyPin(newPin);
-    }
-  };
-
-  const handleDelete = () => {
-    if (pin.length > 0 && status === 'typing') setPin(pin.slice(0, -1));
-  };
-
-  const resetPin = () => {
-    setPin('');
-    setStatus('typing');
-  };
-
-  const verifyPin = (currentPin) => {
-    if (currentPin === config.pin.code.toString()) {
-      setStatus('success');
-      if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-        window.navigator.vibrate([100, 50, 100]);
-      }
-      setTimeout(() => nextScene(), 3500); 
-    } else {
-      setStatus('error');
-      if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-         window.navigator.vibrate([50, 50, 50]);
-      }
-    }
-  };
-
-  const dots = Array.from({ length: targetLength }, (_, i) => i);
-  const heartParticles = Array.from({ length: 20 }, (_, i) => ({
-    id: i,
-    left: `${Math.random() * 90 + 5}%`,
-    animationDuration: `${Math.random() * 2 + 1.5}s`,
-    delay: `${Math.random() * 0.5}s`,
-    scale: Math.random() * 0.5 + 0.8,
-  }));
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0, scale: 1.05 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, filter: 'blur(10px)', transition: { duration: 0.6 } }}
-      className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden"
-    >
-      <div 
-        className="absolute inset-0 bg-cover bg-center transition-all duration-700"
-        style={{ 
-          backgroundImage: `url(${config.lockscreen.backgroundUrl})`, 
-          filter: `blur(${status === 'typing' ? '25px' : '40px'}) brightness(0.5)` 
-        }}
-      />
-      <div className="absolute inset-0 bg-black/20 backdrop-blur-md" />
-
-      <AnimatePresence>
-        {status === 'success' && (
-          <motion.div 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 z-20 pointer-events-none overflow-hidden"
-          >
-            {heartParticles.map(particle => (
-              <motion.div
-                key={particle.id}
-                className="absolute bottom-0"
-                style={{ left: particle.left }}
-                initial={{ y: '100vh', scale: 0, opacity: 1 }}
-                animate={{ y: '-20vh', scale: [particle.scale, particle.scale * 1.5, particle.scale], opacity: [0, 1, 0] }}
-                transition={{ duration: parseFloat(particle.animationDuration), delay: parseFloat(particle.delay), ease: "easeOut" }}
-              >
-                <Heart size={32} className="fill-[#d4a3a3] text-[#d4a3a3]" />
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <motion.div 
-        animate={status === 'error' ? { x: [-15, 15, -12, 12, -8, 8, -4, 4, 0] } : {}}
-        transition={{ duration: 0.5 }}
-        className="relative z-30 flex flex-col items-center w-full max-w-sm px-8"
-      >
-        <AnimatePresence mode="wait">
-          {status === 'typing' ? (
-            <motion.div 
-              key="typing"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="flex flex-col items-center w-full"
-            >
-              <Lock className="text-white/90 mb-6" size={44} />
-              <h2 className="text-white text-xl font-medium mb-10 text-center tracking-wide">{config.pin.hintText}</h2>
-              
-              <div className="flex gap-5 mb-16 justify-center flex-wrap max-w-[280px]">
-                {dots.map(i => (
-                  <div 
-                    key={i} 
-                    className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-300 ${
-                      pin.length > i 
-                        ? 'bg-white border-white scale-110 shadow-[0_0_15px_rgba(255,255,255,0.8)]'
-                        : 'border-white/50 bg-transparent'
-                    }`}
-                  />
-                ))}
-              </div>
-
-              <div className="grid grid-cols-3 gap-x-8 gap-y-6">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
-                  <button
-                    key={num}
-                    aria-label={`Digit ${num}`}
-                    onClick={() => handleKeyPress(num.toString())}
-                    className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-white text-4xl font-light hover:bg-white/25 active:bg-white/40 transition-colors backdrop-blur-xl border border-white/20"
-                  >
-                    {num}
-                  </button>
-                ))}
-                <div />
-                <button
-                  aria-label="Digit 0"
-                  onClick={() => handleKeyPress('0')}
-                  className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-white text-4xl font-light hover:bg-white/25 active:bg-white/40 transition-colors backdrop-blur-xl border border-white/20"
-                >
-                  0
-                </button>
-                <button
-                  aria-label="Delete"
-                  onClick={handleDelete}
-                  className="w-20 h-20 rounded-full flex items-center justify-center text-white/90 hover:bg-white/10 active:bg-white/20 transition-colors"
-                >
-                  <span className="text-sm font-semibold tracking-wider">HAPUS</span>
-                </button>
-              </div>
-            </motion.div>
-          ) : status === 'error' ? (
-            <motion.div 
-              key="error"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="flex flex-col items-center bg-black/40 p-8 rounded-[2rem] backdrop-blur-2xl border border-red-500/40 shadow-2xl w-full text-center"
-            >
-              {config.pin.wrongStickerUrl ? (
-                 <img src={config.pin.wrongStickerUrl} loading="lazy" alt="Salah" className="w-40 h-40 object-contain mb-6 drop-shadow-xl" />
-              ) : (
-                 <div className="text-7xl mb-6 drop-shadow-md">🙅‍♀️</div>
-              )}
-              <h2 className="text-red-300 text-2xl font-bold mb-10 font-serif leading-snug">{config.pin.wrongText}</h2>
-              <button 
-                aria-label="Try Again"
-                onClick={resetPin}
-                className="w-full bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-full font-bold tracking-widest uppercase border border-white/20 transition-all active:scale-95"
-              >
-                COBA LAGI
-              </button>
-            </motion.div>
-          ) : (
-            <motion.div 
-              key="success"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              className="flex flex-col items-center bg-white/20 p-10 rounded-[2rem] backdrop-blur-2xl border border-white/30 shadow-2xl w-full text-center"
-            >
-              {config.pin.successStickerUrl ? (
-                 <img src={config.pin.successStickerUrl} loading="lazy" alt="Sukses" className="w-48 h-48 object-contain mb-6 drop-shadow-xl" />
-              ) : (
-                 <div className="text-8xl mb-6 drop-shadow-md">🥰</div>
-              )}
-              <h2 className="text-white text-3xl font-bold font-serif leading-snug drop-shadow-md">{config.pin.successText}</h2>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-    </motion.div>
-  );
-};
-
-const LoveLetter = ({ nextScene }) => {
-  const { config } = useConfig();
-  const [isOpening, setIsOpening] = useState(false);
-  const [isOpened, setIsOpened] = useState(false);
-
-  const handleOpen = () => {
-    setIsOpening(true);
-    setTimeout(() => setIsOpened(true), 2000);
-  };
-
-  const bgHearts = Array.from({ length: 15 }, (_, i) => ({
-    id: i,
-    left: `${Math.random() * 100}%`,
-    top: `${Math.random() * 100}%`,
-    animationDuration: `${Math.random() * 3 + 3}s`,
-    animationDelay: `${Math.random() * 2}s`,
-  }));
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 0.95, filter: 'blur(10px)', transition: { duration: 0.8 } }}
-      className="w-full h-full bg-[#fdfbf7] flex flex-col relative overflow-hidden paper-texture"
-    >
-      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-60">
-        {bgHearts.map(heart => (
-          <motion.div
-            key={heart.id}
-            className="absolute text-[#e8d5d5]/80"
-            style={{ left: heart.left, top: heart.top }}
-            animate={{ y: [-20, 20, -20], x: [-10, 10, -10], rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
-            transition={{ duration: parseFloat(heart.animationDuration), repeat: Infinity, ease: "easeInOut", delay: parseFloat(heart.animationDelay) }}
-          >
-            <Heart size={Math.random() * 20 + 10} fill="currentColor" />
-          </motion.div>
-        ))}
-        <div className="absolute top-[-10%] left-[-10%] w-64 h-64 bg-[#e8d5d5]/40 rounded-full mix-blend-multiply filter blur-[60px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-72 h-72 bg-[#f3e6d8]/50 rounded-full mix-blend-multiply filter blur-[60px]" />
-      </div>
-      
-      {!isOpened ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-6 relative z-10">
-          <motion.p 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: isOpening ? 0 : 1, y: isOpening ? -30 : 0 }}
-            className="text-[#c48b8b] font-serif italic text-xl mb-12 tracking-wide text-center drop-shadow-sm font-medium"
-          >
-            Klik love untuk membuka surat ❤️
-          </motion.p>
-
-          <div className="relative w-80 h-56 mt-8 perspective-[1000px]">
-            {/* Envelope Back */}
-            <div className="absolute inset-0 bg-[#dcbaba] rounded-lg shadow-inner overflow-hidden border border-[#c4a1a1]">
-              <div className="absolute inset-0 opacity-10 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,#000_10px,#000_20px)]" />
-            </div>
-
-            {/* Letter Inside */}
-            <motion.div 
-              initial={{ y: 10 }}
-              animate={isOpening ? { y: -180, scale: 1.05 } : { y: 10 }}
-              transition={{ duration: 1.2, delay: 0.4, ease: [0.25, 1, 0.5, 1] }}
-              className="absolute bottom-2 left-3 right-3 h-48 bg-[#fdfbf7] rounded-md shadow-md border border-stone-200 flex flex-col items-center pt-6 px-4 z-10 paper-texture overflow-hidden"
-            >
-              <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-sm mb-2">
-                <img src={config.letter.photoUrl} loading="lazy" onError={handleImageError} className="w-full h-full object-cover" alt="Couple" />
-              </div>
-              <p className="font-cursive text-[#b07d7d] text-xl font-bold">Untuk {config.letter.recipient}</p>
-              <p className="font-serif text-[10px] text-gray-400 mt-2 text-center line-clamp-3 leading-relaxed">
-                {config.letter.body}
-              </p>
-            </motion.div>
-
-            {/* Envelope Flaps */}
-            <div className="absolute inset-0 z-20 overflow-hidden rounded-lg pointer-events-none drop-shadow-2xl">
-               <div className="absolute inset-0 bg-[#ebdcdc] origin-left border-r border-white/20" style={{ clipPath: 'polygon(0 0, 50% 50%, 0 100%)' }} />
-               <div className="absolute inset-0 bg-[#e8d8d8] origin-right border-l border-white/20" style={{ clipPath: 'polygon(100% 0, 50% 50%, 100% 100%)' }} />
-               <div className="absolute inset-0 bg-[#e3d1d1] origin-bottom border-t border-white/30" style={{ clipPath: 'polygon(0 100%, 50% 50%, 100% 100%)' }} />
-            </div>
-
-            {/* Top Flap */}
-            <motion.div 
-              initial={{ rotateX: 0 }}
-              animate={isOpening ? { rotateX: 180, zIndex: 0 } : { rotateX: 0, zIndex: 30 }}
-              transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-              className="absolute top-0 left-0 right-0 h-32 bg-[#e6d5d5] origin-top border-b border-white/40 shadow-[0_10px_20px_rgba(0,0,0,0.1)] rounded-t-lg"
-              style={{ clipPath: 'polygon(0 0, 100% 0, 50% 100%)', backfaceVisibility: 'hidden' }}
-            />
-            <motion.div 
-              initial={{ rotateX: -180, opacity: 0 }}
-              animate={isOpening ? { rotateX: 0, opacity: 1, zIndex: 5 } : { rotateX: -180, opacity: 0, zIndex: 0 }}
-              transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-              className="absolute top-0 left-0 right-0 h-32 bg-[#d9c5c5] origin-top rounded-t-lg"
-              style={{ clipPath: 'polygon(0 0, 100% 0, 50% 100%)', backfaceVisibility: 'hidden' }}
-            />
-
-            <AnimatePresence>
-              {!isOpening && (
-                <motion.button 
-                  aria-label="Open Letter"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0, opacity: 0 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleOpen}
-                  className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 w-16 h-16 bg-gradient-to-br from-[#c48b8b] to-[#b07d7d] rounded-full shadow-[0_4px_20px_rgba(176,125,125,0.4)] flex items-center justify-center border-2 border-[#e8d5d5] cursor-pointer"
-                >
-                  <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}>
-                    <Heart className="text-white fill-current opacity-90" size={26} />
-                  </motion.div>
-                </motion.button>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-      ) : (
-        <motion.div 
-          initial={{ y: '100%', opacity: 0, scale: 0.95, rotate: -1 }}
-          animate={{ y: 0, opacity: 1, scale: 1, rotate: 0 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 80 }}
-          className="flex-1 overflow-y-auto hide-scrollbar p-5 md:p-8 relative z-20 flex flex-col items-center pb-32"
-        >
-          <div className="w-full max-w-md bg-[#fdfbf7] rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.08)] p-6 md:p-10 relative mt-4 mb-8 paper-texture border border-[#ece4d9]">
-            <div className="absolute top-0 bottom-0 left-2 w-px bg-[#e8d5d5]/50" />
-            <div className="absolute top-0 bottom-0 left-3 w-px bg-[#e8d5d5]/50" />
-
-            <div className="flex justify-between items-start mb-10 mt-2">
-              <h2 className="font-cursive text-3xl text-[#b07d7d] font-bold ml-4">Untuk {config.letter.recipient} ❤️</h2>
-              <span className="font-cursive text-[#a39a90] text-lg rotate-2">{config.letter.date}</span>
-            </div>
-
-            <div className="w-full px-2 mb-10">
-              <div className="bg-[#fcf9f2] p-3 pb-10 rounded-sm shadow-[0_10px_30px_rgba(0,0,0,0.05)] transform rotate-2 mx-auto max-w-[280px] relative border border-[#ece4d9]">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-6 bg-[#f3e6d8]/60 backdrop-blur-sm -rotate-3 border border-[#e6d9cc]/40 shadow-sm mix-blend-multiply" />
-                <img src={config.letter.photoUrl} loading="lazy" onError={handleImageError} alt="Us" className="w-full aspect-square object-cover rounded-sm filter sepia-[0.15] contrast-[1.05]" />
-                <p className="absolute bottom-3 left-0 right-0 text-center font-cursive text-[#8c8279] text-xl">{config.letter.title}</p>
-              </div>
-            </div>
-            
-            <div className="relative z-10 px-4">
-              <p className="text-[#6b6259] leading-[2.2] whitespace-pre-wrap font-serif text-base tracking-wide text-justify">
-                {config.letter.body}
-              </p>
-            </div>
-
-            <div className="mt-14 text-right pr-4 relative">
-              <div className="absolute -bottom-4 left-4 opacity-40 -rotate-12">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d97777" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 22c4-4 4-10 0-14-4 4-4 10 0 14z"/><path d="M12 8V2"/><path d="M12 8c2.5-1.5 5.5-1.5 8 0"/><path d="M12 8c-2.5-1.5-5.5-1.5-8 0"/>
-                </svg>
-              </div>
-              <p className="font-serif italic text-[#a39a90] text-sm mb-2">With all my love,</p>
-              <p className="font-cursive text-[#c48b8b] text-4xl transform -rotate-2">{config.letter.signature}</p>
-            </div>
-          </div>
-          
-          <motion.button
-            aria-label="Continue"
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 1 }}
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={nextScene}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-xl text-[#b07d7d] border border-[#e8d5d5] px-8 py-3.5 rounded-full font-serif font-bold shadow-[0_8px_30px_rgba(176,125,125,0.2)] flex items-center gap-3 z-30 transition-all hover:bg-[#fcf9f2]"
-          >
-            LANJUTKAN <span className="text-xl font-sans font-light">→</span>
-          </motion.button>
-        </motion.div>
-      )}
-    </motion.div>
-  );
-};
-
-const GameScreen = ({ nextScene }) => {
-  const { config } = useConfig();
-  const [clickedPhotos, setClickedPhotos] = useState(new Set());
-  const [showTwist, setShowTwist] = useState(false);
-  const [wigglingIdx, setWigglingIdx] = useState(null);
-
-  const scatterStyles = [
-    { rotate: -4, y: 10, x: -5 },
-    { rotate: 3, y: -5, x: 5 },
-    { rotate: -2, y: 5, x: 2 },
-    { rotate: 5, y: -10, x: -4 },
-    { rotate: -3, y: 15, x: 6 },
-    { rotate: 2, y: 0, x: -6 },
-  ];
-
-  const handleSelect = (idx) => {
-    if (showTwist) return;
-    setWigglingIdx(idx);
-    setTimeout(() => setWigglingIdx(null), 500);
-
-    const newSet = new Set(clickedPhotos);
-    newSet.add(idx);
-    setClickedPhotos(newSet);
-
-    if (newSet.size === config.game.images.length) {
-      setTimeout(() => setShowTwist(true), 1000);
-    }
-  };
-
-  useEffect(() => {
-    if (showTwist) {
-      const duration = config.game.duration || 5000;
-      const timer = setTimeout(() => nextScene(), duration);
-      return () => clearTimeout(timer);
-    }
-  }, [showTwist, nextScene, config.game.duration]);
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 1.05, filter: 'blur(10px)', transition: { duration: 0.8 } }}
-      className="w-full h-full bg-[#fdfbf7] flex flex-col relative overflow-hidden paper-texture"
-    >
-      <div className="absolute inset-0 pointer-events-none opacity-40">
-         <div className="absolute top-10 left-10 w-40 h-40 bg-[#f3e6d8] rounded-full mix-blend-multiply filter blur-3xl"></div>
-         <div className="absolute bottom-20 right-10 w-48 h-48 bg-[#e8d5d5] rounded-full mix-blend-multiply filter blur-3xl"></div>
-      </div>
-
-      <div className="text-center pt-12 pb-6 px-6 z-10">
-        <h2 className="text-2xl font-bold text-[#b07d7d] mb-2 font-serif drop-shadow-sm">{config.game.title}</h2>
-        <p className="text-[#a39a90] font-medium text-sm font-sans tracking-wide">{config.game.subtitle}</p>
-      </div>
-
-      <div className="flex-1 overflow-y-auto hide-scrollbar px-4 pb-12 z-10">
-        <div className="grid grid-cols-2 gap-x-4 gap-y-8 max-w-lg mx-auto pb-8">
-          {config.game.images.map((photo, idx) => {
-            const isClicked = clickedPhotos.has(idx);
-            const isWiggling = wigglingIdx === idx;
-            const style = scatterStyles[idx % scatterStyles.length];
-
-            return (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ 
-                  opacity: 1, 
-                  scale: isWiggling ? 1.03 : 1, 
-                  rotate: isWiggling ? [0, -5, 5, -5, 5, 0] : style.rotate,
-                  y: style.y,
-                  x: style.x
-                }}
-                transition={{ duration: isWiggling ? 0.4 : 0.6, type: "spring", delay: isWiggling ? 0 : idx * 0.1 }}
-                onClick={() => handleSelect(idx)}
-                className="relative bg-white p-2.5 pb-8 rounded-sm shadow-[0_8px_20px_rgba(0,0,0,0.06)] cursor-pointer transform-gpu hover:shadow-[0_15px_30px_rgba(0,0,0,0.1)] border border-[#f3e6d8] transition-shadow duration-300"
-              >
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-5 bg-[#f3e6d8]/60 backdrop-blur-sm -rotate-2 border border-[#e6d9cc]/40 shadow-sm z-20 mix-blend-multiply"></div>
+            <div id="pin-content-area" class="relative z-30 flex flex-col items-center w-full max-w-sm px-8 transition-transform duration-500">
                 
-                <div className="relative w-full aspect-[4/5] overflow-hidden rounded-sm">
-                  <img src={photo.url} loading="lazy" onError={handleImageError} alt={`Option ${idx}`} className="w-full h-full object-cover filter contrast-[1.02] sepia-[0.05]" />
-                  
-                  <AnimatePresence>
-                    {isClicked && (
-                      <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="absolute inset-0 flex flex-col items-center justify-center bg-[#fdfbf7]/70 backdrop-blur-[4px] p-3 text-center border border-[#e8d5d5]/50"
-                      >
-                        <motion.span 
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1, rotate: [0, -10, 10, 0] }}
-                          transition={{ type: "spring", delay: 0.1 }}
-                          className="text-4xl mb-2 drop-shadow-sm opacity-90"
-                        >
-                          🤍
-                        </motion.span>
-                        <p className="text-[#b07d7d] font-bold text-sm drop-shadow-sm font-sans tracking-wide leading-tight">
-                          {photo.msg || config.game.wrongText}
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                <!-- Typing State -->
+                <div id="pin-typing-state" class="flex flex-col items-center w-full">
+                    <i data-lucide="lock" class="text-white/90 mb-6 w-11 h-11"></i>
+                    <h2 id="pin-hint" class="text-white text-xl font-medium mb-10 text-center tracking-wide"></h2>
+                    
+                    <div id="pin-dots" class="flex gap-5 mb-16 justify-center flex-wrap max-w-[280px]">
+                        <!-- Injected via JS -->
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-x-8 gap-y-6">
+                        <button onclick="pressPin('1')" class="pin-btn w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-white text-4xl font-light active:bg-white/40 backdrop-blur-xl border border-white/20">1</button>
+                        <button onclick="pressPin('2')" class="pin-btn w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-white text-4xl font-light active:bg-white/40 backdrop-blur-xl border border-white/20">2</button>
+                        <button onclick="pressPin('3')" class="pin-btn w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-white text-4xl font-light active:bg-white/40 backdrop-blur-xl border border-white/20">3</button>
+                        <button onclick="pressPin('4')" class="pin-btn w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-white text-4xl font-light active:bg-white/40 backdrop-blur-xl border border-white/20">4</button>
+                        <button onclick="pressPin('5')" class="pin-btn w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-white text-4xl font-light active:bg-white/40 backdrop-blur-xl border border-white/20">5</button>
+                        <button onclick="pressPin('6')" class="pin-btn w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-white text-4xl font-light active:bg-white/40 backdrop-blur-xl border border-white/20">6</button>
+                        <button onclick="pressPin('7')" class="pin-btn w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-white text-4xl font-light active:bg-white/40 backdrop-blur-xl border border-white/20">7</button>
+                        <button onclick="pressPin('8')" class="pin-btn w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-white text-4xl font-light active:bg-white/40 backdrop-blur-xl border border-white/20">8</button>
+                        <button onclick="pressPin('9')" class="pin-btn w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-white text-4xl font-light active:bg-white/40 backdrop-blur-xl border border-white/20">9</button>
+                        <div></div>
+                        <button onclick="pressPin('0')" class="pin-btn w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-white text-4xl font-light active:bg-white/40 backdrop-blur-xl border border-white/20">0</button>
+                        <button onclick="deletePin()" class="w-20 h-20 rounded-full flex items-center justify-center text-white/90 active:bg-white/20 transition-colors">
+                            <span class="text-sm font-semibold tracking-wider">HAPUS</span>
+                        </button>
+                    </div>
                 </div>
-              </motion.div>
-            )
-          })}
+
+                <!-- Error State -->
+                <div id="pin-error-state" class="hidden flex-col items-center bg-black/40 p-8 rounded-[2rem] backdrop-blur-2xl border border-red-500/40 shadow-2xl w-full text-center">
+                    <img id="pin-error-img" src="" class="w-40 h-40 object-contain mb-6 drop-shadow-xl" alt="Salah">
+                    <h2 id="pin-error-text" class="text-red-300 text-2xl font-bold mb-10 font-serif leading-snug"></h2>
+                    <button onclick="resetPinUI()" class="w-full bg-white/10 text-white px-8 py-4 rounded-full font-bold tracking-widest uppercase border border-white/20 active:scale-95">COBA LAGI</button>
+                </div>
+
+                <!-- Success State -->
+                <div id="pin-success-state" class="hidden flex-col items-center bg-white/20 p-10 rounded-[2rem] backdrop-blur-2xl border border-white/30 shadow-2xl w-full text-center">
+                    <img id="pin-success-img" src="" class="w-48 h-48 object-contain mb-6 drop-shadow-xl" alt="Sukses">
+                    <h2 id="pin-success-text" class="text-white text-3xl font-bold font-serif leading-snug drop-shadow-md"></h2>
+                </div>
+            </div>
         </div>
-      </div>
 
-      <AnimatePresence>
-        {showTwist && (
-          <motion.div 
-             initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
-             animate={{ opacity: 1, backdropFilter: "blur(16px)" }}
-             exit={{ opacity: 0 }}
-             className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-[#fcf9f2]/70 p-6 text-center overflow-hidden"
-          >
-             {Array.from({ length: 30 }).map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute"
-                  initial={{ x: "50%", y: "50%", opacity: 1, scale: 0 }}
-                  animate={{ 
-                    x: `${Math.random() * 200 - 100}vw`,
-                    y: `${Math.random() * 200 - 100}vh`,
-                    opacity: [1, 1, 0],
-                    scale: Math.random() * 1.5 + 0.5,
-                    rotate: Math.random() * 360
-                  }}
-                  transition={{ duration: Math.random() * 2.5 + 3, ease: "easeOut" }}
-                >
-                  <Heart size={32} className="text-[#d4a3a3] fill-[#e8d5d5] opacity-80" />
-                </motion.div>
-             ))}
+        <!-- SCENE 3: LOVE LETTER -->
+        <div id="scene-letter" class="scene bg-[#fdfbf7] flex-col overflow-hidden paper-texture z-30">
+            <!-- Background Hearts -->
+            <div id="letter-bg-hearts" class="absolute inset-0 pointer-events-none overflow-hidden opacity-60">
+                <div class="absolute top-[-10%] left-[-10%] w-64 h-64 bg-[#e8d5d5]/40 rounded-full mix-blend-multiply filter blur-[60px]"></div>
+                <div class="absolute bottom-[-10%] right-[-10%] w-72 h-72 bg-[#f3e6d8]/50 rounded-full mix-blend-multiply filter blur-[60px]"></div>
+                <!-- JS injected hearts -->
+            </div>
 
-             <motion.h1 
-               initial={{ scale: 0.8, opacity: 0 }}
-               animate={{ scale: 1, opacity: 1 }}
-               transition={{ delay: 1.0, type: "spring", bounce: 0.6 }}
-               className="text-4xl md:text-5xl font-bold font-cursive text-[#c48b8b] leading-tight drop-shadow-md whitespace-pre-wrap z-10"
-             >
-               {config.game.finalText}
-             </motion.h1>
-             
-             <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 2.5 }}
-                className="absolute bottom-10 text-[#c48b8b] text-sm font-sans tracking-widest uppercase opacity-80 animate-pulse"
-             >
-                Memuat kenangan...
-             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  );
-};
+            <!-- Envelope View (Before Open) -->
+            <div id="envelope-wrapper" class="flex-1 flex flex-col items-center justify-center p-6 relative z-10 w-full h-full">
+                <p id="envelope-hint" class="text-[#c48b8b] font-serif italic text-xl mb-12 tracking-wide text-center drop-shadow-sm font-medium transition-all duration-500">Klik love untuk membuka surat ❤️</p>
+                
+                <div id="envelope-container" class="relative w-80 h-56 mt-8 perspective-2000">
+                    <!-- Envelope Back -->
+                    <div class="absolute inset-0 bg-[#dcbaba] rounded-lg shadow-inner overflow-hidden border border-[#c4a1a1]">
+                        <div class="absolute inset-0 opacity-10 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,#000_10px,#000_20px)]"></div>
+                    </div>
+                    
+                    <!-- Letter Paper Inside -->
+                    <div class="letter-paper absolute bottom-2 left-3 right-3 h-48 bg-[#fdfbf7] rounded-md shadow-md border border-stone-200 flex flex-col items-center pt-6 px-4 z-10 paper-texture overflow-hidden transform translate-y-[10px]">
+                        <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-sm mb-2">
+                            <img id="env-photo" src="" class="w-full h-full object-cover">
+                        </div>
+                        <p id="env-recipient" class="font-cursive text-[#b07d7d] text-xl font-bold"></p>
+                        <p id="env-body-preview" class="font-serif text-[10px] text-gray-400 mt-2 text-center line-clamp-3 leading-relaxed"></p>
+                    </div>
 
-const PhotoAlbum = () => {
-  const { config } = useConfig();
-  const [isOpen, setIsOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0); 
-  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
-  const [userMessage, setUserMessage] = useState('');
-  const [touchStartX, setTouchStartX] = useState(null);
-  
-  const photosPerPage = 2;
-  const photos = config.album.pages;
-  
-  const pages = [];
-  for (let i = 0; i < photos.length; i += photosPerPage) {
-    pages.push(photos.slice(i, i + photosPerPage));
-  }
-  
-  const spreads = [];
-  for (let i = 0; i < pages.length; i += 2) {
-    spreads.push({
-      left: pages[i] || [],
-      right: pages[i + 1] || []
-    });
-  }
+                    <!-- Envelope Flaps -->
+                    <div class="absolute inset-0 z-20 overflow-hidden rounded-lg pointer-events-none drop-shadow-2xl">
+                        <div class="absolute inset-0 bg-[#ebdcdc] origin-left border-r border-white/20" style="clip-path: polygon(0 0, 50% 50%, 0 100%)"></div>
+                        <div class="absolute inset-0 bg-[#e8d8d8] origin-right border-l border-white/20" style="clip-path: polygon(100% 0, 50% 50%, 100% 100%)"></div>
+                        <div class="absolute inset-0 bg-[#e3d1d1] origin-bottom border-t border-white/30" style="clip-path: polygon(0 100%, 50% 50%, 100% 100%)"></div>
+                    </div>
 
-  const totalFlips = spreads.length;
+                    <!-- Top Flap -->
+                    <div class="envelope-flap-top envelope-flap-top-front absolute top-0 left-0 right-0 h-32 bg-[#e6d5d5] border-b border-white/40 shadow-[0_10px_20px_rgba(0,0,0,0.1)] rounded-t-lg z-30" style="clip-path: polygon(0 0, 100% 0, 50% 100%); backface-visibility: hidden;"></div>
+                    <div class="envelope-flap-top envelope-flap-top-back absolute top-0 left-0 right-0 h-32 bg-[#d9c5c5] rounded-t-lg z-0 opacity-0 transform rotate-x-[-180deg]" style="clip-path: polygon(0 0, 100% 0, 50% 100%); backface-visibility: hidden;"></div>
 
-  const handleNext = () => {
-    if (!isOpen) { setIsOpen(true); return; }
-    if (currentPage <= totalFlips) setCurrentPage(prev => prev + 1);
-  };
+                    <!-- Open Button -->
+                    <button id="btn-open-envelope" onclick="openEnvelope()" class="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 w-16 h-16 bg-gradient-to-br from-[#c48b8b] to-[#b07d7d] rounded-full shadow-[0_4px_20px_rgba(176,125,125,0.4)] flex items-center justify-center border-2 border-[#e8d5d5] cursor-pointer transition-transform hover:scale-105 active:scale-95">
+                        <div class="animate-heartbeat"><i data-lucide="heart" class="text-white fill-current opacity-90 w-7 h-7"></i></div>
+                    </button>
+                </div>
+            </div>
 
-  const handlePrev = () => {
-    if (currentPage > 0) {
-      setCurrentPage(prev => prev - 1);
-      if (currentPage === 1) setIsOpen(false);
-    }
-  };
+            <!-- Opened Letter View (Hidden Initially) -->
+            <div id="letter-full-view" class="hidden flex-1 overflow-y-auto hide-scrollbar p-5 md:p-8 relative z-20 flex-col items-center pb-32 transform translate-y-[100%] opacity-0 transition-all duration-1000 ease-[cubic-bezier(0.175,0.885,0.32,1.275)]">
+                <div class="w-full max-w-md bg-[#fdfbf7] rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.08)] p-6 md:p-10 relative mt-4 mb-8 paper-texture border border-[#ece4d9]">
+                    <div class="absolute top-0 bottom-0 left-2 w-px bg-[#e8d5d5]/50"></div>
+                    <div class="absolute top-0 bottom-0 left-3 w-px bg-[#e8d5d5]/50"></div>
 
-  const handleTouchStart = (e) => setTouchStartX(e.touches[0].clientX);
-  const handleTouchEnd = (e) => {
-    if (touchStartX === null) return;
-    const diff = touchStartX - e.changedTouches[0].clientX;
-    if (diff > 50) handleNext();
-    else if (diff < -50) handlePrev();
-    setTouchStartX(null);
-  };
+                    <div class="flex justify-between items-start mb-10 mt-2">
+                        <h2 id="letter-title-recipient" class="font-cursive text-3xl text-[#b07d7d] font-bold ml-4"></h2>
+                        <span id="letter-date" class="font-cursive text-[#a39a90] text-lg rotate-2"></span>
+                    </div>
 
-  const handleSendWA = () => {
-    const baseText = config.whatsapp.defaultMessage;
-    const finalMessage = userMessage.trim() ? `${baseText}\n\n${userMessage}` : baseText;
-    const text = encodeURIComponent(finalMessage);
-    const num = config.whatsapp.phone.replace(/\D/g, '');
-    window.open(`https://wa.me/${num}?text=${text}`, '_blank');
-  };
+                    <div class="w-full px-2 mb-10">
+                        <div class="bg-[#fcf9f2] p-3 pb-10 rounded-sm shadow-[0_10px_30px_rgba(0,0,0,0.05)] transform rotate-2 mx-auto max-w-[280px] relative border border-[#ece4d9]">
+                            <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-6 bg-[#f3e6d8]/60 backdrop-blur-sm -rotate-3 border border-[#e6d9cc]/40 shadow-sm mix-blend-multiply"></div>
+                            <img id="letter-photo" src="" class="w-full aspect-square object-cover rounded-sm filter sepia-[0.15] contrast-[1.05]">
+                            <p id="letter-title-img" class="absolute bottom-3 left-0 right-0 text-center font-cursive text-[#8c8279] text-xl"></p>
+                        </div>
+                    </div>
+                    
+                    <div class="relative z-10 px-4">
+                        <p id="letter-body" class="text-[#6b6259] leading-[2.2] whitespace-pre-wrap font-serif text-base tracking-wide text-justify"></p>
+                    </div>
 
-  const renderPhotoGrid = (pagePhotos, isRight) => (
-    <div className="grid grid-cols-1 gap-4 p-4 h-full content-center">
-      {pagePhotos.map((photo, idx) => (
-        <div 
-          key={idx} 
-          className="bg-white p-2 pb-6 rounded-sm shadow-[0_5px_15px_rgba(0,0,0,0.1)] border border-[#e6d9cc] relative mx-auto"
-          style={{ 
-            transform: `rotate(${isRight ? (idx % 2 === 0 ? 3 : -2) : (idx % 2 === 0 ? -3 : 2)}deg) scale(0.95)`,
-            width: '90%', maxWidth: '200px'
-          }}
-        >
-          <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-10 h-3 bg-[#f3e6d8]/80 backdrop-blur-sm -rotate-2 mix-blend-multiply border border-[#e6d9cc]/30" />
-          <img src={photo} loading="lazy" onError={handleImageError} alt="Memory" className="w-full aspect-[4/5] object-cover filter contrast-[1.05] sepia-[0.1]" />
+                    <div class="mt-14 text-right pr-4 relative">
+                        <p class="font-serif italic text-[#a39a90] text-sm mb-2">With all my love,</p>
+                        <p id="letter-signature" class="font-cursive text-[#c48b8b] text-4xl transform -rotate-2"></p>
+                    </div>
+                </div>
+                
+                <button onclick="goToScene(3)" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-xl text-[#b07d7d] border border-[#e8d5d5] px-8 py-3.5 rounded-full font-serif font-bold shadow-[0_8px_30px_rgba(176,125,125,0.2)] flex items-center gap-3 z-30 transition-all hover:bg-[#fcf9f2] active:scale-95">
+                    LANJUTKAN <span class="text-xl font-sans font-light">→</span>
+                </button>
+            </div>
         </div>
-      ))}
+
+        <!-- SCENE 4: GAME SCREEN -->
+        <div id="scene-game" class="scene bg-[#fdfbf7] flex-col overflow-hidden paper-texture z-20">
+            <div class="absolute inset-0 pointer-events-none opacity-40">
+                <div class="absolute top-10 left-10 w-40 h-40 bg-[#f3e6d8] rounded-full mix-blend-multiply filter blur-3xl"></div>
+                <div class="absolute bottom-20 right-10 w-48 h-48 bg-[#e8d5d5] rounded-full mix-blend-multiply filter blur-3xl"></div>
+            </div>
+
+            <div class="text-center pt-12 pb-6 px-6 z-10">
+                <h2 id="game-title" class="text-2xl font-bold text-[#b07d7d] mb-2 font-serif drop-shadow-sm"></h2>
+                <p id="game-subtitle" class="text-[#a39a90] font-medium text-sm font-sans tracking-wide"></p>
+            </div>
+
+            <div class="flex-1 overflow-y-auto hide-scrollbar px-4 pb-12 z-10">
+                <div id="game-grid" class="grid grid-cols-2 gap-x-4 gap-y-8 max-w-lg mx-auto pb-8">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+
+            <!-- Game Twist Overlay -->
+            <div id="game-twist-overlay" class="hidden absolute inset-0 z-[100] flex-col items-center justify-center bg-[#fcf9f2]/70 p-6 text-center overflow-hidden backdrop-blur-md opacity-0 transition-opacity duration-1000">
+                <div id="game-twist-particles" class="absolute inset-0"></div>
+                <h1 id="game-twist-text" class="text-4xl md:text-5xl font-bold font-cursive text-[#c48b8b] leading-tight drop-shadow-md whitespace-pre-wrap z-10 transform scale-0 transition-transform duration-1000 ease-[cubic-bezier(0.175,0.885,0.32,1.275)]"></h1>
+                <div class="absolute bottom-10 text-[#c48b8b] text-sm font-sans tracking-widest uppercase opacity-80 animate-pulse-opacity">Memuat kenangan...</div>
+            </div>
+        </div>
+
+        <!-- SCENE 5: ALBUM FOTO -->
+        <div id="scene-album" class="scene bg-[#12100e] flex-col items-center justify-center overflow-hidden z-10">
+            <div class="absolute inset-0 opacity-30 pointer-events-none film-grain"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150vw] h-[150vw] bg-[radial-gradient(circle,rgba(60,50,45,0.8)_0%,rgba(18,16,14,1)_70%)] pointer-events-none"></div>
+            
+            <div id="album-hint" class="text-white/40 font-serif text-sm absolute top-10 tracking-widest uppercase z-10 transition-opacity duration-500">Tap buku untuk membuka</div>
+
+            <div id="album-wrapper" class="relative w-[90%] max-w-[320px] aspect-[3/4] perspective-2000 transform scale-90 transition-transform duration-700">
+                
+                <!-- Last Page (Back cover interior) -->
+                <div class="absolute inset-0 bg-[#241c17] rounded-r-lg shadow-2xl border-l-4 border-[#120e0b] shadow-[20px_20px_40px_rgba(0,0,0,0.8)] preserve-3d book-cover-texture z-0">
+                    <div class="absolute inset-0 bg-[#fdfbf7] ml-2 paper-texture border-l shadow-inner flex flex-col items-center justify-center p-6 text-center">
+                        <h2 class="font-cursive text-3xl text-[#b07d7d] mb-4">Our Journey<br/>Continues...</h2>
+                        <p class="font-serif text-[#8c8279] text-sm mb-10 leading-relaxed">Setiap foto adalah cerita, dan cerita kita belum selesai.</p>
+                        <button onclick="openMessageModal(event)" class="bg-gradient-to-r from-[#d4a3a3] to-[#c48b8b] text-white px-6 py-3.5 rounded-full font-sans font-semibold tracking-wide shadow-lg shadow-[#d4a3a3]/40 active:scale-95 transition-transform flex items-center gap-2">
+                            KIRIM PESAN 💌
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Spreads generated by JS -->
+                <div id="album-spreads-container"></div>
+                
+            </div>
+
+            <!-- Touch Zones for Swiping/Tapping pages -->
+            <div id="album-touch-left" class="hidden absolute top-0 bottom-0 left-0 w-1/3 z-50 cursor-pointer" onclick="flipAlbumPage(-1)"></div>
+            <div id="album-touch-right" class="hidden absolute top-0 bottom-0 right-0 w-1/3 z-50 cursor-pointer" onclick="flipAlbumPage(1)"></div>
+
+            <!-- SCENE 6: MESSAGE MODAL (Over Album) -->
+            <div id="message-modal" class="hidden absolute inset-0 z-[100] items-center justify-center bg-black/60 backdrop-blur-md p-5 opacity-0 transition-opacity duration-500">
+                <div class="bg-[#fcf9f2] w-full max-w-sm rounded-[2rem] p-6 shadow-2xl border border-[#e8d5d5] relative paper-texture transform translate-y-8 transition-transform duration-500" id="message-modal-content">
+                    <button onclick="closeMessageModal()" class="absolute top-4 right-4 text-[#a39a90] p-3 rounded-full active:scale-95">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                    <div class="flex flex-col items-center mt-2 mb-6">
+                        <div class="w-12 h-12 bg-[#e8d5d5]/50 rounded-full flex items-center justify-center mb-3">
+                            <i data-lucide="heart" class="text-[#c48b8b] fill-current w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-2xl font-cursive font-bold text-[#b07d7d] text-center">Kirim Pesan 💌</h3>
+                        <p class="text-[#8c8279] text-sm text-center font-sans mt-1">Tulis pesan manismu untukku...</p>
+                    </div>
+                    <textarea id="wa-msg-input" placeholder="Tulis pesan tambahan di sini..." class="w-full h-32 p-4 rounded-2xl bg-white/70 border border-[#e8d5d5] focus:outline-none resize-none mb-6 font-sans text-[#6b6259] shadow-inner text-base"></textarea>
+                    <button onclick="sendToWhatsApp()" id="wa-btn-text" class="w-full bg-[#8ba888] text-white py-4 rounded-full font-sans font-bold tracking-wide flex items-center justify-center gap-3 shadow-[0_10px_25px_rgba(139,168,136,0.3)] active:scale-95">
+                        <i data-lucide="phone" class="w-5 h-5 fill-current"></i> KIRIM KE WHATSAPP
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-  );
 
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0, filter: 'blur(10px)' }}
-      className="w-full h-full bg-[#12100e] flex flex-col items-center justify-center relative overflow-hidden"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-    >
-      <div className="absolute inset-0 opacity-30 pointer-events-none film-grain" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150vw] h-[150vw] bg-[radial-gradient(circle,rgba(60,50,45,0.8)_0%,rgba(18,16,14,1)_70%)]" />
-      
-      <div className="text-white/40 font-serif text-sm absolute top-10 tracking-widest uppercase">
-        {isOpen ? "Tap kanan untuk lanjut, kiri kembali" : "Tap buku untuk membuka"}
-      </div>
+    <!-- ADMIN PANEL MODAL -->
+    <div id="admin-panel" class="hidden fixed inset-0 z-[200] items-center justify-center p-4 bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="bg-[#fcf9f2] rounded-[2rem] w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl border border-[#e8d5d5] paper-texture transform scale-95 transition-transform duration-300" id="admin-panel-content">
+            <div class="flex justify-between items-center p-5 border-b border-[#e8d5d5]/50 bg-white/50 backdrop-blur-md">
+                <h2 class="text-xl font-bold text-[#b07d7d] flex items-center gap-2 font-serif">
+                    <i data-lucide="settings" class="text-[#d4a3a3] w-5 h-5"></i> Admin Configurations
+                </h2>
+                <button onclick="closeAdmin()" class="p-2 bg-[#f3e6d8] rounded-full text-[#b07d7d]"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
 
-      <motion.div 
-        className="relative w-[90%] max-w-[320px] aspect-[3/4] perspective-2000"
-        animate={{ scale: isOpen ? 1 : 0.9, x: isOpen ? '25%' : '0%' }}
-        transition={{ type: "spring", stiffness: 45, damping: 15 }}
-      >
-        <div className="absolute inset-0 bg-[#241c17] rounded-r-lg shadow-2xl border-l-4 border-[#120e0b] shadow-[20px_20px_40px_rgba(0,0,0,0.8)] preserve-3d book-cover-texture">
-           <div className="absolute inset-0 bg-[#fdfbf7] ml-2 paper-texture border-l shadow-inner flex flex-col items-center justify-center p-6 text-center">
-              <h2 className="font-cursive text-3xl text-[#b07d7d] mb-4">Our Journey<br/>Continues...</h2>
-              <p className="font-serif text-[#8c8279] text-sm mb-10 leading-relaxed">Setiap foto adalah cerita, dan cerita kita belum selesai.</p>
-              <button 
-                aria-label="Send Message"
-                onClick={(e) => { e.stopPropagation(); setIsMessageModalOpen(true); }}
-                className="bg-gradient-to-r from-[#d4a3a3] to-[#c48b8b] text-white px-6 py-3.5 rounded-full font-sans font-semibold tracking-wide shadow-lg shadow-[#d4a3a3]/40 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
-              >
-                KIRIM PESAN 💌
-              </button>
-           </div>
+            <div class="flex overflow-x-auto p-3 bg-[#fdfbf7] hide-scrollbar border-b border-[#e8d5d5]/50 gap-2">
+                <button onclick="switchAdminTab('tab-ls')" id="btn-tab-ls" class="admin-tab-btn flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all bg-[#b07d7d] text-white shadow-md">Lockscreen</button>
+                <button onclick="switchAdminTab('tab-pin')" id="btn-tab-pin" class="admin-tab-btn flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all text-[#8c8279] hover:bg-[#f3e6d8]">PIN</button>
+                <button onclick="switchAdminTab('tab-letter')" id="btn-tab-letter" class="admin-tab-btn flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all text-[#8c8279] hover:bg-[#f3e6d8]">Surat</button>
+                <button onclick="switchAdminTab('tab-game')" id="btn-tab-game" class="admin-tab-btn flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all text-[#8c8279] hover:bg-[#f3e6d8]">Game</button>
+                <button onclick="switchAdminTab('tab-album')" id="btn-tab-album" class="admin-tab-btn flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all text-[#8c8279] hover:bg-[#f3e6d8]">Album</button>
+                <button onclick="switchAdminTab('tab-wa')" id="btn-tab-wa" class="admin-tab-btn flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all text-[#8c8279] hover:bg-[#f3e6d8]">WhatsApp</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-6 bg-white/30 backdrop-blur-sm relative z-10 text-[#6b6259]">
+                <!-- Lockscreen Tab -->
+                <div id="tab-ls" class="admin-tab-content space-y-4">
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Background URL</label><input type="text" id="cfg-ls-bg" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Teks Tanggal</label><input type="text" id="cfg-ls-date" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Overlay Opacity (0-1)</label><input type="number" step="0.1" id="cfg-ls-op" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Blur (px)</label><input type="number" id="cfg-ls-blur" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                    <h3 class="font-bold text-[#b07d7d] mt-6 border-b pb-2">Music Player</h3>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Title</label><input type="text" id="cfg-ls-m-title" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Artist</label><input type="text" id="cfg-ls-m-artist" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Cover URL</label><input type="text" id="cfg-ls-m-cover" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Audio URL (.mp3)</label><input type="text" id="cfg-ls-m-audio" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                </div>
+                <!-- PIN Tab -->
+                <div id="tab-pin" class="admin-tab-content hidden space-y-4">
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">PIN Code</label><input type="text" id="cfg-pin-code" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Hint Text</label><input type="text" id="cfg-pin-hint" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Pesan Salah</label><input type="text" id="cfg-pin-w-txt" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">URL Stiker Salah</label><input type="text" id="cfg-pin-w-stk" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Pesan Sukses</label><input type="text" id="cfg-pin-s-txt" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">URL Stiker Sukses</label><input type="text" id="cfg-pin-s-stk" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                </div>
+                <!-- Letter Tab -->
+                <div id="tab-letter" class="admin-tab-content hidden space-y-4">
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Photo URL</label><input type="text" id="cfg-let-photo" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Penerima</label><input type="text" id="cfg-let-rec" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Tanggal</label><input type="text" id="cfg-let-date" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Judul Surat</label><input type="text" id="cfg-let-title" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Isi Surat</label><textarea id="cfg-let-body" rows="5" class="w-full px-4 py-2.5 border rounded-xl outline-none"></textarea></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Tanda Tangan</label><input type="text" id="cfg-let-sig" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                </div>
+                <!-- Game Tab -->
+                <div id="tab-game" class="admin-tab-content hidden space-y-4">
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Judul Game</label><input type="text" id="cfg-game-title" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Subtitle</label><input type="text" id="cfg-game-sub" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Teks Plot Twist</label><textarea id="cfg-game-final" rows="3" class="w-full px-4 py-2.5 border rounded-xl outline-none"></textarea></div>
+                    <h3 class="font-bold text-[#b07d7d] mt-6 border-b pb-2">Daftar Foto Game (Harus 6)</h3>
+                    <div id="admin-game-photos" class="space-y-3"></div>
+                </div>
+                <!-- Album Tab -->
+                <div id="tab-album" class="admin-tab-content hidden space-y-4">
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Judul Album</label><input type="text" id="cfg-alb-title" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                    <div class="flex justify-between items-center mt-6 border-b pb-2">
+                        <h3 class="font-bold text-[#b07d7d]">Daftar Foto Album</h3>
+                        <button onclick="addAlbumPhoto()" class="text-xs bg-[#f3e6d8] text-[#b07d7d] px-3 py-1.5 rounded-full font-bold">+ Tambah</button>
+                    </div>
+                    <div id="admin-album-photos" class="space-y-3"></div>
+                </div>
+                <!-- WhatsApp Tab -->
+                <div id="tab-wa" class="admin-tab-content hidden space-y-4">
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Nomor WA (Mulai dari 62...)</label><input type="text" id="cfg-wa-phone" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Pesan Default</label><textarea id="cfg-wa-msg" rows="3" class="w-full px-4 py-2.5 border rounded-xl outline-none"></textarea></div>
+                    <div class="flex flex-col gap-1.5"><label class="text-sm font-semibold text-[#8c8279]">Teks Tombol</label><input type="text" id="cfg-wa-btn" class="w-full px-4 py-2.5 border rounded-xl outline-none"></div>
+                </div>
+            </div>
+
+            <div class="p-5 border-t border-[#e8d5d5]/50 bg-white/50 backdrop-blur-md flex justify-end">
+                <button onclick="saveAdmin()" class="flex items-center gap-2 bg-[#c48b8b] text-white px-8 py-3 rounded-full font-bold active:scale-95 shadow-lg shadow-[#c48b8b]/40">
+                    <i data-lucide="save" class="w-5 h-5"></i> Simpan Perubahan
+                </button>
+            </div>
         </div>
-
-        {spreads.map((spread, index) => {
-          const pageIndex = index + 1; 
-          const isFlipped = currentPage > pageIndex;
-          
-          return (
-            <motion.div
-              key={`spread-${index}`}
-              className="absolute inset-0 origin-left preserve-3d cursor-pointer"
-              style={{ zIndex: isFlipped ? pageIndex + 10 : 40 - pageIndex }}
-              initial={false}
-              animate={{ rotateY: isFlipped ? -180 : 0 }}
-              transition={{ type: "spring", stiffness: 40, damping: 14 }}
-              onClick={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                const clickX = e.clientX - rect.left;
-                if (clickX > rect.width / 2) handleNext();
-                else handlePrev();
-              }}
-            >
-              <div className="absolute inset-0 backface-hidden bg-[#fdfbf7] ml-1 paper-texture border-l shadow-[inset_10px_0_20px_rgba(0,0,0,0.05)] border-[#e6d9cc]">
-                 {renderPhotoGrid(spread.right, true)}
-              </div>
-              <div className="absolute inset-0 backface-hidden bg-[#fdfbf7] mr-1 paper-texture border-r shadow-[inset_-10px_0_20px_rgba(0,0,0,0.05)] border-[#e6d9cc]" style={{ transform: 'rotateY(180deg)' }}>
-                 {renderPhotoGrid(spread.left, false)}
-              </div>
-            </motion.div>
-          )
-        })}
-
-        <motion.div
-          className="absolute inset-0 origin-left preserve-3d cursor-pointer"
-          style={{ zIndex: isOpen ? 5 : 50 }}
-          initial={false}
-          animate={{ rotateY: isOpen ? -180 : 0 }}
-          transition={{ type: "spring", stiffness: 45, damping: 15 }}
-          onClick={() => isOpen ? handlePrev() : handleNext()}
-        >
-          <div className="absolute inset-0 backface-hidden bg-[#241c17] rounded-r-lg shadow-[15px_10px_30px_rgba(0,0,0,0.7)] border-l-8 border-[#1a1410] flex flex-col items-center justify-center p-8 book-cover-texture relative overflow-hidden">
-             <div className="absolute inset-3 border-2 border-[#d4af37]/40 rounded-sm" />
-             <div className="absolute inset-4 border border-[#d4af37]/20 rounded-sm" />
-             <div className="absolute top-4 left-4 w-4 h-4 border-t-2 border-l-2 border-[#d4af37]/60" />
-             <div className="absolute top-4 right-4 w-4 h-4 border-t-2 border-r-2 border-[#d4af37]/60" />
-             <div className="absolute bottom-4 left-4 w-4 h-4 border-b-2 border-l-2 border-[#d4af37]/60" />
-             <div className="absolute bottom-4 right-4 w-4 h-4 border-b-2 border-r-2 border-[#d4af37]/60" />
-
-             <h1 className="text-[#d4af37] font-serif font-bold text-3xl text-center leading-snug tracking-wider" style={{ textShadow: '1px 2px 2px rgba(0,0,0,0.8), 0 0 10px rgba(212,175,55,0.2)' }}>
-               {config.album.title.split(' ').map((word, i) => (
-                 <span key={i} className="block">{word}</span>
-               ))}
-             </h1>
-             <div className="mt-12 w-12 h-[2px] bg-[#d4af37]/50 shadow-[0_0_5px_rgba(212,175,55,0.5)]" />
-          </div>
-          <div className="absolute inset-0 backface-hidden bg-[#362921] rounded-l-lg shadow-inner book-cover-texture border-r-8 border-[#1a1410]" style={{ transform: 'rotateY(180deg)' }}>
-             <div className="absolute inset-2 bg-[#fdfbf7] opacity-10 paper-texture m-4 rounded-sm" />
-          </div>
-        </motion.div>
-      </motion.div>
-      
-      {isOpen && (
-        <>
-          <div className="absolute top-0 bottom-0 left-0 w-1/3 z-50 cursor-pointer" onClick={handlePrev} />
-          <div className="absolute top-0 bottom-0 right-0 w-1/3 z-50 cursor-pointer" onClick={handleNext} />
-        </>
-      )}
-
-      {/* Message Modal */}
-      <AnimatePresence>
-        {isMessageModalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-5"
-            onClick={() => setIsMessageModalOpen(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 30 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 30 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="bg-[#fcf9f2] w-full max-w-sm rounded-[2rem] p-6 shadow-2xl border border-[#e8d5d5] relative paper-texture"
-              onClick={(e) => e.stopPropagation()} 
-            >
-              <button 
-                aria-label="Close Modal"
-                onClick={() => setIsMessageModalOpen(false)} 
-                className="absolute top-4 right-4 text-[#a39a90] hover:text-[#b07d7d] p-3 hover:bg-[#e8d5d5]/30 rounded-full transition-colors active:scale-95"
-              >
-                <X size={20} />
-              </button>
-              
-              <div className="flex flex-col items-center mt-2 mb-6">
-                 <div className="w-12 h-12 bg-[#e8d5d5]/50 rounded-full flex items-center justify-center mb-3">
-                   <Heart size={24} className="text-[#c48b8b] fill-[#c48b8b]" />
-                 </div>
-                 <h3 className="text-2xl font-cursive font-bold text-[#b07d7d] text-center">Kirim Pesan 💌</h3>
-                 <p className="text-[#8c8279] text-sm text-center font-sans mt-1">Tulis pesan manismu untukku...</p>
-              </div>
-
-              <textarea
-                value={userMessage}
-                onChange={(e) => setUserMessage(e.target.value)}
-                placeholder="Tulis pesan tambahan di sini..."
-                className="w-full h-32 p-4 rounded-2xl bg-white/70 border border-[#e8d5d5] focus:outline-none focus:ring-2 focus:ring-[#d4a3a3] resize-none mb-6 font-sans text-[#6b6259] shadow-inner text-base"
-              />
-              
-              <button
-                aria-label="Send to WhatsApp"
-                onClick={handleSendWA}
-                className="w-full bg-[#8ba888] hover:bg-[#7a9477] text-white py-4 rounded-full font-sans font-bold tracking-wide flex items-center justify-center gap-3 shadow-[0_10px_25px_rgba(139,168,136,0.3)] transition-all hover:scale-[1.02] active:scale-95"
-              >
-                <Phone size={20} fill="currentColor" />
-                {config.whatsapp.buttonText}
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  );
-};
-
-const MainApp = () => {
-  const [currentScene, setCurrentScene] = useState(0);
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
-
-  const nextScene = () => setCurrentScene(prev => prev + 1);
-
-  // Dynamic SEO Injection
-  useEffect(() => {
-    document.title = "Untuk Kamu, Sayang ❤️";
-    let metaDesc = document.querySelector('meta[name="description"]');
-    if (!metaDesc) {
-      metaDesc = document.createElement('meta');
-      metaDesc.name = "description";
-      document.head.appendChild(metaDesc);
-    }
-    metaDesc.content = "An interactive birthday surprise made with love.";
-
-    let favicon = document.querySelector('link[rel="icon"]');
-    if (!favicon) {
-      favicon = document.createElement('link');
-      favicon.rel = "icon";
-      document.head.appendChild(favicon);
-    }
-    favicon.href = "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❤️</text></svg>";
-  }, []);
-
-  const renderScene = () => {
-    switch (currentScene) {
-      case 0: return <Lockscreen key="lock" nextScene={nextScene} openAdmin={() => setIsAdminOpen(true)} />;
-      case 1: return <PinScreen key="pin" nextScene={nextScene} />;
-      case 2: return <LoveLetter key="letter" nextScene={nextScene} />;
-      case 3: return <GameScreen key="game" nextScene={nextScene} />;
-      case 4: return <PhotoAlbum key="album" nextScene={nextScene} />;
-      default: return null;
-    }
-  };
-
-  return (
-    <div className="w-full h-screen h-[100dvh] bg-[#f8f5f0] flex justify-center overflow-hidden font-sans">
-      <div className="w-full h-full max-w-md relative bg-[#fdfbf7] overflow-hidden shadow-2xl">
-        <div className="film-grain"></div>
-        <AnimatePresence mode="wait">
-          {renderScene()}
-        </AnimatePresence>
-        <AdminPanel isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} />
-      </div>
     </div>
-  );
-};
 
-export default function App() {
-  return (
-    <ConfigProvider>
-      <AudioProvider>
-        <style dangerouslySetInnerHTML={{__html: `
-          .hide-scrollbar::-webkit-scrollbar { display: none; }
-          .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-          @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
-          .font-sans { font-family: 'Inter', sans-serif; }
-          .font-serif { font-family: 'Playfair Display', serif; }
-          .font-cursive { font-family: 'Dancing Script', cursive; }
-          .paper-texture { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E"); }
-          .film-grain { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; }
-          .book-cover-texture { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E"), linear-gradient(to right, rgba(0,0,0,0.4) 0%, transparent 5%, transparent 95%, rgba(255,255,255,0.05) 100%); }
-          .perspective-2000 { perspective: 2000px; }
-          .preserve-3d { transform-style: preserve-3d; }
-          .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-        `}} />
-        <MainApp />
-      </AudioProvider>
-    </ConfigProvider>
-  );
-}
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const defaultConfig = {
+            lockscreen: {
+                backgroundUrl: 'https://images.unsplash.com/photo-1518599904199-0ca897819ddb?q=80&w=1080&auto=format&fit=crop',
+                dateText: 'Senin, 14 Februari', overlayOpacity: 0.4, blur: 4,
+                music: { title: 'Beautiful In White', artist: 'Westlife', coverUrl: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=200&auto=format&fit=crop', audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/16/audio_db6591201e.mp3?filename=lofi-study-112191.mp3' },
+                notifications: [
+                    { app: 'Messages', title: 'Sayang 🥺', time: 'now', content: 'Coba geser ke atas deh...' },
+                    { app: 'Calendar', title: 'Special Day', time: '1m ago', content: 'Today is the day!' }
+                ]
+            },
+            pin: { code: '140299', hintText: 'Masukkan tanggal lahir', wrongText: 'Yakin tanggal lahirnya itu? 😂', successText: 'Pinter! I love you ❤️', wrongStickerUrl: 'https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHIzMjZ2NDhqcDJ2bDFidHcyczZocHNhbXZlZDhzcjVoeWhobWZ1ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/WwKco9a8e0qTz9n9F3/giphy.gif', successStickerUrl: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExejcxc3d0b2YwdWNoOW9kcm81OTcyZHAzYm9tMnNla3JsdjIzdWltaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/l4pTdcifPGuRoGnOo/giphy.gif' },
+            letter: { title: 'Happy Birthday, Cintaku.', recipient: 'Cintaku', body: 'Selamat ulang tahun untuk orang paling spesial dalam hidupku. Terima kasih sudah menjadi alasan bahagiaku setiap hari. Semoga semua mimpimu terwujud, dan semoga kita bisa terus sama-sama bikin memori indah. I love you more than words can say. 💕\n\nScroll ke bawah ya...', signature: 'From yours truly.', date: '14 Februari 2024', photoUrl: 'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=800&auto=format&fit=crop', decoration: '' },
+            game: { title: 'MANA YANG PALING AKU SUKA? ❤️', subtitle: 'Coba tebak dengan benar...', images: [
+                { url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=400&auto=format&fit=crop', msg: 'HUUUU SALAH 😭😂' },
+                { url: 'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=400&auto=format&fit=crop', msg: 'Bukan yang ini wleee 😛' },
+                { url: 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=400&auto=format&fit=crop', msg: 'Cantik sih, tapi salah! 🤪' },
+                { url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400&auto=format&fit=crop', msg: 'Coba lagi sayang 🤭' },
+                { url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop', msg: 'Masih salah hehehe 🙈' },
+                { url: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=400&auto=format&fit=crop', msg: 'Tetot! Salah lagi ❌' }
+            ], wrongText: 'HUUUU SALAH 😭😂', finalText: 'Gak ada di sini...\nkarena yang paling aku suka kan\nKAMU ❤️', duration: 5000 },
+            album: { title: 'OUR LITTLE MEMORIES', coverImage: '', pages: [
+                'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=600&auto=format&fit=crop', 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=600&auto=format&fit=crop', 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=600&auto=format&fit=crop', 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=600&auto=format&fit=crop', 'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=600&auto=format&fit=crop', 'https://images.unsplash.com/photo-1494774157365-9e04c6720e47?q=80&w=600&auto=format&fit=crop'
+            ]},
+            whatsapp: { phone: '6289529889634', defaultMessage: 'Halo sayang! Makasih yaa buat surprisenya, aku suka banget! ❤️', buttonText: 'KIRIM KE WHATSAPP' }
+        };
+
+        window.appConfig = JSON.parse(JSON.stringify(defaultConfig));
+        let isConfigLoaded = false;
+        
+        const scenes = ['scene-lockscreen', 'scene-pin', 'scene-letter', 'scene-game', 'scene-album'];
+        let currentSceneIndex = 0;
+
+        let db;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-love-app';
+        try {
+            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+            if(Object.keys(firebaseConfig).length > 0) {
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                db = getFirestore(app);
+                
+                const initAuth = async () => {
+                    try {
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
+                        else await signInAnonymously(auth);
+                        
+                        const docRef = doc(db, 'artifacts', appId, 'public', 'siteConfig');
+                        onSnapshot(docRef, (snapshot) => {
+                            if (snapshot.exists()) {
+                                window.appConfig = { ...defaultConfig, ...snapshot.data() };
+                            } else {
+                                setDoc(docRef, defaultConfig).catch(()=>{});
+                            }
+                            isConfigLoaded = true;
+                            renderAll();
+                            hideLoading();
+                        }, (error) => {
+                            console.warn("Firestore listener permission denied. Using local config.");
+                            fallbackLocal();
+                        });
+                    } catch(e) { fallbackLocal(); }
+                };
+                initAuth();
+            } else { fallbackLocal(); }
+        } catch(e) { fallbackLocal(); }
+
+        function fallbackLocal() {
+            isConfigLoaded = true;
+            renderAll();
+            hideLoading();
+        }
+
+        function hideLoading() {
+            document.getElementById('scene-loading').classList.remove('active');
+            document.getElementById('scene-lockscreen').classList.add('active');
+        }
+
+        let isTransitioning = false;
+        window.goToScene = function(idx) {
+            if (isTransitioning) return;
+            isTransitioning = true;
+
+            const current = document.getElementById(scenes[currentSceneIndex]);
+            current.classList.remove('active');
+            current.classList.add('-translate-y-full', 'opacity-0');
+            
+            setTimeout(() => {
+                current.style.display = 'none';
+                currentSceneIndex = idx;
+                const next = document.getElementById(scenes[currentSceneIndex]);
+                next.style.display = 'flex';
+                void next.offsetWidth; // trigger reflow
+                next.classList.remove('-translate-y-full', 'translate-y-[100%]', 'opacity-0');
+                next.classList.add('active');
+                setTimeout(() => { isTransitioning = false; }, 800);
+            }, 800);
+        }
+
+        let globalAudio = new Audio();
+        globalAudio.loop = true;
+        let isPlaying = false;
+        let userInteracted = false;
+
+        window.toggleAudio = function() {
+            if(!userInteracted) userInteracted = true;
+            if(isPlaying) globalAudio.pause();
+            else globalAudio.play().catch(e=>console.warn(e));
+            isPlaying = !isPlaying;
+            document.getElementById('btn-play-pause').innerHTML = isPlaying 
+                ? '<i data-lucide="pause" class="w-12 h-12 fill-current"></i>' 
+                : '<i data-lucide="play" class="w-12 h-12 fill-current"></i>';
+            lucide.createIcons();
+        }
+
+        globalAudio.addEventListener('timeupdate', () => {
+            if(globalAudio.duration) {
+                document.getElementById('audio-progress').style.width = `${(globalAudio.currentTime/globalAudio.duration)*100}%`;
+            }
+        });
+
+        const initAudio = () => {
+            if(!userInteracted) {
+                userInteracted = true;
+                globalAudio.play().then(() => {
+                    isPlaying = true;
+                    document.getElementById('btn-play-pause').innerHTML = '<i data-lucide="pause" class="w-12 h-12 fill-current"></i>';
+                    lucide.createIcons();
+                }).catch(()=>{});
+            }
+        }
+        window.addEventListener('click', initAudio, { once: true });
+        window.addEventListener('touchstart', initAudio, { once: true });
+
+        function renderLockscreen() {
+            const ls = window.appConfig.lockscreen;
+            document.getElementById('ls-bg').src = ls.backgroundUrl;
+            document.getElementById('ls-date').innerText = ls.dateText;
+            document.getElementById('ls-overlay').style.backgroundColor = `rgba(0,0,0,${ls.overlayOpacity})`;
+            document.getElementById('ls-overlay').style.backdropFilter = `blur(${ls.blur}px)`;
+            
+            document.getElementById('ls-music-cover').src = ls.music.coverUrl;
+            document.getElementById('ls-music-title').innerText = ls.music.title;
+            document.getElementById('ls-music-artist').innerText = ls.music.artist;
+            
+            if(globalAudio.src !== ls.music.audioUrl) {
+                const wasPlaying = isPlaying;
+                globalAudio.src = ls.music.audioUrl;
+                if(wasPlaying) globalAudio.play();
+            }
+
+            const notifHtml = ls.notifications.map(n => `
+                <div class="bg-black/30 backdrop-blur-xl rounded-[1.5rem] p-4 flex gap-4 shadow-lg border border-white/10">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#d4a3a3] to-[#b07d7d] flex items-center justify-center shrink-0 shadow-inner border border-white/20">
+                        <i data-lucide="heart" class="text-white fill-current"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-baseline mb-0.5">
+                            <span class="text-white/90 text-sm font-semibold tracking-wide uppercase">${n.app}</span>
+                            <span class="text-white/50 text-xs">${n.time}</span>
+                        </div>
+                        <p class="text-white font-semibold text-base truncate">${n.title}</p>
+                        <p class="text-white/70 text-sm line-clamp-2 mt-0.5 leading-snug">${n.content}</p>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('ls-notifications').innerHTML = notifHtml;
+        }
+
+        setInterval(() => {
+            document.getElementById('ls-time').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        }, 1000);
+
+        // Lockscreen Swipe Logic
+        let lsStartY = 0;
+        let isDragging = false;
+        const dragArea = document.getElementById('ls-drag-area');
+
+        // Touch events (Mobile)
+        dragArea.addEventListener('touchstart', e => {
+            lsStartY = e.touches[0].clientY;
+        }, { passive: true });
+        
+        dragArea.addEventListener('touchend', e => {
+            if (lsStartY - e.changedTouches[0].clientY > 50) goToScene(1);
+        });
+
+        // Mouse events (Desktop / Laptop)
+        dragArea.addEventListener('mousedown', e => {
+            isDragging = true;
+            lsStartY = e.clientY;
+        });
+
+        dragArea.addEventListener('mouseup', e => {
+            if (isDragging) {
+                isDragging = false;
+                if (lsStartY - e.clientY > 50) goToScene(1);
+            }
+        });
+
+        dragArea.addEventListener('mouseleave', e => {
+            if (isDragging) {
+                isDragging = false;
+                if (lsStartY - e.clientY > 50) goToScene(1);
+            }
+        });
+
+        let currentPin = '';
+        window.pressPin = function(num) {
+            const targetLen = window.appConfig.pin.code.toString().length || 6;
+            if(currentPin.length < targetLen) {
+                currentPin += num;
+                updatePinDots();
+                if(currentPin.length === targetLen) {
+                    if(currentPin === window.appConfig.pin.code.toString()) {
+                        document.getElementById('pin-typing-state').classList.add('hidden');
+                        document.getElementById('pin-success-state').classList.remove('hidden');
+                        document.getElementById('pin-success-state').classList.add('flex');
+                        document.getElementById('pin-particles').classList.remove('hidden');
+                        generateHearts();
+                        if(navigator.vibrate) navigator.vibrate([100,50,100]);
+                        setTimeout(() => goToScene(2), 3500);
+                    } else {
+                        document.getElementById('pin-content-area').classList.add('animate-shake');
+                        document.getElementById('pin-typing-state').classList.add('hidden');
+                        document.getElementById('pin-error-state').classList.remove('hidden');
+                        document.getElementById('pin-error-state').classList.add('flex');
+                        if(navigator.vibrate) navigator.vibrate([50,50,50]);
+                        setTimeout(() => document.getElementById('pin-content-area').classList.remove('animate-shake'), 500);
+                    }
+                }
+            }
+        }
+        window.deletePin = function() {
+            if(currentPin.length > 0) { currentPin = currentPin.slice(0, -1); updatePinDots(); }
+        }
+        window.resetPinUI = function() {
+            currentPin = ''; updatePinDots();
+            document.getElementById('pin-error-state').classList.add('hidden');
+            document.getElementById('pin-error-state').classList.remove('flex');
+            document.getElementById('pin-typing-state').classList.remove('hidden');
+        }
+
+        function updatePinDots() {
+            const targetLen = window.appConfig.pin.code.toString().length || 6;
+            let html = '';
+            for(let i=0; i<targetLen; i++) {
+                if(i < currentPin.length) html += `<div class="w-3.5 h-3.5 rounded-full border-2 bg-white border-white scale-110 shadow-[0_0_15px_rgba(255,255,255,0.8)] transition-all"></div>`;
+                else html += `<div class="w-3.5 h-3.5 rounded-full border-2 border-white/50 bg-transparent transition-all"></div>`;
+            }
+            document.getElementById('pin-dots').innerHTML = html;
+        }
+
+        function renderPin() {
+            const p = window.appConfig.pin;
+            document.getElementById('pin-bg').style.backgroundImage = `url(${window.appConfig.lockscreen.backgroundUrl})`;
+            document.getElementById('pin-hint').innerText = p.hintText;
+            document.getElementById('pin-error-text').innerText = p.wrongText;
+            document.getElementById('pin-success-text').innerText = p.successText;
+            document.getElementById('pin-error-img').src = p.wrongStickerUrl || 'https://placehold.co/100x100/transparent/ff0000?text=X';
+            document.getElementById('pin-success-img').src = p.successStickerUrl || 'https://placehold.co/100x100/transparent/00ff00?text=O';
+            updatePinDots();
+        }
+
+        function generateHearts() {
+            let html = '';
+            for(let i=0; i<20; i++) {
+                const left = Math.random() * 90 + 5;
+                const dur = Math.random() * 2 + 1.5;
+                const delay = Math.random() * 0.5;
+                html += `<div class="absolute bottom-0 text-[#d4a3a3]" style="left:${left}%; animation: float-up ${dur}s ease-out ${delay}s forwards;"><i data-lucide="heart" class="fill-current w-8 h-8"></i></div>`;
+            }
+            document.getElementById('pin-particles').innerHTML = html;
+            lucide.createIcons();
+        }
+
+        window.openEnvelope = function() {
+            document.getElementById('envelope-hint').style.opacity = '0';
+            document.getElementById('envelope-container').classList.add('envelope-open');
+            document.getElementById('btn-open-envelope').style.transform = 'scale(0)';
+            
+            setTimeout(() => {
+                document.getElementById('envelope-wrapper').classList.add('hidden');
+                document.getElementById('letter-full-view').classList.remove('hidden');
+                document.getElementById('letter-full-view').classList.add('flex');
+                
+                // Trigger animation frame for CSS transition
+                requestAnimationFrame(() => {
+                    document.getElementById('letter-full-view').classList.remove('translate-y-[100%]', 'opacity-0');
+                    document.getElementById('letter-full-view').classList.add('translate-y-0', 'opacity-100');
+                });
+            }, 1200);
+        }
+
+        function renderLetter() {
+            const l = window.appConfig.letter;
+            document.getElementById('env-photo').src = l.photoUrl;
+            document.getElementById('env-recipient').innerText = `Untuk ${l.recipient}`;
+            document.getElementById('env-body-preview').innerText = l.body;
+            
+            document.getElementById('letter-photo').src = l.photoUrl;
+            document.getElementById('letter-title-recipient').innerText = `Untuk ${l.recipient} ❤️`;
+            document.getElementById('letter-date').innerText = l.date;
+            document.getElementById('letter-title-img').innerText = l.title;
+            document.getElementById('letter-body').innerText = l.body;
+            document.getElementById('letter-signature').innerText = l.signature;
+
+            let hearts = '';
+            for(let i=0; i<15; i++) {
+                hearts += `<div class="absolute text-[#e8d5d5]/80 animate-bounce-subtle" style="left:${Math.random()*100}%; top:${Math.random()*100}%; animation-delay:${Math.random()*2}s"><i data-lucide="heart" class="fill-current w-${Math.floor(Math.random()*4)+4} h-${Math.floor(Math.random()*4)+4}"></i></div>`;
+            }
+            document.getElementById('letter-bg-hearts').innerHTML += hearts;
+        }
+
+        let clickedPhotos = new Set();
+        window.clickGamePhoto = function(idx) {
+            if(clickedPhotos.has(idx)) return;
+            clickedPhotos.add(idx);
+            
+            const p = document.getElementById(`g-photo-${idx}`);
+            p.classList.add('animate-shake');
+            p.querySelector('.wrong-msg').classList.remove('hidden');
+            p.querySelector('.wrong-msg').classList.add('flex');
+            
+            if(clickedPhotos.size === window.appConfig.game.images.length) {
+                setTimeout(() => {
+                    const tw = document.getElementById('game-twist-overlay');
+                    tw.classList.remove('hidden');
+                    tw.classList.add('flex');
+                    requestAnimationFrame(() => {
+                        tw.classList.remove('opacity-0');
+                        tw.classList.add('opacity-100');
+                        document.getElementById('game-twist-text').classList.remove('scale-0');
+                        document.getElementById('game-twist-text').classList.add('scale-100');
+                    });
+                    
+                    let parts = '';
+                    for(let i=0; i<30; i++) {
+                        parts += `<div class="absolute text-[#d4a3a3] opacity-80" style="left:50%; top:50%; transform:translate(-50%,-50%); animation: float-up ${Math.random()*2+2}s ease-out ${Math.random()*1}s forwards"><i data-lucide="heart" class="fill-[#e8d5d5] w-8 h-8"></i></div>`;
+                    }
+                    document.getElementById('game-twist-particles').innerHTML = parts;
+                    lucide.createIcons();
+
+                    setTimeout(() => goToScene(4), window.appConfig.game.duration || 5000);
+                }, 1000);
+            }
+        }
+
+        function renderGame() {
+            const g = window.appConfig.game;
+            document.getElementById('game-title').innerText = g.title;
+            document.getElementById('game-subtitle').innerText = g.subtitle;
+            document.getElementById('game-twist-text').innerText = g.finalText;
+            
+            const scatterStyles = [ {r:-4, y:10}, {r:3, y:-5}, {r:-2, y:5}, {r:5, y:-10}, {r:-3, y:15}, {r:2, y:0} ];
+            
+            let html = '';
+            g.images.forEach((img, i) => {
+                const s = scatterStyles[i%scatterStyles.length];
+                html += `
+                <div id="g-photo-${i}" onclick="clickGamePhoto(${i})" class="relative bg-white p-2.5 pb-8 rounded-sm shadow-[0_8px_20px_rgba(0,0,0,0.06)] cursor-pointer hover:shadow-[0_15px_30px_rgba(0,0,0,0.1)] border border-[#f3e6d8] transition-shadow duration-300 transform" style="transform: rotate(${s.r}deg) translateY(${s.y}px)">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-5 bg-[#f3e6d8]/60 backdrop-blur-sm -rotate-2 border border-[#e6d9cc]/40 shadow-sm z-20 mix-blend-multiply"></div>
+                    <div class="relative w-full aspect-[4/5] overflow-hidden rounded-sm">
+                        <img src="${img.url}" class="w-full h-full object-cover filter contrast-[1.02] sepia-[0.05]">
+                        <div class="wrong-msg hidden absolute inset-0 flex-col items-center justify-center bg-[#fdfbf7]/70 backdrop-blur-[4px] p-3 text-center border border-[#e8d5d5]/50 opacity-0 transition-opacity duration-300" style="opacity: 1">
+                            <span class="text-4xl mb-2">🤍</span>
+                            <p class="text-[#b07d7d] font-bold text-sm leading-tight">${img.msg || g.wrongText}</p>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('game-grid').innerHTML = html;
+        }
+
+        let albumCurrentPage = 0;
+        let totalSpreads = 0;
+        
+        window.openAlbum = function() {
+            document.getElementById('album-hint').style.opacity = '0';
+            document.getElementById('album-wrapper').classList.remove('scale-90');
+            document.getElementById('album-wrapper').classList.add('scale-100', 'translate-x-[25%]');
+            document.getElementById('album-cover').classList.add('rotate-y-n180');
+            
+            document.getElementById('album-touch-left').classList.remove('hidden');
+            document.getElementById('album-touch-right').classList.remove('hidden');
+            albumCurrentPage = 1;
+        }
+
+        window.flipAlbumPage = function(dir) {
+            if(dir === 1 && albumCurrentPage <= totalSpreads) { // next
+                const spread = document.getElementById(`spread-${albumCurrentPage-1}`);
+                if(spread) {
+                    spread.classList.add('rotate-y-n180');
+                    spread.style.zIndex = albumCurrentPage + 10;
+                }
+                albumCurrentPage++;
+            } else if (dir === -1 && albumCurrentPage > 0) { // prev
+                albumCurrentPage--;
+                if(albumCurrentPage === 0) {
+                    document.getElementById('album-cover').classList.remove('rotate-y-n180');
+                    document.getElementById('album-wrapper').classList.remove('translate-x-[25%]', 'scale-100');
+                    document.getElementById('album-wrapper').classList.add('scale-90');
+                    document.getElementById('album-touch-left').classList.add('hidden');
+                    document.getElementById('album-touch-right').classList.add('hidden');
+                    document.getElementById('album-hint').style.opacity = '1';
+                } else {
+                    const spread = document.getElementById(`spread-${albumCurrentPage-1}`);
+                    if(spread) {
+                        spread.classList.remove('rotate-y-n180');
+                        spread.style.zIndex = 40 - albumCurrentPage;
+                    }
+                }
+            }
+        }
+
+        function renderAlbum() {
+            const photos = window.appConfig.album.pages;
+            let pages = [];
+            for (let i = 0; i < photos.length; i += 2) pages.push(photos.slice(i, i + 2));
+            let spreads = [];
+            for (let i = 0; i < pages.length; i += 2) spreads.push({ left: pages[i] || [], right: pages[i + 1] || [] });
+            
+            totalSpreads = spreads.length;
+            albumCurrentPage = 0;
+
+            let html = `
+            <div id="album-cover" class="absolute inset-0 origin-left preserve-3d cursor-pointer z-50 transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]" onclick="openAlbum()">
+                <div class="absolute inset-0 backface-hidden bg-[#241c17] rounded-r-lg shadow-[15px_10px_30px_rgba(0,0,0,0.7)] border-l-8 border-[#1a1410] flex flex-col items-center justify-center p-8 book-cover-texture relative overflow-hidden">
+                    <div class="absolute inset-3 border-2 border-[#d4af37]/40 rounded-sm"></div>
+                    <div class="absolute inset-4 border border-[#d4af37]/20 rounded-sm"></div>
+                    <h1 class="text-[#d4af37] font-serif font-bold text-3xl text-center leading-snug tracking-wider" style="text-shadow: 1px 2px 2px rgba(0,0,0,0.8), 0 0 10px rgba(212,175,55,0.2)">
+                        ${window.appConfig.album.title.split(' ').map(w=>`<span class="block">${w}</span>`).join('')}
+                    </h1>
+                    <div class="mt-12 w-12 h-[2px] bg-[#d4af37]/50 shadow-[0_0_5px_rgba(212,175,55,0.5)]"></div>
+                </div>
+                <div class="absolute inset-0 backface-hidden bg-[#362921] rounded-l-lg shadow-inner book-cover-texture border-r-8 border-[#1a1410] rotate-y-180"></div>
+            </div>
+            `;
+
+            const renderGrid = (arr, isRight) => `
+                <div class="grid grid-cols-1 gap-4 p-4 h-full content-center">
+                    ${arr.map((p, i) => `
+                        <div class="bg-white p-2 pb-6 rounded-sm shadow-[0_5px_15px_rgba(0,0,0,0.1)] border border-[#e6d9cc] relative mx-auto" style="transform: rotate(${isRight?(i%2==0?3:-2):(i%2==0?-3:2)}deg) scale(0.95); width: 90%; max-width: 200px">
+                            <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-10 h-3 bg-[#f3e6d8]/80 backdrop-blur-sm -rotate-2 mix-blend-multiply border border-[#e6d9cc]/30"></div>
+                            <img src="${p}" class="w-full aspect-[4/5] object-cover filter contrast-[1.05] sepia-[0.1]">
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            spreads.forEach((spread, idx) => {
+                html += `
+                <div id="spread-${idx}" class="absolute inset-0 origin-left preserve-3d transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]" style="z-index: ${40 - (idx+1)}">
+                    <div class="absolute inset-0 backface-hidden bg-[#fdfbf7] ml-1 paper-texture border-l shadow-[inset_10px_0_20px_rgba(0,0,0,0.05)] border-[#e6d9cc]">
+                        ${renderGrid(spread.right, true)}
+                    </div>
+                    <div class="absolute inset-0 backface-hidden bg-[#fdfbf7] mr-1 paper-texture border-r shadow-[inset_-10px_0_20px_rgba(0,0,0,0.05)] border-[#e6d9cc] rotate-y-180">
+                        ${renderGrid(spread.left, false)}
+                    </div>
+                </div>
+                `;
+            });
+            document.getElementById('album-spreads-container').innerHTML = html;
+        }
+
+        // WhatsApp Modal
+        window.openMessageModal = function(e) {
+            e.stopPropagation();
+            const modal = document.getElementById('message-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            requestAnimationFrame(() => {
+                modal.classList.remove('opacity-0');
+                modal.classList.add('opacity-100');
+                document.getElementById('message-modal-content').classList.remove('translate-y-8');
+                document.getElementById('message-modal-content').classList.add('translate-y-0');
+            });
+            document.getElementById('wa-btn-text').innerHTML = `<i data-lucide="phone" class="w-5 h-5 fill-current"></i> ${window.appConfig.whatsapp.buttonText}`;
+            lucide.createIcons();
+        }
+
+        window.closeMessageModal = function() {
+            const modal = document.getElementById('message-modal');
+            modal.classList.remove('opacity-100');
+            modal.classList.add('opacity-0');
+            document.getElementById('message-modal-content').classList.remove('translate-y-0');
+            document.getElementById('message-modal-content').classList.add('translate-y-8');
+            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 500);
+        }
+
+        window.sendToWhatsApp = function() {
+            const userMsg = document.getElementById('wa-msg-input').value;
+            const baseText = window.appConfig.whatsapp.defaultMessage;
+            const final = userMsg.trim() ? `${baseText}\n\n${userMsg}` : baseText;
+            const num = window.appConfig.whatsapp.phone.replace(/\D/g, '');
+            window.open(`https://wa.me/${num}?text=${encodeURIComponent(final)}`, '_blank');
+        }
+
+        window.openAdmin = function() {
+            populateAdminForm();
+            const modal = document.getElementById('admin-panel');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            requestAnimationFrame(() => {
+                modal.classList.remove('opacity-0');
+                modal.classList.add('opacity-100');
+                document.getElementById('admin-panel-content').classList.remove('scale-95');
+                document.getElementById('admin-panel-content').classList.add('scale-100');
+            });
+        }
+
+        window.closeAdmin = function() {
+            const modal = document.getElementById('admin-panel');
+            modal.classList.remove('opacity-100');
+            modal.classList.add('opacity-0');
+            document.getElementById('admin-panel-content').classList.remove('scale-100');
+            document.getElementById('admin-panel-content').classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+        }
+
+        window.switchAdminTab = function(tabId) {
+            document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            
+            document.querySelectorAll('.admin-tab-btn').forEach(el => {
+                el.className = "admin-tab-btn flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all text-[#8c8279] hover:bg-[#f3e6d8]";
+            });
+            document.getElementById(`btn-${tabId}`).className = "admin-tab-btn flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all bg-[#b07d7d] text-white shadow-md";
+        }
+
+        let adminGamePhotos = [];
+        let adminAlbumPhotos = [];
+
+        function populateAdminForm() {
+            const c = window.appConfig;
+            // Lockscreen
+            document.getElementById('cfg-ls-bg').value = c.lockscreen.backgroundUrl;
+            document.getElementById('cfg-ls-date').value = c.lockscreen.dateText;
+            document.getElementById('cfg-ls-op').value = c.lockscreen.overlayOpacity;
+            document.getElementById('cfg-ls-blur').value = c.lockscreen.blur;
+            document.getElementById('cfg-ls-m-title').value = c.lockscreen.music.title;
+            document.getElementById('cfg-ls-m-artist').value = c.lockscreen.music.artist;
+            document.getElementById('cfg-ls-m-cover').value = c.lockscreen.music.coverUrl;
+            document.getElementById('cfg-ls-m-audio').value = c.lockscreen.music.audioUrl;
+            // Pin
+            document.getElementById('cfg-pin-code').value = c.pin.code;
+            document.getElementById('cfg-pin-hint').value = c.pin.hintText;
+            document.getElementById('cfg-pin-w-txt').value = c.pin.wrongText;
+            document.getElementById('cfg-pin-w-stk').value = c.pin.wrongStickerUrl;
+            document.getElementById('cfg-pin-s-txt').value = c.pin.successText;
+            document.getElementById('cfg-pin-s-stk').value = c.pin.successStickerUrl;
+            // Letter
+            document.getElementById('cfg-let-photo').value = c.letter.photoUrl;
+            document.getElementById('cfg-let-rec').value = c.letter.recipient;
+            document.getElementById('cfg-let-date').value = c.letter.date;
+            document.getElementById('cfg-let-title').value = c.letter.title;
+            document.getElementById('cfg-let-body').value = c.letter.body;
+            document.getElementById('cfg-let-sig').value = c.letter.signature;
+            // Game
+            document.getElementById('cfg-game-title').value = c.game.title;
+            document.getElementById('cfg-game-sub').value = c.game.subtitle;
+            document.getElementById('cfg-game-final').value = c.game.finalText;
+            adminGamePhotos = [...c.game.images];
+            renderAdminGameList();
+            // Album
+            document.getElementById('cfg-alb-title').value = c.album.title;
+            adminAlbumPhotos = [...c.album.pages];
+            renderAdminAlbumList();
+            // WhatsApp
+            document.getElementById('cfg-wa-phone').value = c.whatsapp.phone;
+            document.getElementById('cfg-wa-msg').value = c.whatsapp.defaultMessage;
+            document.getElementById('cfg-wa-btn').value = c.whatsapp.buttonText;
+        }
+
+        function renderAdminGameList() {
+            let h = '';
+            adminGamePhotos.forEach((p, i) => {
+                h += `
+                <div class="p-4 bg-white/60 rounded-xl shadow-sm border border-[#e8d5d5] space-y-3">
+                    <span class="font-semibold text-sm text-[#8c8279]">Foto ${i+1}</span>
+                    <input type="text" value="${p.url}" onchange="adminGamePhotos[${i}].url=this.value" class="w-full px-4 py-2 border rounded-xl outline-none" placeholder="URL Foto">
+                    <input type="text" value="${p.msg}" onchange="adminGamePhotos[${i}].msg=this.value" class="w-full px-4 py-2 border rounded-xl outline-none" placeholder="Pesan Salah">
+                </div>`;
+            });
+            document.getElementById('admin-game-photos').innerHTML = h;
+        }
+
+        window.addAlbumPhoto = function() { adminAlbumPhotos.push(''); renderAdminAlbumList(); }
+        window.removeAlbumPhoto = function(idx) { adminAlbumPhotos.splice(idx,1); renderAdminAlbumList(); }
+
+        function renderAdminAlbumList() {
+            let h = '';
+            adminAlbumPhotos.forEach((p, i) => {
+                h += `
+                <div class="flex gap-2 items-center bg-white/80 p-2 rounded-xl border border-[#e8d5d5]">
+                    <span class="w-6 text-sm text-[#a39a90] text-center">${i+1}</span>
+                    <input type="text" value="${p}" onchange="adminAlbumPhotos[${i}]=this.value" class="flex-1 px-3 py-2 text-sm border rounded-lg outline-none" placeholder="URL Foto">
+                    <button onclick="removeAlbumPhoto(${i})" class="text-red-400 p-2"><i data-lucide="x" class="w-4 h-4"></i></button>
+                </div>`;
+            });
+            document.getElementById('admin-album-photos').innerHTML = h;
+            lucide.createIcons();
+        }
+
+        window.saveAdmin = async function() {
+            const newCfg = JSON.parse(JSON.stringify(window.appConfig));
+            newCfg.lockscreen.backgroundUrl = document.getElementById('cfg-ls-bg').value;
+            newCfg.lockscreen.dateText = document.getElementById('cfg-ls-date').value;
+            newCfg.lockscreen.overlayOpacity = parseFloat(document.getElementById('cfg-ls-op').value);
+            newCfg.lockscreen.blur = parseInt(document.getElementById('cfg-ls-blur').value);
+            newCfg.lockscreen.music.title = document.getElementById('cfg-ls-m-title').value;
+            newCfg.lockscreen.music.artist = document.getElementById('cfg-ls-m-artist').value;
+            newCfg.lockscreen.music.coverUrl = document.getElementById('cfg-ls-m-cover').value;
+            newCfg.lockscreen.music.audioUrl = document.getElementById('cfg-ls-m-audio').value;
+
+            newCfg.pin.code = document.getElementById('cfg-pin-code').value;
+            newCfg.pin.hintText = document.getElementById('cfg-pin-hint').value;
+            newCfg.pin.wrongText = document.getElementById('cfg-pin-w-txt').value;
+            newCfg.pin.wrongStickerUrl = document.getElementById('cfg-pin-w-stk').value;
+            newCfg.pin.successText = document.getElementById('cfg-pin-s-txt').value;
+            newCfg.pin.successStickerUrl = document.getElementById('cfg-pin-s-stk').value;
+
+            newCfg.letter.photoUrl = document.getElementById('cfg-let-photo').value;
+            newCfg.letter.recipient = document.getElementById('cfg-let-rec').value;
+            newCfg.letter.date = document.getElementById('cfg-let-date').value;
+            newCfg.letter.title = document.getElementById('cfg-let-title').value;
+            newCfg.letter.body = document.getElementById('cfg-let-body').value;
+            newCfg.letter.signature = document.getElementById('cfg-let-sig').value;
+
+            newCfg.game.title = document.getElementById('cfg-game-title').value;
+            newCfg.game.subtitle = document.getElementById('cfg-game-sub').value;
+            newCfg.game.finalText = document.getElementById('cfg-game-final').value;
+            newCfg.game.images = adminGamePhotos;
+
+            newCfg.album.title = document.getElementById('cfg-alb-title').value;
+            newCfg.album.pages = adminAlbumPhotos;
+
+            newCfg.whatsapp.phone = document.getElementById('cfg-wa-phone').value;
+            newCfg.whatsapp.defaultMessage = document.getElementById('cfg-wa-msg').value;
+            newCfg.whatsapp.buttonText = document.getElementById('cfg-wa-btn').value;
+
+            window.appConfig = newCfg;
+            
+            if(db) {
+                try {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'siteConfig'), newCfg);
+                } catch(e) {}
+            }
+            renderAll();
+            closeAdmin();
+        }
+
+        function renderAll() {
+            renderLockscreen();
+            renderPin();
+            renderLetter();
+            renderGame();
+            renderAlbum();
+            lucide.createIcons();
+        }
+
+        // Initialize icons on load
+        lucide.createIcons();
+
+    </script>
+</body>
+</html>
