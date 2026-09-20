@@ -5,17 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Untuk Kamu, Sayang ❤️</title>
     <meta name="description" content="An interactive birthday surprise made with love.">
+    <!-- Favicon Hati -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❤️</text></svg>">
     
-    <!-- Load Tailwind CSS via CDN (JIT compiler included) -->
+    <!-- Load Tailwind CSS JIT -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Load Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
+        /* Sembunyikan scrollbar tapi tetap bisa scroll */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Font Imports */
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
         
         .font-sans { font-family: 'Inter', sans-serif; }
@@ -27,14 +31,14 @@
         .film-grain { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; }
         .book-cover-texture { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.15'/%3E%3C/svg%3E"), linear-gradient(to right, rgba(0,0,0,0.4) 0%, transparent 5%, transparent 95%, rgba(255,255,255,0.05) 100%); }
         
-        /* 3D Elements */
+        /* 3D Elements untuk Album */
         .perspective-2000 { perspective: 2000px; }
         .preserve-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
         .rotate-y-n180 { transform: rotateY(-180deg); }
 
-        /* Scene Transitions */
+        /* Scene Transitions (Menggantikan Framer Motion) */
         .scene { 
             position: absolute; inset: 0; 
             opacity: 0; pointer-events: none; 
@@ -44,7 +48,7 @@
             opacity: 1; pointer-events: auto; transform: translateY(0); filter: blur(0); 
         }
         
-        /* Animations */
+        /* Custom Animations */
         @keyframes heartbeat {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.1); }
@@ -76,7 +80,7 @@
         }
         .animate-pulse-opacity { animation: pulse-opacity 2s infinite ease-in-out; }
 
-        /* Envelope specific */
+        /* Envelope / Surat Animations */
         .envelope-flap-top { transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s 0.2s; transform-origin: top; }
         .letter-paper { transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1); }
         .envelope-open .envelope-flap-top-front { transform: rotateX(180deg); z-index: 0 !important; }
@@ -87,6 +91,7 @@
 </head>
 <body class="w-full h-screen h-[100dvh] bg-[#f8f5f0] flex justify-center overflow-hidden font-sans">
     
+    <!-- Wrapper Utama Mobile Size -->
     <div id="app-container" class="w-full h-full max-w-md relative bg-[#fdfbf7] overflow-hidden shadow-2xl">
         <div class="film-grain absolute inset-0 z-[100]"></div>
 
@@ -95,6 +100,7 @@
             <div class="animate-heartbeat">
                 <i data-lucide="heart" class="w-12 h-12 fill-current opacity-80"></i>
             </div>
+            <p id="loading-text" class="absolute bottom-10 font-sans text-sm text-[#b07d7d]">Menyiapkan kenangan...</p>
         </div>
 
         <!-- SCENE 1: LOCKSCREEN -->
@@ -102,11 +108,12 @@
             <img id="ls-bg" src="" alt="Background" class="absolute inset-0 w-full h-full object-cover">
             <div id="ls-overlay" class="absolute inset-0 transition-all duration-500"></div>
 
-            <button onclick="openAdmin()" class="absolute top-6 left-6 z-[60] p-2.5 bg-black/20 rounded-full text-white/60 hover:text-white transition-colors backdrop-blur-md border border-white/10">
+            <!-- Tombol Admin (Kiri Atas) -->
+            <button onclick="openAdmin()" aria-label="Open Admin" class="absolute top-6 left-6 z-[60] p-2.5 bg-black/20 rounded-full text-white/60 hover:text-white transition-colors backdrop-blur-md border border-white/10">
                 <i data-lucide="settings" class="w-5 h-5"></i>
             </button>
 
-            <!-- Drag Area -->
+            <!-- Drag Area / Swipe Up -->
             <div id="ls-drag-area" class="relative z-10 w-full h-full flex flex-col items-center pt-20 pb-8 cursor-grab active:cursor-grabbing">
                 <!-- Clock -->
                 <div class="flex flex-col items-center mb-10 w-full select-none pointer-events-none">
@@ -116,10 +123,10 @@
 
                 <!-- Notifications -->
                 <div id="ls-notifications" class="w-full px-5 mb-8 space-y-3 flex-1 overflow-y-auto hide-scrollbar select-none pointer-events-none">
-                    <!-- Injected via JS -->
+                    <!-- Notification Injected via JS -->
                 </div>
 
-                <!-- Music Player -->
+                <!-- Music Player Widget -->
                 <div class="w-full px-5 mt-auto mb-10 pointer-events-auto">
                     <div class="bg-black/40 backdrop-blur-2xl rounded-[2rem] p-5 shadow-2xl border border-white/10">
                         <div class="flex items-center gap-4 mb-5">
@@ -129,9 +136,11 @@
                                 <p id="ls-music-artist" class="text-white/60 text-sm truncate"></p>
                             </div>
                         </div>
+                        <!-- Progress Bar -->
                         <div class="w-full h-1.5 bg-white/20 rounded-full mb-6 overflow-hidden">
                             <div id="audio-progress" class="h-full bg-white rounded-full transition-all duration-300" style="width: 0%"></div>
                         </div>
+                        <!-- Controls -->
                         <div class="flex justify-center items-center gap-12">
                             <button class="text-white/80 active:scale-95"><i data-lucide="skip-back" class="w-8 h-8 fill-current"></i></button>
                             <button onclick="toggleAudio()" class="text-white hover:scale-110 active:scale-95 transition-transform" id="btn-play-pause">
@@ -142,12 +151,13 @@
                     </div>
                 </div>
 
-                <!-- Footer Buttons -->
+                <!-- Shortcuts -->
                 <div class="flex justify-between w-full px-12 mb-8 pointer-events-auto">
-                    <button class="w-14 h-14 rounded-full bg-black/30 backdrop-blur-xl flex items-center justify-center text-white border border-white/10 shadow-lg active:scale-90"><i data-lucide="flashlight" class="w-6 h-6"></i></button>
-                    <button class="w-14 h-14 rounded-full bg-black/30 backdrop-blur-xl flex items-center justify-center text-white border border-white/10 shadow-lg active:scale-90"><i data-lucide="camera" class="w-6 h-6"></i></button>
+                    <button aria-label="Flashlight" class="w-14 h-14 rounded-full bg-black/30 backdrop-blur-xl flex items-center justify-center text-white border border-white/10 shadow-lg active:scale-90"><i data-lucide="flashlight" class="w-6 h-6"></i></button>
+                    <button aria-label="Camera" class="w-14 h-14 rounded-full bg-black/30 backdrop-blur-xl flex items-center justify-center text-white border border-white/10 shadow-lg active:scale-90"><i data-lucide="camera" class="w-6 h-6"></i></button>
                 </div>
 
+                <!-- Swipe up text -->
                 <div class="text-white flex flex-col items-center pb-2 pointer-events-auto cursor-pointer animate-bounce-subtle" onclick="goToScene(1)">
                     <span class="text-sm font-semibold tracking-widest uppercase opacity-80 drop-shadow-md">Geser ke atas untuk membuka</span>
                 </div>
@@ -159,7 +169,7 @@
             <div id="pin-bg" class="absolute inset-0 bg-cover bg-center transition-all duration-700 blur-[25px] brightness-50"></div>
             <div class="absolute inset-0 bg-black/20 backdrop-blur-md"></div>
             
-            <!-- Success Particles Container -->
+            <!-- Success Particles -->
             <div id="pin-particles" class="absolute inset-0 z-20 pointer-events-none overflow-hidden hidden"></div>
 
             <div id="pin-content-area" class="relative z-30 flex flex-col items-center w-full max-w-sm px-8 transition-transform duration-500">
@@ -212,7 +222,6 @@
             <div id="letter-bg-hearts" class="absolute inset-0 pointer-events-none overflow-hidden opacity-60">
                 <div class="absolute top-[-10%] left-[-10%] w-64 h-64 bg-[#e8d5d5]/40 rounded-full mix-blend-multiply filter blur-[60px]"></div>
                 <div class="absolute bottom-[-10%] right-[-10%] w-72 h-72 bg-[#f3e6d8]/50 rounded-full mix-blend-multiply filter blur-[60px]"></div>
-                <!-- JS injected hearts -->
             </div>
 
             <!-- Envelope View (Before Open) -->
@@ -301,7 +310,7 @@
 
             <div class="flex-1 overflow-y-auto hide-scrollbar px-4 pb-12 z-10">
                 <div id="game-grid" class="grid grid-cols-2 gap-x-4 gap-y-8 max-w-lg mx-auto pb-8">
-                    <!-- Injected via JS -->
+                    <!-- Images Injected via JS -->
                 </div>
             </div>
 
@@ -448,10 +457,12 @@
     </div>
 
     <script type="module">
+        // Firebase Setup using ESM format for browser compatibility (No Node.js needed)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Konfigurasi Default (Jika Firebase mati / tidak ada internet / permission denied)
         const defaultConfig = {
             lockscreen: {
                 backgroundUrl: 'https://images.unsplash.com/photo-1518599904199-0ca897819ddb?q=80&w=1080&auto=format&fit=crop',
@@ -479,14 +490,17 @@
         };
 
         window.appConfig = JSON.parse(JSON.stringify(defaultConfig));
-        let isConfigLoaded = false;
         
+        // Navigation State
         const scenes = ['scene-lockscreen', 'scene-pin', 'scene-letter', 'scene-game', 'scene-album'];
         let currentSceneIndex = 0;
+        let isTransitioning = false;
 
         let db;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-love-app';
+        
         try {
+            // Gunakan konfigurasi eksternal jika ada, jika tidak, abaikan Firebase dan pakai lokal
             const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
             if(Object.keys(firebaseConfig).length > 0) {
                 const app = initializeApp(firebaseConfig);
@@ -495,9 +509,7 @@
                 
                 const initAuth = async () => {
                     try {
-                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
-                        else await signInAnonymously(auth);
-                        
+                        await signInAnonymously(auth);
                         const docRef = doc(db, 'artifacts', appId, 'public', 'siteConfig');
                         onSnapshot(docRef, (snapshot) => {
                             if (snapshot.exists()) {
@@ -505,11 +517,10 @@
                             } else {
                                 setDoc(docRef, defaultConfig).catch(()=>{});
                             }
-                            isConfigLoaded = true;
                             renderAll();
                             hideLoading();
                         }, (error) => {
-                            console.warn("Firestore listener permission denied. Using local config.");
+                            console.warn("Firestore listener ditolak (Security Rules). Menggunakan konfigurasi lokal.");
                             fallbackLocal();
                         });
                     } catch(e) { fallbackLocal(); }
@@ -519,17 +530,17 @@
         } catch(e) { fallbackLocal(); }
 
         function fallbackLocal() {
-            isConfigLoaded = true;
             renderAll();
             hideLoading();
         }
 
         function hideLoading() {
-            document.getElementById('scene-loading').classList.remove('active');
-            document.getElementById('scene-lockscreen').classList.add('active');
+            setTimeout(() => {
+                document.getElementById('scene-loading').classList.remove('active');
+                document.getElementById('scene-lockscreen').classList.add('active');
+            }, 1000);
         }
 
-        let isTransitioning = false;
         window.goToScene = function(idx) {
             if (isTransitioning) return;
             isTransitioning = true;
@@ -557,8 +568,11 @@
 
         window.toggleAudio = function() {
             if(!userInteracted) userInteracted = true;
-            if(isPlaying) globalAudio.pause();
-            else globalAudio.play().catch(e=>console.warn(e));
+            if(isPlaying) {
+                globalAudio.pause();
+            } else {
+                globalAudio.play().catch(e=>console.warn("Autoplay dicegah oleh browser."));
+            }
             isPlaying = !isPlaying;
             document.getElementById('btn-play-pause').innerHTML = isPlaying 
                 ? '<i data-lucide="pause" class="w-12 h-12 fill-current"></i>' 
@@ -624,39 +638,25 @@
             document.getElementById('ls-time').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
         }, 1000);
 
-        // Lockscreen Swipe Logic
         let lsStartY = 0;
-        let isDragging = false;
+        let lsIsDragging = false;
         const dragArea = document.getElementById('ls-drag-area');
 
-        // Touch events (Mobile)
-        dragArea.addEventListener('touchstart', e => {
-            lsStartY = e.touches[0].clientY;
-        }, { passive: true });
-        
+        // Touch (Mobile)
+        dragArea.addEventListener('touchstart', e => { lsStartY = e.touches[0].clientY; }, { passive: true });
         dragArea.addEventListener('touchend', e => {
             if (lsStartY - e.changedTouches[0].clientY > 50) goToScene(1);
         });
 
-        // Mouse events (Desktop / Laptop)
-        dragArea.addEventListener('mousedown', e => {
-            isDragging = true;
-            lsStartY = e.clientY;
-        });
-
+        // Mouse (Desktop)
+        dragArea.addEventListener('mousedown', e => { lsIsDragging = true; lsStartY = e.clientY; });
         dragArea.addEventListener('mouseup', e => {
-            if (isDragging) {
-                isDragging = false;
+            if (lsIsDragging) {
+                lsIsDragging = false;
                 if (lsStartY - e.clientY > 50) goToScene(1);
             }
         });
-
-        dragArea.addEventListener('mouseleave', e => {
-            if (isDragging) {
-                isDragging = false;
-                if (lsStartY - e.clientY > 50) goToScene(1);
-            }
-        });
+        dragArea.addEventListener('mouseleave', e => { lsIsDragging = false; });
 
         let currentPin = '';
         window.pressPin = function(num) {
@@ -737,7 +737,6 @@
                 document.getElementById('letter-full-view').classList.remove('hidden');
                 document.getElementById('letter-full-view').classList.add('flex');
                 
-                // Trigger animation frame for CSS transition
                 requestAnimationFrame(() => {
                     document.getElementById('letter-full-view').classList.remove('translate-y-[100%]', 'opacity-0');
                     document.getElementById('letter-full-view').classList.add('translate-y-0', 'opacity-100');
@@ -757,12 +756,6 @@
             document.getElementById('letter-title-img').innerText = l.title;
             document.getElementById('letter-body').innerText = l.body;
             document.getElementById('letter-signature').innerText = l.signature;
-
-            let hearts = '';
-            for(let i=0; i<15; i++) {
-                hearts += `<div class="absolute text-[#e8d5d5]/80 animate-bounce-subtle" style="left:${Math.random()*100}%; top:${Math.random()*100}%; animation-delay:${Math.random()*2}s"><i data-lucide="heart" class="fill-current w-${Math.floor(Math.random()*4)+4} h-${Math.floor(Math.random()*4)+4}"></i></div>`;
-            }
-            document.getElementById('letter-bg-hearts').innerHTML += hearts;
         }
 
         let clickedPhotos = new Set();
@@ -840,14 +833,14 @@
         }
 
         window.flipAlbumPage = function(dir) {
-            if(dir === 1 && albumCurrentPage <= totalSpreads) { // next
+            if(dir === 1 && albumCurrentPage <= totalSpreads) {
                 const spread = document.getElementById(`spread-${albumCurrentPage-1}`);
                 if(spread) {
                     spread.classList.add('rotate-y-n180');
                     spread.style.zIndex = albumCurrentPage + 10;
                 }
                 albumCurrentPage++;
-            } else if (dir === -1 && albumCurrentPage > 0) { // prev
+            } else if (dir === -1 && albumCurrentPage > 0) {
                 albumCurrentPage--;
                 if(albumCurrentPage === 0) {
                     document.getElementById('album-cover').classList.remove('rotate-y-n180');
@@ -916,7 +909,6 @@
             document.getElementById('album-spreads-container').innerHTML = html;
         }
 
-        // WhatsApp Modal
         window.openMessageModal = function(e) {
             e.stopPropagation();
             const modal = document.getElementById('message-modal');
@@ -986,7 +978,6 @@
 
         function populateAdminForm() {
             const c = window.appConfig;
-            // Lockscreen
             document.getElementById('cfg-ls-bg').value = c.lockscreen.backgroundUrl;
             document.getElementById('cfg-ls-date').value = c.lockscreen.dateText;
             document.getElementById('cfg-ls-op').value = c.lockscreen.overlayOpacity;
@@ -995,31 +986,31 @@
             document.getElementById('cfg-ls-m-artist').value = c.lockscreen.music.artist;
             document.getElementById('cfg-ls-m-cover').value = c.lockscreen.music.coverUrl;
             document.getElementById('cfg-ls-m-audio').value = c.lockscreen.music.audioUrl;
-            // Pin
+            
             document.getElementById('cfg-pin-code').value = c.pin.code;
             document.getElementById('cfg-pin-hint').value = c.pin.hintText;
             document.getElementById('cfg-pin-w-txt').value = c.pin.wrongText;
             document.getElementById('cfg-pin-w-stk').value = c.pin.wrongStickerUrl;
             document.getElementById('cfg-pin-s-txt').value = c.pin.successText;
             document.getElementById('cfg-pin-s-stk').value = c.pin.successStickerUrl;
-            // Letter
+            
             document.getElementById('cfg-let-photo').value = c.letter.photoUrl;
             document.getElementById('cfg-let-rec').value = c.letter.recipient;
             document.getElementById('cfg-let-date').value = c.letter.date;
             document.getElementById('cfg-let-title').value = c.letter.title;
             document.getElementById('cfg-let-body').value = c.letter.body;
             document.getElementById('cfg-let-sig').value = c.letter.signature;
-            // Game
+            
             document.getElementById('cfg-game-title').value = c.game.title;
             document.getElementById('cfg-game-sub').value = c.game.subtitle;
             document.getElementById('cfg-game-final').value = c.game.finalText;
             adminGamePhotos = [...c.game.images];
             renderAdminGameList();
-            // Album
+            
             document.getElementById('cfg-alb-title').value = c.album.title;
             adminAlbumPhotos = [...c.album.pages];
             renderAdminAlbumList();
-            // WhatsApp
+            
             document.getElementById('cfg-wa-phone').value = c.whatsapp.phone;
             document.getElementById('cfg-wa-msg').value = c.whatsapp.defaultMessage;
             document.getElementById('cfg-wa-btn').value = c.whatsapp.buttonText;
@@ -1094,7 +1085,7 @@
 
             window.appConfig = newCfg;
             
-            if(db) {
+            if(typeof db !== 'undefined') {
                 try {
                     await setDoc(doc(db, 'artifacts', appId, 'public', 'siteConfig'), newCfg);
                 } catch(e) {}
@@ -1112,7 +1103,6 @@
             lucide.createIcons();
         }
 
-        // Initialize icons on load
         lucide.createIcons();
 
     </script>
