@@ -38,7 +38,7 @@
         .rotate-y-180 { transform: rotateY(180deg); }
         .rotate-y-n180 { transform: rotateY(-180deg); }
 
-        /* Scene Transitions (Menggantikan Framer Motion) */
+        /* Scene Transitions */
         .scene { 
             position: absolute; inset: 0; 
             opacity: 0; pointer-events: none; 
@@ -86,7 +86,6 @@
         .envelope-open .envelope-flap-top-front { transform: rotateX(180deg); z-index: 0 !important; }
         .envelope-open .envelope-flap-top-back { transform: rotateX(0deg) !important; opacity: 1 !important; z-index: 5 !important; }
         .envelope-open .letter-paper { transform: translateY(-180px) scale(1.05); }
-
     </style>
 </head>
 <body class="w-full h-screen h-[100dvh] bg-[#f8f5f0] flex justify-center overflow-hidden font-sans">
@@ -457,12 +456,6 @@
     </div>
 
     <script type="module">
-        // Firebase Setup using ESM format for browser compatibility (No Node.js needed)
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Konfigurasi Default (Jika Firebase mati / tidak ada internet / permission denied)
         const defaultConfig = {
             lockscreen: {
                 backgroundUrl: 'https://images.unsplash.com/photo-1518599904199-0ca897819ddb?q=80&w=1080&auto=format&fit=crop',
@@ -495,49 +488,67 @@
         const scenes = ['scene-lockscreen', 'scene-pin', 'scene-letter', 'scene-game', 'scene-album'];
         let currentSceneIndex = 0;
         let isTransitioning = false;
-
         let db;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-love-app';
-        
-        try {
-            // Gunakan konfigurasi eksternal jika ada, jika tidak, abaikan Firebase dan pakai lokal
-            const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-            if(Object.keys(firebaseConfig).length > 0) {
-                const app = initializeApp(firebaseConfig);
-                const auth = getAuth(app);
-                db = getFirestore(app);
-                
-                const initAuth = async () => {
-                    try {
-                        await signInAnonymously(auth);
-                        const docRef = doc(db, 'artifacts', appId, 'public', 'siteConfig');
-                        onSnapshot(docRef, (snapshot) => {
-                            if (snapshot.exists()) {
-                                window.appConfig = { ...defaultConfig, ...snapshot.data() };
-                            } else {
-                                setDoc(docRef, defaultConfig).catch(()=>{});
-                            }
-                            renderAll();
-                            hideLoading();
-                        }, (error) => {
-                            console.warn("Firestore listener ditolak (Security Rules). Menggunakan konfigurasi lokal.");
-                            fallbackLocal();
-                        });
-                    } catch(e) { fallbackLocal(); }
-                };
-                initAuth();
-            } else { fallbackLocal(); }
-        } catch(e) { fallbackLocal(); }
 
-        function fallbackLocal() {
+        const fallbackLocal = () => {
             renderAll();
             hideLoading();
-        }
+        };
+
+        const initApp = async () => {
+            // Segera render icon lucide untuk loading screen agar tidak polos
+            if (window.lucide) window.lucide.createIcons();
+
+            try {
+                const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
+                const firebaseConfig = JSON.parse(firebaseConfigStr);
+                
+                // Gunakan Dynamic Import agar jika Firebase terblokir (AdBlock) atau tidak disetting,
+                // script ini tidak akan crash dan langsung menuju mode lokal dengan mulus.
+                if(Object.keys(firebaseConfig).length > 0) {
+                    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js");
+                    const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js");
+                    const { getFirestore, doc, setDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js");
+                    
+                    const app = initializeApp(firebaseConfig);
+                    const auth = getAuth(app);
+                    db = getFirestore(app);
+                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-love-app';
+
+                    await signInAnonymously(auth);
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'siteConfig');
+                    
+                    onSnapshot(docRef, (snapshot) => {
+                        if (snapshot.exists()) {
+                            window.appConfig = { ...defaultConfig, ...snapshot.data() };
+                        } else {
+                            setDoc(docRef, defaultConfig).catch(()=>{});
+                        }
+                        // Panggil render setelah data masuk
+                        fallbackLocal();
+                    }, (error) => {
+                        console.warn("Firebase tidak diizinkan atau ditolak. Menggunakan data default.");
+                        fallbackLocal();
+                    });
+                } else {
+                    fallbackLocal();
+                }
+            } catch(e) {
+                console.warn("Firebase gagal dimuat atau sistem sedang offline. Beralih ke data lokal.", e);
+                fallbackLocal();
+            }
+        };
+
+        // Memulai Inisialisasi Aplikasi
+        initApp();
 
         function hideLoading() {
             setTimeout(() => {
-                document.getElementById('scene-loading').classList.remove('active');
-                document.getElementById('scene-lockscreen').classList.add('active');
+                const loading = document.getElementById('scene-loading');
+                if(loading) loading.classList.remove('active');
+                
+                const lockscreen = document.getElementById('scene-lockscreen');
+                if(lockscreen) lockscreen.classList.add('active');
             }, 1000);
         }
 
@@ -546,17 +557,23 @@
             isTransitioning = true;
 
             const current = document.getElementById(scenes[currentSceneIndex]);
-            current.classList.remove('active');
-            current.classList.add('-translate-y-full', 'opacity-0');
+            if(current) {
+                current.classList.remove('active');
+                current.classList.add('-translate-y-full', 'opacity-0');
+            }
             
             setTimeout(() => {
-                current.style.display = 'none';
+                if(current) current.style.display = 'none';
                 currentSceneIndex = idx;
+                
                 const next = document.getElementById(scenes[currentSceneIndex]);
-                next.style.display = 'flex';
-                void next.offsetWidth; // trigger reflow
-                next.classList.remove('-translate-y-full', 'translate-y-[100%]', 'opacity-0');
-                next.classList.add('active');
+                if(next) {
+                    next.style.display = 'flex';
+                    void next.offsetWidth; // trigger reflow
+                    next.classList.remove('-translate-y-full', 'translate-y-[100%]', 'opacity-0');
+                    next.classList.add('active');
+                }
+                
                 setTimeout(() => { isTransitioning = false; }, 800);
             }, 800);
         }
@@ -577,12 +594,13 @@
             document.getElementById('btn-play-pause').innerHTML = isPlaying 
                 ? '<i data-lucide="pause" class="w-12 h-12 fill-current"></i>' 
                 : '<i data-lucide="play" class="w-12 h-12 fill-current"></i>';
-            lucide.createIcons();
+            if(window.lucide) window.lucide.createIcons();
         }
 
         globalAudio.addEventListener('timeupdate', () => {
             if(globalAudio.duration) {
-                document.getElementById('audio-progress').style.width = `${(globalAudio.currentTime/globalAudio.duration)*100}%`;
+                const p = document.getElementById('audio-progress');
+                if(p) p.style.width = `${(globalAudio.currentTime/globalAudio.duration)*100}%`;
             }
         });
 
@@ -591,9 +609,12 @@
                 userInteracted = true;
                 globalAudio.play().then(() => {
                     isPlaying = true;
-                    document.getElementById('btn-play-pause').innerHTML = '<i data-lucide="pause" class="w-12 h-12 fill-current"></i>';
-                    lucide.createIcons();
-                }).catch(()=>{});
+                    const btn = document.getElementById('btn-play-pause');
+                    if(btn) btn.innerHTML = '<i data-lucide="pause" class="w-12 h-12 fill-current"></i>';
+                    if(window.lucide) window.lucide.createIcons();
+                }).catch((e)=>{
+                    console.log("Autoplay diblokir oleh browser sampai user berinteraksi lebih lanjut.");
+                });
             }
         }
         window.addEventListener('click', initAudio, { once: true });
@@ -613,7 +634,7 @@
             if(globalAudio.src !== ls.music.audioUrl) {
                 const wasPlaying = isPlaying;
                 globalAudio.src = ls.music.audioUrl;
-                if(wasPlaying) globalAudio.play();
+                if(wasPlaying) globalAudio.play().catch(()=>{});
             }
 
             const notifHtml = ls.notifications.map(n => `
@@ -635,28 +656,31 @@
         }
 
         setInterval(() => {
-            document.getElementById('ls-time').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+            const lsTime = document.getElementById('ls-time');
+            if(lsTime) lsTime.innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
         }, 1000);
 
         let lsStartY = 0;
         let lsIsDragging = false;
         const dragArea = document.getElementById('ls-drag-area');
 
-        // Touch (Mobile)
-        dragArea.addEventListener('touchstart', e => { lsStartY = e.touches[0].clientY; }, { passive: true });
-        dragArea.addEventListener('touchend', e => {
-            if (lsStartY - e.changedTouches[0].clientY > 50) goToScene(1);
-        });
+        if(dragArea) {
+            // Touch (Mobile)
+            dragArea.addEventListener('touchstart', e => { lsStartY = e.touches[0].clientY; }, { passive: true });
+            dragArea.addEventListener('touchend', e => {
+                if (lsStartY - e.changedTouches[0].clientY > 50) goToScene(1);
+            });
 
-        // Mouse (Desktop)
-        dragArea.addEventListener('mousedown', e => { lsIsDragging = true; lsStartY = e.clientY; });
-        dragArea.addEventListener('mouseup', e => {
-            if (lsIsDragging) {
-                lsIsDragging = false;
-                if (lsStartY - e.clientY > 50) goToScene(1);
-            }
-        });
-        dragArea.addEventListener('mouseleave', e => { lsIsDragging = false; });
+            // Mouse (Desktop)
+            dragArea.addEventListener('mousedown', e => { lsIsDragging = true; lsStartY = e.clientY; });
+            dragArea.addEventListener('mouseup', e => {
+                if (lsIsDragging) {
+                    lsIsDragging = false;
+                    if (lsStartY - e.clientY > 50) goToScene(1);
+                }
+            });
+            dragArea.addEventListener('mouseleave', e => { lsIsDragging = false; });
+        }
 
         let currentPin = '';
         window.pressPin = function(num) {
@@ -724,7 +748,7 @@
                 html += `<div class="absolute bottom-0 text-[#d4a3a3]" style="left:${left}%; animation: float-up ${dur}s ease-out ${delay}s forwards;"><i data-lucide="heart" class="fill-current w-8 h-8"></i></div>`;
             }
             document.getElementById('pin-particles').innerHTML = html;
-            lucide.createIcons();
+            if(window.lucide) window.lucide.createIcons();
         }
 
         window.openEnvelope = function() {
@@ -785,7 +809,7 @@
                         parts += `<div class="absolute text-[#d4a3a3] opacity-80" style="left:50%; top:50%; transform:translate(-50%,-50%); animation: float-up ${Math.random()*2+2}s ease-out ${Math.random()*1}s forwards"><i data-lucide="heart" class="fill-[#e8d5d5] w-8 h-8"></i></div>`;
                     }
                     document.getElementById('game-twist-particles').innerHTML = parts;
-                    lucide.createIcons();
+                    if(window.lucide) window.lucide.createIcons();
 
                     setTimeout(() => goToScene(4), window.appConfig.game.duration || 5000);
                 }, 1000);
@@ -921,7 +945,7 @@
                 document.getElementById('message-modal-content').classList.add('translate-y-0');
             });
             document.getElementById('wa-btn-text').innerHTML = `<i data-lucide="phone" class="w-5 h-5 fill-current"></i> ${window.appConfig.whatsapp.buttonText}`;
-            lucide.createIcons();
+            if(window.lucide) window.lucide.createIcons();
         }
 
         window.closeMessageModal = function() {
@@ -1043,7 +1067,7 @@
                 </div>`;
             });
             document.getElementById('admin-album-photos').innerHTML = h;
-            lucide.createIcons();
+            if(window.lucide) window.lucide.createIcons();
         }
 
         window.saveAdmin = async function() {
@@ -1087,6 +1111,9 @@
             
             if(typeof db !== 'undefined') {
                 try {
+                    // Update Firebase Firestore secara dinamis jika terhubung
+                    const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js");
+                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-love-app';
                     await setDoc(doc(db, 'artifacts', appId, 'public', 'siteConfig'), newCfg);
                 } catch(e) {}
             }
@@ -1100,10 +1127,8 @@
             renderLetter();
             renderGame();
             renderAlbum();
-            lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons();
         }
-
-        lucide.createIcons();
 
     </script>
 </body>
