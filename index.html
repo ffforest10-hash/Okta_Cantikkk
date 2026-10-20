@@ -385,7 +385,16 @@
                     </button>
                 </div>
             </div>
+
+            <!-- LIGHTBOX MODAL (ZOOM FOTO) -->
+            <div id="lightbox-modal" class="hidden absolute inset-0 z-[150] items-center justify-center bg-black/90 backdrop-blur-sm p-4 opacity-0 transition-opacity duration-300" onclick="closeLightbox()">
+                <img id="lightbox-img" src="" class="max-w-full max-h-[90%] object-contain rounded-md shadow-2xl transform scale-95 transition-transform duration-300">
+                <button class="absolute top-6 right-6 text-white/70 hover:text-white p-2 rounded-full bg-black/20 backdrop-blur-md border border-white/10 active:scale-95">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
         </div>
+
     </div>
 
     <!-- ADMIN PANEL MODAL -->
@@ -874,6 +883,38 @@
             window.open(`https://wa.me/${num}?text=${encodeURIComponent(final)}`, '_blank');
         }
 
+        window.openLightbox = function(src) {
+            const modal = document.getElementById('lightbox-modal');
+            const img = document.getElementById('lightbox-img');
+            if(modal && img) {
+                img.src = src;
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                requestAnimationFrame(() => {
+                    modal.classList.remove('opacity-0');
+                    modal.classList.add('opacity-100');
+                    img.classList.remove('scale-95');
+                    img.classList.add('scale-100');
+                });
+            }
+        }
+
+        window.closeLightbox = function() {
+            const modal = document.getElementById('lightbox-modal');
+            const img = document.getElementById('lightbox-img');
+            if(modal && img) {
+                modal.classList.remove('opacity-100');
+                modal.classList.add('opacity-0');
+                img.classList.remove('scale-100');
+                img.classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                    img.src = '';
+                }, 300);
+            }
+        }
+
         // --- RENDER FUNCTIONS (WITH SAFETY CHECKS) --- //
 
         function updatePinDots() {
@@ -932,22 +973,23 @@
                 }
 
                 const nContainer = document.getElementById('ls-notifications');
-                if(nContainer && ls.notifications) {
-                    const notifHtml = ls.notifications.map(n => `
-                        <div class="bg-black/30 backdrop-blur-xl rounded-[1.5rem] p-4 flex gap-4 shadow-lg border border-white/10">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#d4a3a3] to-[#b07d7d] flex items-center justify-center shrink-0 shadow-inner border border-white/20">
-                                <i data-lucide="heart" class="text-white fill-current"></i>
+                if(nContainer && ls.notifications && ls.notifications.length > 0) {
+                    const n = ls.notifications[0];
+                    const notifHtml = `
+                        <div class="bg-black/40 backdrop-blur-2xl rounded-[1.5rem] p-4 flex gap-4 shadow-lg border border-white/10">
+                            <div class="w-12 h-12 rounded-xl bg-[#25D366] flex items-center justify-center shrink-0 shadow-inner border border-white/20">
+                                <i data-lucide="message-circle" class="text-white fill-current w-6 h-6"></i>
                             </div>
                             <div class="flex-1 min-w-0">
                                 <div class="flex justify-between items-baseline mb-0.5">
-                                    <span class="text-white/90 text-sm font-semibold tracking-wide uppercase">${n.app || ''}</span>
-                                    <span class="text-white/50 text-xs">${n.time || ''}</span>
+                                    <span class="text-white/90 text-sm font-semibold tracking-wide">WhatsApp</span>
+                                    <span class="text-white/50 text-xs">sekarang</span>
                                 </div>
-                                <p class="text-white font-semibold text-base truncate">${n.title || ''}</p>
-                                <p class="text-white/70 text-sm line-clamp-2 mt-0.5 leading-snug">${n.content || ''}</p>
+                                <p class="text-white font-bold text-base truncate">${n.title || ''}</p>
+                                <p class="text-white/80 text-sm line-clamp-2 mt-0.5 leading-snug">${n.content || ''}</p>
                             </div>
                         </div>
-                    `).join('');
+                    `;
                     nContainer.innerHTML = notifHtml;
                 }
             } catch(e) { console.error(e) }
@@ -1090,12 +1132,11 @@
                     const tapeRot = i % 2 === 0 ? '-rotate-2' : 'rotate-3';
                     
                     scrollHtml += `
-                    <div class="relative bg-[#fcf9f2] p-4 pb-12 rounded-sm shadow-[0_15px_40px_rgba(0,0,0,0.12)] border border-[#ece4d9] w-[90%] md:w-[80%] transition-transform duration-500 hover:scale-[1.03]" style="transform: rotate(${rotate}deg)">
+                    <div onclick="openLightbox('${p}')" class="relative bg-[#fcf9f2] p-4 pb-12 rounded-sm shadow-[0_15px_40px_rgba(0,0,0,0.12)] border border-[#ece4d9] w-[90%] md:w-[80%] transition-transform duration-500 hover:scale-[1.03] cursor-pointer" style="transform: rotate(${rotate}deg)">
                         <div class="absolute -top-3 ${tapePos} w-16 h-6 bg-[#f3e6d8]/80 backdrop-blur-md ${tapeRot} mix-blend-multiply border border-[#e6d9cc]/40 shadow-sm z-10"></div>
                         <div class="w-full aspect-[4/5] overflow-hidden rounded-sm border border-[#e8d5d5]/50 shadow-inner bg-[#f3e6d8]/30">
                             <img src="${p}" onerror="this.src='https://placehold.co/400x500/f3e6d8/b07d7d?text=Error'" loading="lazy" class="w-full h-full object-cover filter contrast-[1.05] sepia-[0.15]">
                         </div>
-                        <div class="absolute bottom-4 left-0 right-0 text-center font-cursive text-[#b07d7d] text-2xl font-bold opacity-80">${i+1}</div>
                     </div>
                     `;
                 });
@@ -1168,6 +1209,8 @@
                 document.getElementById('cfg-ls-date').value = c.lockscreen.dateText;
                 document.getElementById('cfg-ls-op').value = c.lockscreen.overlayOpacity;
                 document.getElementById('cfg-ls-blur').value = c.lockscreen.blur;
+                document.getElementById('cfg-ls-notif-title').value = c.lockscreen.notifications[0]?.title || '';
+                document.getElementById('cfg-ls-notif-msg').value = c.lockscreen.notifications[0]?.content || '';
                 document.getElementById('cfg-ls-m-title').value = c.lockscreen.music.title;
                 document.getElementById('cfg-ls-m-artist').value = c.lockscreen.music.artist;
                 document.getElementById('cfg-ls-m-cover').value = c.lockscreen.music.coverUrl;
@@ -1242,6 +1285,14 @@
                 newCfg.lockscreen.dateText = document.getElementById('cfg-ls-date').value;
                 newCfg.lockscreen.overlayOpacity = parseFloat(document.getElementById('cfg-ls-op').value);
                 newCfg.lockscreen.blur = parseInt(document.getElementById('cfg-ls-blur').value);
+                
+                newCfg.lockscreen.notifications = [{
+                    app: 'WhatsApp',
+                    title: document.getElementById('cfg-ls-notif-title').value,
+                    content: document.getElementById('cfg-ls-notif-msg').value,
+                    time: 'sekarang'
+                }];
+
                 newCfg.lockscreen.music.title = document.getElementById('cfg-ls-m-title').value;
                 newCfg.lockscreen.music.artist = document.getElementById('cfg-ls-m-artist').value;
                 newCfg.lockscreen.music.coverUrl = document.getElementById('cfg-ls-m-cover').value;
