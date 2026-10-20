@@ -42,18 +42,18 @@
         .scene { 
             position: absolute; inset: 0; 
             opacity: 0; pointer-events: none; 
-            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), filter 0.8s ease; 
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), filter 0.6s ease; 
         }
         .scene.active { 
-            opacity: 1; pointer-events: auto; transform: translateY(0); filter: blur(0); 
+            opacity: 1; pointer-events: auto; transform: translateY(0); filter: blur(0); display: flex !important;
         }
         
         /* Custom Animations */
         @keyframes heartbeat {
             0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            50% { transform: scale(1.15); }
         }
-        .animate-heartbeat { animation: heartbeat 2s infinite ease-in-out; }
+        .animate-heartbeat { animation: heartbeat 1.5s infinite ease-in-out; }
 
         @keyframes float-up {
             0% { transform: translateY(100vh) scale(0); opacity: 1; }
@@ -95,11 +95,11 @@
         <div class="film-grain absolute inset-0 z-[100]"></div>
 
         <!-- LOADING SCENE -->
-        <div id="scene-loading" class="scene active flex items-center justify-center bg-[#f8f5f0] text-[#c48b8b] z-[60]" style="display: flex;">
+        <div id="scene-loading" class="absolute inset-0 z-[60] flex items-center justify-center bg-[#f8f5f0] text-[#c48b8b] transition-opacity duration-500">
             <div class="animate-heartbeat">
                 <i data-lucide="heart" class="w-12 h-12 fill-current opacity-80"></i>
             </div>
-            <p id="loading-text" class="absolute bottom-10 font-sans text-sm text-[#b07d7d]">Menyiapkan kenangan...</p>
+            <p id="loading-text" class="absolute bottom-10 font-sans text-sm text-[#b07d7d] tracking-wide">Menyiapkan kenangan...</p>
         </div>
 
         <!-- SCENE 1: LOCKSCREEN -->
@@ -261,7 +261,7 @@
             </div>
 
             <!-- Opened Letter View (Hidden Initially) -->
-            <div id="letter-full-view" class="hidden flex-1 overflow-y-auto hide-scrollbar p-5 md:p-8 relative z-20 flex-col items-center pb-32 transform translate-y-[100%] opacity-0 transition-all duration-1000 ease-[cubic-bezier(0.175,0.885,0.32,1.275)]">
+            <div id="letter-full-view" class="hidden flex-1 overflow-y-auto hide-scrollbar p-5 md:p-8 relative z-20 flex-col items-center transform translate-y-[100%] opacity-0 transition-all duration-1000 ease-[cubic-bezier(0.175,0.885,0.32,1.275)]">
                 <div class="w-full max-w-md bg-[#fdfbf7] rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.08)] p-6 md:p-10 relative mt-4 mb-8 paper-texture border border-[#ece4d9]">
                     <div class="absolute top-0 bottom-0 left-2 w-px bg-[#e8d5d5]/50"></div>
                     <div class="absolute top-0 bottom-0 left-3 w-px bg-[#e8d5d5]/50"></div>
@@ -289,9 +289,12 @@
                     </div>
                 </div>
                 
-                <button onclick="goToScene(3)" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-xl text-[#b07d7d] border border-[#e8d5d5] px-8 py-3.5 rounded-full font-serif font-bold shadow-[0_8px_30px_rgba(176,125,125,0.2)] flex items-center gap-3 z-30 transition-all hover:bg-[#fcf9f2] active:scale-95">
-                    LANJUTKAN <span class="text-xl font-sans font-light">→</span>
-                </button>
+                <!-- Perbaikan Posisi Tombol Lanjutkan agar tidak menutupi teks -->
+                <div class="mt-4 mb-12 flex justify-center w-full">
+                    <button onclick="goToScene(3)" class="bg-white/90 backdrop-blur-xl text-[#b07d7d] border border-[#e8d5d5] px-8 py-3.5 rounded-full font-serif font-bold shadow-[0_8px_30px_rgba(176,125,125,0.2)] flex items-center gap-3 z-30 transition-transform duration-300 hover:bg-[#fcf9f2] active:scale-95 hover:-translate-y-1">
+                        LANJUTKAN <span class="text-xl font-sans font-light">→</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -313,10 +316,18 @@
                 </div>
             </div>
 
-            <!-- Game Twist Overlay -->
-            <div id="game-twist-overlay" class="hidden absolute inset-0 z-[100] flex-col items-center justify-center bg-[#fcf9f2]/70 p-6 text-center overflow-hidden backdrop-blur-md opacity-0 transition-opacity duration-1000">
-                <div id="game-twist-particles" class="absolute inset-0"></div>
-                <h1 id="game-twist-text" class="text-4xl md:text-5xl font-bold font-cursive text-[#c48b8b] leading-tight drop-shadow-md whitespace-pre-wrap z-10 transform scale-0 transition-transform duration-1000 ease-[cubic-bezier(0.175,0.885,0.32,1.275)]"></h1>
+            <!-- Game Twist Overlay (Dipercantik) -->
+            <div id="game-twist-overlay" class="hidden absolute inset-0 z-[100] flex-col items-center justify-center bg-[#fcf9f2]/80 p-6 text-center overflow-hidden backdrop-blur-md opacity-0 transition-opacity duration-1000">
+                <div id="game-twist-particles" class="absolute inset-0 pointer-events-none"></div>
+                
+                <!-- Card Aesthetic untuk teks -->
+                <div id="game-twist-card" class="relative z-10 bg-white/90 backdrop-blur-xl p-8 md:p-12 rounded-[2.5rem] shadow-[0_20px_60px_rgba(176,125,125,0.2)] border border-[#e8d5d5] max-w-sm w-full mx-auto transform scale-0 transition-transform duration-1000 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] flex flex-col items-center justify-center">
+                    <div class="w-16 h-16 bg-[#f3e6d8] rounded-full flex items-center justify-center mb-6 shadow-inner">
+                        <i data-lucide="heart" class="text-[#c48b8b] fill-current w-8 h-8"></i>
+                    </div>
+                    <h1 id="game-twist-text" class="text-3xl md:text-4xl font-bold font-cursive text-[#b07d7d] leading-relaxed drop-shadow-sm whitespace-pre-wrap"></h1>
+                </div>
+
                 <div class="absolute bottom-10 text-[#c48b8b] text-sm font-sans tracking-widest uppercase opacity-80 animate-pulse-opacity">Memuat kenangan...</div>
             </div>
         </div>
@@ -364,7 +375,7 @@
                         <p class="text-[#8c8279] text-sm text-center font-sans mt-1">Tulis pesan manismu untukku...</p>
                     </div>
                     <textarea id="wa-msg-input" placeholder="Tulis pesan tambahan di sini..." class="w-full h-32 p-4 rounded-2xl bg-white/70 border border-[#e8d5d5] focus:outline-none resize-none mb-6 font-sans text-[#6b6259] shadow-inner text-base"></textarea>
-                    <button onclick="sendToWhatsApp()" id="wa-btn-text" class="w-full bg-[#8ba888] text-white py-4 rounded-full font-sans font-bold tracking-wide flex items-center justify-center gap-3 shadow-[0_10px_25px_rgba(139,168,136,0.3)] active:scale-95">
+                    <button onclick="sendToWhatsApp()" id="wa-btn-text" class="w-full bg-[#8ba888] text-white py-4 rounded-full font-sans font-bold tracking-wide flex items-center justify-center gap-3 shadow-[0_10px_25px_rgba(139,168,136,0.3)] active:scale-95 transition-transform hover:scale-[1.02]">
                         <i data-lucide="phone" class="w-5 h-5 fill-current"></i> KIRIM KE WHATSAPP
                     </button>
                 </div>
@@ -487,7 +498,7 @@
         const scenes = ['scene-lockscreen', 'scene-pin', 'scene-letter', 'scene-game', 'scene-album'];
         let currentSceneIndex = 0;
         let isTransitioning = false;
-        let isLoaded = false; // Flag to prevent re-triggering hideLoading
+        let isLoaded = false;
         let db;
 
         let globalAudio = new Audio();
@@ -495,7 +506,6 @@
         let isPlaying = false;
         let userInteracted = false;
 
-        // Failsafe method to guarantee loading screen goes away
         const fallbackLocal = () => {
             try {
                 renderAll();
@@ -510,27 +520,25 @@
             if (isLoaded) return;
             isLoaded = true;
             
-            setTimeout(() => {
-                const loading = document.getElementById('scene-loading');
-                if(loading) {
-                    loading.classList.remove('active');
-                    setTimeout(() => { loading.style.display = 'none'; }, 800);
+            const loading = document.getElementById('scene-loading');
+            if(loading) {
+                loading.classList.remove('opacity-100');
+                loading.classList.add('opacity-0');
+                setTimeout(() => { loading.style.display = 'none'; }, 300); // DIPERCEPAT jadi 300ms
+            }
+            
+            if (currentSceneIndex === 0) {
+                const lockscreen = document.getElementById('scene-lockscreen');
+                if(lockscreen) {
+                    lockscreen.style.display = 'flex';
+                    void lockscreen.offsetWidth;
+                    lockscreen.classList.add('active');
+                    lockscreen.style.pointerEvents = 'auto';
                 }
-                
-                // Only activate lockscreen if we haven't swiped to PIN screen yet
-                if (currentSceneIndex === 0) {
-                    const lockscreen = document.getElementById('scene-lockscreen');
-                    if(lockscreen) {
-                        lockscreen.style.display = 'flex';
-                        void lockscreen.offsetWidth; // force browser to reflow
-                        lockscreen.classList.add('active');
-                        lockscreen.style.pointerEvents = 'auto'; // Extra safety
-                    }
-                }
-            }, 1000);
+            }
         }
 
-        // TUNGGU SAMPAI DOM BENAR-BENAR SIAP!
+        // TUNGGU DOM SIAP DULU!
         document.addEventListener('DOMContentLoaded', () => {
             setupEventListeners();
             initApp();
@@ -542,12 +550,10 @@
             let lsStartY = 0;
             let lsIsDragging = false;
             if(dragArea) {
-                // Touch (Mobile)
                 dragArea.addEventListener('touchstart', e => { lsStartY = e.touches[0].clientY; }, { passive: true });
                 dragArea.addEventListener('touchend', e => {
                     if (lsStartY - e.changedTouches[0].clientY > 50) goToScene(1);
                 });
-                // Mouse (Desktop)
                 dragArea.addEventListener('mousedown', e => { lsIsDragging = true; lsStartY = e.clientY; });
                 dragArea.addEventListener('mouseup', e => {
                     if (lsIsDragging) {
@@ -558,7 +564,7 @@
                 dragArea.addEventListener('mouseleave', e => { lsIsDragging = false; });
             }
 
-            // Audio Setup (Autoplay fallback)
+            // Audio Setup
             const initAudio = () => {
                 if(!userInteracted) {
                     userInteracted = true;
@@ -573,13 +579,11 @@
             window.addEventListener('click', initAudio, { once: true });
             window.addEventListener('touchstart', initAudio, { once: true });
 
-            // Clock Interval
             setInterval(() => {
                 const lsTime = document.getElementById('ls-time');
                 if(lsTime) lsTime.innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
             }, 1000);
 
-            // Audio Progress update
             globalAudio.addEventListener('timeupdate', () => {
                 if(globalAudio.duration) {
                     const p = document.getElementById('audio-progress');
@@ -589,53 +593,54 @@
         }
 
         const initApp = async () => {
-            let useLocal = true;
+            if (window.lucide) window.lucide.createIcons();
+            
+            // Failsafe Loading Timeout (Maksimal nunggu Firebase 1.5 detik)
+            const safetyTimeout = setTimeout(() => {
+                console.warn("Waktu tunggu Firebase habis. Menggunakan data lokal...");
+                fallbackLocal();
+            }, 1500); 
+            
             try {
-                if (window.lucide) window.lucide.createIcons();
-                
-                // Safe check for Firebase config
-                let firebaseConfigStr = '{}';
-                if (typeof window !== 'undefined' && window.__firebase_config) {
-                    firebaseConfigStr = window.__firebase_config;
-                } else if (typeof __firebase_config !== 'undefined') {
-                    firebaseConfigStr = __firebase_config;
-                }
-                
-                const firebaseConfig = JSON.parse(firebaseConfigStr);
-                
-                if(Object.keys(firebaseConfig).length > 0) {
-                    useLocal = false; // We have a config, let's try to load it
-                    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js");
-                    const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/10.13.1/firebase-auth.js");
-                    const { getFirestore, doc, setDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js");
-                    
-                    const app = initializeApp(firebaseConfig);
-                    const auth = getAuth(app);
-                    db = getFirestore(app);
-                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-love-app';
+                // Konfigurasi Asli Firebase User
+                const firebaseConfig = {
+                    apiKey: "AIzaSyDJQScAnz5VulSrHB94NKnGY918CZjmrTE",
+                    authDomain: "okta-cantikkk.firebaseapp.com",
+                    projectId: "okta-cantikkk",
+                    storageBucket: "okta-cantikkk.firebasestorage.app",
+                    messagingSenderId: "869280662214",
+                    appId: "1:869280662214:web:387fc33a81724111cf8dc7",
+                    measurementId: "G-3B5104FTXZ"
+                };
 
-                    await signInAnonymously(auth);
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'siteConfig');
-                    
-                    onSnapshot(docRef, (snapshot) => {
-                        if (snapshot.exists()) {
-                            window.appConfig = { ...defaultConfig, ...snapshot.data() };
-                        } else {
-                            setDoc(docRef, defaultConfig).catch(()=>{});
-                        }
-                        fallbackLocal(); // Safe to call multiple times because hideLoading has a lock
-                    }, (error) => {
-                        console.warn("Firebase permission error (Aman diabaikan di GitHub Pages)", error);
-                        fallbackLocal();
-                    });
-                }
+                const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js");
+                const { getAuth, signInAnonymously } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js");
+                const { getFirestore, doc, setDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+                
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                db = getFirestore(app);
+                const appId = 'okta-cantik-app';
+
+                await signInAnonymously(auth);
+                const docRef = doc(db, 'site', 'config');
+                
+                onSnapshot(docRef, (snapshot) => {
+                    clearTimeout(safetyTimeout); // Matikan failsafe jika sukses konek
+                    if (snapshot.exists()) {
+                        window.appConfig = { ...defaultConfig, ...snapshot.data() };
+                    } else {
+                        setDoc(docRef, defaultConfig).catch(()=>{});
+                    }
+                    fallbackLocal(); 
+                }, (error) => {
+                    console.warn("Firebase permission error, aman diabaikan. Lanjut data lokal.");
+                    clearTimeout(safetyTimeout);
+                    fallbackLocal();
+                });
             } catch(e) {
-                console.warn("Firebase di-skip karena berjalan di GitHub Pages. Menggunakan data lokal...", e);
-                useLocal = true;
-            }
-
-            // Jika config kosong atau proses fetch gagal, gunakan data default
-            if(useLocal) {
+                console.warn("Gagal inisialisasi Firebase, masuk mode offline lokal.", e);
+                clearTimeout(safetyTimeout);
                 fallbackLocal();
             }
         };
@@ -650,7 +655,7 @@
             if(current) {
                 current.classList.remove('active');
                 current.classList.add('-translate-y-full', 'opacity-0');
-                setTimeout(() => { current.style.display = 'none'; }, 800);
+                setTimeout(() => { current.style.display = 'none'; }, 600);
             }
             
             currentSceneIndex = idx;
@@ -663,8 +668,8 @@
                     next.classList.remove('-translate-y-full', 'translate-y-[100%]', 'opacity-0');
                     next.classList.add('active');
                 }
-                setTimeout(() => { isTransitioning = false; }, 800);
-            }, 800);
+                setTimeout(() => { isTransitioning = false; }, 600);
+            }, 600);
         }
 
         window.toggleAudio = function() {
@@ -741,13 +746,19 @@
             if(clickedPhotos.has(idx)) return;
             clickedPhotos.add(idx);
             
-            const p = document.getElementById(`g-photo-${idx}`);
-            if(p) {
-                p.classList.add('animate-shake');
-                const wrongMsg = p.querySelector('.wrong-msg');
+            const innerWrap = document.getElementById(`g-photo-inner-${idx}`);
+            if(innerWrap) {
+                // Animasi membal yang smooth (tanpa merusak posisi dasar)
+                innerWrap.classList.add('scale-90', '-rotate-3');
+                setTimeout(() => {
+                    innerWrap.classList.remove('scale-90', '-rotate-3');
+                }, 250);
+
+                const wrongMsg = innerWrap.parentElement.querySelector('.wrong-msg');
                 if(wrongMsg) {
                     wrongMsg.classList.remove('hidden');
                     wrongMsg.classList.add('flex');
+                    setTimeout(() => { wrongMsg.classList.remove('opacity-0'); wrongMsg.classList.add('opacity-100'); }, 10);
                 }
             }
             
@@ -760,17 +771,17 @@
                         requestAnimationFrame(() => {
                             tw.classList.remove('opacity-0');
                             tw.classList.add('opacity-100');
-                            const gt = document.getElementById('game-twist-text');
-                            if(gt) {
-                                gt.classList.remove('scale-0');
-                                gt.classList.add('scale-100');
+                            const gtCard = document.getElementById('game-twist-card');
+                            if(gtCard) {
+                                gtCard.classList.remove('scale-0');
+                                gtCard.classList.add('scale-100');
                             }
                         });
                     }
                     
                     let parts = '';
                     for(let i=0; i<30; i++) {
-                        parts += `<div class="absolute text-[#d4a3a3] opacity-80" style="left:50%; top:50%; transform:translate(-50%,-50%); animation: float-up ${Math.random()*2+2}s ease-out ${Math.random()*1}s forwards"><i data-lucide="heart" class="fill-[#e8d5d5] w-8 h-8"></i></div>`;
+                        parts += `<div class="absolute text-[#d4a3a3] opacity-80 pointer-events-none" style="left:50%; top:50%; transform:translate(-50%,-50%); animation: float-up ${Math.random()*2+2}s ease-out ${Math.random()*1}s forwards"><i data-lucide="heart" class="fill-[#e8d5d5] w-8 h-8"></i></div>`;
                     }
                     const gp = document.getElementById('game-twist-particles');
                     if(gp) gp.innerHTML = parts;
@@ -905,196 +916,208 @@
         }
 
         function renderLockscreen() {
-            const ls = window.appConfig.lockscreen || defaultConfig.lockscreen;
-            
-            const bg = document.getElementById('ls-bg');
-            if(bg) bg.src = ls.backgroundUrl;
-            
-            const date = document.getElementById('ls-date');
-            if(date) date.innerText = ls.dateText;
-            
-            const overlay = document.getElementById('ls-overlay');
-            if(overlay) {
-                overlay.style.backgroundColor = `rgba(0,0,0,${ls.overlayOpacity || 0.4})`;
-                overlay.style.backdropFilter = `blur(${ls.blur || 4}px)`;
-            }
-            
-            const cover = document.getElementById('ls-music-cover');
-            if(cover && ls.music) cover.src = ls.music.coverUrl;
-            
-            const mTitle = document.getElementById('ls-music-title');
-            if(mTitle && ls.music) mTitle.innerText = ls.music.title;
-            
-            const mArtist = document.getElementById('ls-music-artist');
-            if(mArtist && ls.music) mArtist.innerText = ls.music.artist;
-            
-            if(ls.music && ls.music.audioUrl && globalAudio.src !== ls.music.audioUrl) {
-                const wasPlaying = isPlaying;
-                globalAudio.src = ls.music.audioUrl;
-                if(wasPlaying) globalAudio.play().catch(()=>{});
-            }
+            try {
+                const ls = window.appConfig.lockscreen || defaultConfig.lockscreen;
+                
+                const bg = document.getElementById('ls-bg');
+                if(bg) bg.src = ls.backgroundUrl;
+                
+                const date = document.getElementById('ls-date');
+                if(date) date.innerText = ls.dateText;
+                
+                const overlay = document.getElementById('ls-overlay');
+                if(overlay) {
+                    overlay.style.backgroundColor = `rgba(0,0,0,${ls.overlayOpacity || 0.4})`;
+                    overlay.style.backdropFilter = `blur(${ls.blur || 4}px)`;
+                }
+                
+                const cover = document.getElementById('ls-music-cover');
+                if(cover && ls.music) cover.src = ls.music.coverUrl;
+                
+                const mTitle = document.getElementById('ls-music-title');
+                if(mTitle && ls.music) mTitle.innerText = ls.music.title;
+                
+                const mArtist = document.getElementById('ls-music-artist');
+                if(mArtist && ls.music) mArtist.innerText = ls.music.artist;
+                
+                if(ls.music && ls.music.audioUrl && globalAudio.src !== ls.music.audioUrl) {
+                    const wasPlaying = isPlaying;
+                    globalAudio.src = ls.music.audioUrl;
+                    if(wasPlaying) globalAudio.play().catch(()=>{});
+                }
 
-            const nContainer = document.getElementById('ls-notifications');
-            if(nContainer && ls.notifications) {
-                const notifHtml = ls.notifications.map(n => `
-                    <div class="bg-black/30 backdrop-blur-xl rounded-[1.5rem] p-4 flex gap-4 shadow-lg border border-white/10">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#d4a3a3] to-[#b07d7d] flex items-center justify-center shrink-0 shadow-inner border border-white/20">
-                            <i data-lucide="heart" class="text-white fill-current"></i>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex justify-between items-baseline mb-0.5">
-                                <span class="text-white/90 text-sm font-semibold tracking-wide uppercase">${n.app || ''}</span>
-                                <span class="text-white/50 text-xs">${n.time || ''}</span>
+                const nContainer = document.getElementById('ls-notifications');
+                if(nContainer && ls.notifications) {
+                    const notifHtml = ls.notifications.map(n => `
+                        <div class="bg-black/30 backdrop-blur-xl rounded-[1.5rem] p-4 flex gap-4 shadow-lg border border-white/10">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#d4a3a3] to-[#b07d7d] flex items-center justify-center shrink-0 shadow-inner border border-white/20">
+                                <i data-lucide="heart" class="text-white fill-current"></i>
                             </div>
-                            <p class="text-white font-semibold text-base truncate">${n.title || ''}</p>
-                            <p class="text-white/70 text-sm line-clamp-2 mt-0.5 leading-snug">${n.content || ''}</p>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-baseline mb-0.5">
+                                    <span class="text-white/90 text-sm font-semibold tracking-wide uppercase">${n.app || ''}</span>
+                                    <span class="text-white/50 text-xs">${n.time || ''}</span>
+                                </div>
+                                <p class="text-white font-semibold text-base truncate">${n.title || ''}</p>
+                                <p class="text-white/70 text-sm line-clamp-2 mt-0.5 leading-snug">${n.content || ''}</p>
+                            </div>
                         </div>
-                    </div>
-                `).join('');
-                nContainer.innerHTML = notifHtml;
-            }
+                    `).join('');
+                    nContainer.innerHTML = notifHtml;
+                }
+            } catch(e) { console.error(e) }
         }
 
         function renderPin() {
-            const p = window.appConfig.pin || defaultConfig.pin;
-            const bg = document.getElementById('pin-bg');
-            if(bg && window.appConfig.lockscreen) bg.style.backgroundImage = `url(${window.appConfig.lockscreen.backgroundUrl})`;
-            
-            const hint = document.getElementById('pin-hint');
-            if(hint) hint.innerText = p.hintText;
-            
-            const eText = document.getElementById('pin-error-text');
-            if(eText) eText.innerText = p.wrongText;
-            
-            const sText = document.getElementById('pin-success-text');
-            if(sText) sText.innerText = p.successText;
-            
-            const eImg = document.getElementById('pin-error-img');
-            if(eImg) eImg.src = p.wrongStickerUrl || 'https://placehold.co/100x100/transparent/ff0000?text=X';
-            
-            const sImg = document.getElementById('pin-success-img');
-            if(sImg) sImg.src = p.successStickerUrl || 'https://placehold.co/100x100/transparent/00ff00?text=O';
-            
-            updatePinDots();
+            try {
+                const p = window.appConfig.pin || defaultConfig.pin;
+                const bg = document.getElementById('pin-bg');
+                if(bg && window.appConfig.lockscreen) bg.style.backgroundImage = `url(${window.appConfig.lockscreen.backgroundUrl})`;
+                
+                const hint = document.getElementById('pin-hint');
+                if(hint) hint.innerText = p.hintText;
+                
+                const eText = document.getElementById('pin-error-text');
+                if(eText) eText.innerText = p.wrongText;
+                
+                const sText = document.getElementById('pin-success-text');
+                if(sText) sText.innerText = p.successText;
+                
+                const eImg = document.getElementById('pin-error-img');
+                if(eImg) eImg.src = p.wrongStickerUrl || 'https://placehold.co/100x100/transparent/ff0000?text=X';
+                
+                const sImg = document.getElementById('pin-success-img');
+                if(sImg) sImg.src = p.successStickerUrl || 'https://placehold.co/100x100/transparent/00ff00?text=O';
+                
+                updatePinDots();
+            } catch(e){ console.error(e) }
         }
 
         function renderLetter() {
-            const l = window.appConfig.letter || defaultConfig.letter;
-            
-            const envPhoto = document.getElementById('env-photo');
-            if(envPhoto) envPhoto.src = l.photoUrl;
-            
-            const envRec = document.getElementById('env-recipient');
-            if(envRec) envRec.innerText = `Untuk ${l.recipient}`;
-            
-            const envBody = document.getElementById('env-body-preview');
-            if(envBody) envBody.innerText = l.body;
-            
-            const letPhoto = document.getElementById('letter-photo');
-            if(letPhoto) letPhoto.src = l.photoUrl;
-            
-            const letRec = document.getElementById('letter-title-recipient');
-            if(letRec) letRec.innerText = `Untuk ${l.recipient} ❤️`;
-            
-            const letDate = document.getElementById('letter-date');
-            if(letDate) letDate.innerText = l.date;
-            
-            const letImgTitle = document.getElementById('letter-title-img');
-            if(letImgTitle) letImgTitle.innerText = l.title;
-            
-            const letBody = document.getElementById('letter-body');
-            if(letBody) letBody.innerText = l.body;
-            
-            const letSig = document.getElementById('letter-signature');
-            if(letSig) letSig.innerText = l.signature;
+            try {
+                const l = window.appConfig.letter || defaultConfig.letter;
+                
+                const envPhoto = document.getElementById('env-photo');
+                if(envPhoto) envPhoto.src = l.photoUrl;
+                
+                const envRec = document.getElementById('env-recipient');
+                if(envRec) envRec.innerText = `Untuk ${l.recipient}`;
+                
+                const envBody = document.getElementById('env-body-preview');
+                if(envBody) envBody.innerText = l.body;
+                
+                const letPhoto = document.getElementById('letter-photo');
+                if(letPhoto) letPhoto.src = l.photoUrl;
+                
+                const letRec = document.getElementById('letter-title-recipient');
+                if(letRec) letRec.innerText = `Untuk ${l.recipient} ❤️`;
+                
+                const letDate = document.getElementById('letter-date');
+                if(letDate) letDate.innerText = l.date;
+                
+                const letImgTitle = document.getElementById('letter-title-img');
+                if(letImgTitle) letImgTitle.innerText = l.title;
+                
+                const letBody = document.getElementById('letter-body');
+                if(letBody) letBody.innerText = l.body;
+                
+                const letSig = document.getElementById('letter-signature');
+                if(letSig) letSig.innerText = l.signature;
+            } catch(e) { console.error(e) }
         }
 
         function renderGame() {
-            const g = window.appConfig.game || defaultConfig.game;
-            
-            const gTitle = document.getElementById('game-title');
-            if(gTitle) gTitle.innerText = g.title;
-            
-            const gSub = document.getElementById('game-subtitle');
-            if(gSub) gSub.innerText = g.subtitle;
-            
-            const gTwist = document.getElementById('game-twist-text');
-            if(gTwist) gTwist.innerText = g.finalText;
-            
-            const scatterStyles = [ {r:-4, y:10}, {r:3, y:-5}, {r:-2, y:5}, {r:5, y:-10}, {r:-3, y:15}, {r:2, y:0} ];
-            let html = '';
-            
-            if(g.images && Array.isArray(g.images)) {
-                g.images.forEach((img, i) => {
-                    const s = scatterStyles[i%scatterStyles.length];
-                    html += `
-                    <div id="g-photo-${i}" onclick="clickGamePhoto(${i})" class="relative bg-white p-2.5 pb-8 rounded-sm shadow-[0_8px_20px_rgba(0,0,0,0.06)] cursor-pointer hover:shadow-[0_15px_30px_rgba(0,0,0,0.1)] border border-[#f3e6d8] transition-shadow duration-300 transform" style="transform: rotate(${s.r}deg) translateY(${s.y}px)">
-                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-5 bg-[#f3e6d8]/60 backdrop-blur-sm -rotate-2 border border-[#e6d9cc]/40 shadow-sm z-20 mix-blend-multiply"></div>
-                        <div class="relative w-full aspect-[4/5] overflow-hidden rounded-sm">
-                            <img src="${img.url || ''}" onerror="this.src='https://placehold.co/400x500/f3e6d8/b07d7d?text=Error'" class="w-full h-full object-cover filter contrast-[1.02] sepia-[0.05]">
-                            <div class="wrong-msg hidden absolute inset-0 flex-col items-center justify-center bg-[#fdfbf7]/70 backdrop-blur-[4px] p-3 text-center border border-[#e8d5d5]/50 opacity-0 transition-opacity duration-300" style="opacity: 1">
-                                <span class="text-4xl mb-2">🤍</span>
-                                <p class="text-[#b07d7d] font-bold text-sm leading-tight">${img.msg || g.wrongText}</p>
+            try {
+                const g = window.appConfig.game || defaultConfig.game;
+                
+                const gTitle = document.getElementById('game-title');
+                if(gTitle) gTitle.innerText = g.title;
+                
+                const gSub = document.getElementById('game-subtitle');
+                if(gSub) gSub.innerText = g.subtitle;
+                
+                const gTwist = document.getElementById('game-twist-text');
+                if(gTwist) gTwist.innerText = g.finalText;
+                
+                const scatterStyles = [ {r:-4, y:10}, {r:3, y:-5}, {r:-2, y:5}, {r:5, y:-10}, {r:-3, y:15}, {r:2, y:0} ];
+                let html = '';
+                
+                if(g.images && Array.isArray(g.images)) {
+                    g.images.forEach((img, i) => {
+                        const s = scatterStyles[i%scatterStyles.length];
+                        html += `
+                        <div style="transform: rotate(${s.r}deg) translateY(${s.y}px)">
+                            <div id="g-photo-inner-${i}" onclick="clickGamePhoto(${i})" class="relative bg-white p-2.5 pb-8 rounded-sm shadow-[0_8px_20px_rgba(0,0,0,0.06)] cursor-pointer hover:shadow-[0_15px_30px_rgba(0,0,0,0.1)] border border-[#f3e6d8] transition-transform duration-300">
+                                <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-12 h-5 bg-[#f3e6d8]/60 backdrop-blur-sm -rotate-2 border border-[#e6d9cc]/40 shadow-sm z-20 mix-blend-multiply"></div>
+                                <div class="relative w-full aspect-[4/5] overflow-hidden rounded-sm">
+                                    <img src="${img.url || ''}" onerror="this.src='https://placehold.co/400x500/f3e6d8/b07d7d?text=Error'" class="w-full h-full object-cover filter contrast-[1.02] sepia-[0.05]">
+                                    <div class="wrong-msg hidden absolute inset-0 flex-col items-center justify-center bg-[#fdfbf7]/60 backdrop-blur-[4px] p-3 text-center border border-[#e8d5d5]/50 opacity-0 transition-opacity duration-300">
+                                        <span class="text-4xl mb-2 drop-shadow-sm">🤍</span>
+                                        <p class="text-[#b07d7d] font-bold text-sm leading-tight drop-shadow-md">${img.msg || g.wrongText}</p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>`;
-                });
-            }
-            const grid = document.getElementById('game-grid');
-            if(grid) grid.innerHTML = html;
+                        </div>`;
+                    });
+                }
+                const grid = document.getElementById('game-grid');
+                if(grid) grid.innerHTML = html;
+            } catch(e) { console.error(e) }
         }
 
         function renderAlbum() {
-            const photos = (window.appConfig.album && window.appConfig.album.pages) ? window.appConfig.album.pages : [];
-            let pages = [];
-            for (let i = 0; i < photos.length; i += 2) pages.push(photos.slice(i, i + 2));
-            let spreads = [];
-            for (let i = 0; i < pages.length; i += 2) spreads.push({ left: pages[i] || [], right: pages[i + 1] || [] });
-            
-            totalSpreads = spreads.length;
-            albumCurrentPage = 0;
+            try {
+                const photos = (window.appConfig.album && window.appConfig.album.pages) ? window.appConfig.album.pages : [];
+                let pages = [];
+                for (let i = 0; i < photos.length; i += 2) pages.push(photos.slice(i, i + 2));
+                let spreads = [];
+                for (let i = 0; i < pages.length; i += 2) spreads.push({ left: pages[i] || [], right: pages[i + 1] || [] });
+                
+                totalSpreads = spreads.length;
+                albumCurrentPage = 0;
 
-            const albumTitle = (window.appConfig.album && window.appConfig.album.title) ? window.appConfig.album.title : 'OUR MEMORIES';
+                const albumTitle = (window.appConfig.album && window.appConfig.album.title) ? window.appConfig.album.title : 'OUR MEMORIES';
 
-            let html = `
-            <div id="album-cover" class="absolute inset-0 origin-left preserve-3d cursor-pointer z-50 transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]" onclick="openAlbum()">
-                <div class="absolute inset-0 backface-hidden bg-[#241c17] rounded-r-lg shadow-[15px_10px_30px_rgba(0,0,0,0.7)] border-l-8 border-[#1a1410] flex flex-col items-center justify-center p-8 book-cover-texture relative overflow-hidden">
-                    <div class="absolute inset-3 border-2 border-[#d4af37]/40 rounded-sm"></div>
-                    <div class="absolute inset-4 border border-[#d4af37]/20 rounded-sm"></div>
-                    <h1 class="text-[#d4af37] font-serif font-bold text-3xl text-center leading-snug tracking-wider" style="text-shadow: 1px 2px 2px rgba(0,0,0,0.8), 0 0 10px rgba(212,175,55,0.2)">
-                        ${albumTitle.split(' ').map(w=>`<span class="block">${w}</span>`).join('')}
-                    </h1>
-                    <div class="mt-12 w-12 h-[2px] bg-[#d4af37]/50 shadow-[0_0_5px_rgba(212,175,55,0.5)]"></div>
-                </div>
-                <div class="absolute inset-0 backface-hidden bg-[#362921] rounded-l-lg shadow-inner book-cover-texture border-r-8 border-[#1a1410] rotate-y-180"></div>
-            </div>
-            `;
-
-            const renderGrid = (arr, isRight) => `
-                <div class="grid grid-cols-1 gap-4 p-4 h-full content-center">
-                    ${arr.map((p, i) => `
-                        <div class="bg-white p-2 pb-6 rounded-sm shadow-[0_5px_15px_rgba(0,0,0,0.1)] border border-[#e6d9cc] relative mx-auto" style="transform: rotate(${isRight?(i%2==0?3:-2):(i%2==0?-3:2)}deg) scale(0.95); width: 90%; max-width: 200px">
-                            <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-10 h-3 bg-[#f3e6d8]/80 backdrop-blur-sm -rotate-2 mix-blend-multiply border border-[#e6d9cc]/30"></div>
-                            <img src="${p}" onerror="this.src='https://placehold.co/400x500/f3e6d8/b07d7d?text=Error'" class="w-full aspect-[4/5] object-cover filter contrast-[1.05] sepia-[0.1]">
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-
-            spreads.forEach((spread, idx) => {
-                html += `
-                <div id="spread-${idx}" class="absolute inset-0 origin-left preserve-3d transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]" style="z-index: ${40 - (idx+1)}">
-                    <div class="absolute inset-0 backface-hidden bg-[#fdfbf7] ml-1 paper-texture border-l shadow-[inset_10px_0_20px_rgba(0,0,0,0.05)] border-[#e6d9cc]">
-                        ${renderGrid(spread.right, true)}
+                let html = `
+                <div id="album-cover" class="absolute inset-0 origin-left preserve-3d cursor-pointer z-50 transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]" onclick="openAlbum()">
+                    <div class="absolute inset-0 backface-hidden bg-[#241c17] rounded-r-lg shadow-[15px_10px_30px_rgba(0,0,0,0.7)] border-l-8 border-[#1a1410] flex flex-col items-center justify-center p-8 book-cover-texture relative overflow-hidden">
+                        <div class="absolute inset-3 border-2 border-[#d4af37]/40 rounded-sm"></div>
+                        <div class="absolute inset-4 border border-[#d4af37]/20 rounded-sm"></div>
+                        <h1 class="text-[#d4af37] font-serif font-bold text-3xl text-center leading-snug tracking-wider" style="text-shadow: 1px 2px 2px rgba(0,0,0,0.8), 0 0 10px rgba(212,175,55,0.2)">
+                            ${albumTitle.split(' ').map(w=>`<span class="block">${w}</span>`).join('')}
+                        </h1>
+                        <div class="mt-12 w-12 h-[2px] bg-[#d4af37]/50 shadow-[0_0_5px_rgba(212,175,55,0.5)]"></div>
                     </div>
-                    <div class="absolute inset-0 backface-hidden bg-[#fdfbf7] mr-1 paper-texture border-r shadow-[inset_-10px_0_20px_rgba(0,0,0,0.05)] border-[#e6d9cc] rotate-y-180">
-                        ${renderGrid(spread.left, false)}
-                    </div>
+                    <div class="absolute inset-0 backface-hidden bg-[#362921] rounded-l-lg shadow-inner book-cover-texture border-r-8 border-[#1a1410] rotate-y-180"></div>
                 </div>
                 `;
-            });
-            const container = document.getElementById('album-spreads-container');
-            if(container) container.innerHTML = html;
+
+                const renderGrid = (arr, isRight) => `
+                    <div class="grid grid-cols-1 gap-4 p-4 h-full content-center">
+                        ${arr.map((p, i) => `
+                            <div class="bg-white p-2 pb-6 rounded-sm shadow-[0_5px_15px_rgba(0,0,0,0.1)] border border-[#e6d9cc] relative mx-auto" style="transform: rotate(${isRight?(i%2==0?3:-2):(i%2==0?-3:2)}deg) scale(0.95); width: 90%; max-width: 200px">
+                                <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-10 h-3 bg-[#f3e6d8]/80 backdrop-blur-sm -rotate-2 mix-blend-multiply border border-[#e6d9cc]/30"></div>
+                                <img src="${p}" onerror="this.src='https://placehold.co/400x500/f3e6d8/b07d7d?text=Error'" class="w-full aspect-[4/5] object-cover filter contrast-[1.05] sepia-[0.1]">
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                spreads.forEach((spread, idx) => {
+                    html += `
+                    <div id="spread-${idx}" class="absolute inset-0 origin-left preserve-3d transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]" style="z-index: ${40 - (idx+1)}">
+                        <div class="absolute inset-0 backface-hidden bg-[#fdfbf7] ml-1 paper-texture border-l shadow-[inset_10px_0_20px_rgba(0,0,0,0.05)] border-[#e6d9cc]">
+                            ${renderGrid(spread.right, true)}
+                        </div>
+                        <div class="absolute inset-0 backface-hidden bg-[#fdfbf7] mr-1 paper-texture border-r shadow-[inset_-10px_0_20px_rgba(0,0,0,0.05)] border-[#e6d9cc] rotate-y-180">
+                            ${renderGrid(spread.left, false)}
+                        </div>
+                    </div>
+                    `;
+                });
+                const container = document.getElementById('album-spreads-container');
+                if(container) container.innerHTML = html;
+            } catch(e) { console.error(e) }
         }
 
         function renderAll() {
@@ -1107,9 +1130,7 @@
         }
 
         // --- ADMIN FUNCTIONS ---
-        // (Sengaja tetap disisipkan apabila sewaktu-waktu file dipasang kembali di Firebase/Gemini Preview)
         window.openAdmin = function() {
-            // (Admin logic remains safely intact for local/dev usage)
             populateAdminForm();
             const modal = document.getElementById('admin-panel');
             if(!modal) return;
@@ -1270,9 +1291,8 @@
                 
                 if(typeof db !== 'undefined') {
                     try {
-                        const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js");
-                        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-love-app';
-                        await setDoc(doc(db, 'artifacts', appId, 'public', 'siteConfig'), newCfg);
+                        const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+                        await setDoc(doc(db, 'site', 'config'), newCfg);
                     } catch(e) {}
                 }
                 
