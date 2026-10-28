@@ -13,8 +13,15 @@
     tailwind.config = {
       theme: {
         extend: {
-          colors: {
-            brand: { pink: '#c48b8b', cream: '#fcf9f2', sage: '#8ba888', dark: '#2c2c2c' }
+          colors: { 
+            brand: { 
+              pink: '#c48b8b', 
+              cream: '#fcf9f2', 
+              sage: '#8ba888', 
+              dark: '#2c2c2c',
+              gold: '#d4af37',
+              leather: '#3a2e2b'
+            } 
           },
           fontFamily: {
             sans: ['Inter', 'sans-serif'],
@@ -27,736 +34,1116 @@
   </script>
   
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
   
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
-    /* Global Styles & Textures */
+    /* CSS Resets & Base Textures */
+    * { box-sizing: border-box; }
     body {
-      margin: 0;
-      background-color: #000;
-      color: #333;
-      font-family: 'Inter', sans-serif;
-      overflow: hidden;
-      touch-action: none;
+      margin: 0; background-color: #050505; color: #333; font-family: 'Inter', sans-serif;
+      overflow: hidden; touch-action: manipulation;
     }
     .grain-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50;
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-      opacity: 0.03; pointer-events: none; z-index: 50;
+      opacity: 0.04;
     }
     #app-container {
       position: relative; width: 100%; height: 100dvh; max-width: 480px; margin: 0 auto;
-      background-color: #fcf9f2; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    }
-    .scene {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      display: none; flex-direction: column; overflow: hidden;
-      transition: opacity 0.5s ease;
-    }
-    .scene.active { display: flex; opacity: 1; }
-    
-    /* Glassmorphism */
-    .glass-panel {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background-color: #fcf9f2; overflow: hidden; box-shadow: 0 0 35px rgba(0,0,0,0.85);
     }
     
-    /* Scrollable areas */
-    .scrollable { overflow-y: auto; touch-action: pan-y; padding-bottom: 50px;}
-    .scrollable::-webkit-scrollbar { width: 0px; background: transparent; }
+    /* SCENE MANAGEMENT */
+    .scene { 
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+      display: none; flex-direction: column; overflow: hidden; z-index: 10; opacity: 0; 
+      transition: opacity 0.4s ease; 
+    }
+    .scene.active { display: flex; opacity: 1; z-index: 20; }
+    
+    /* GLASSMORPHISM & UTILITIES */
+    .glass-panel { background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.22); }
+    .paper-texture { background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.07'/%3E%3C/svg%3E"); }
+    .scrollable { overflow-y: auto; padding-bottom: 70px; -webkit-overflow-scrolling: touch; }
+    .scrollable::-webkit-scrollbar { display: none; }
+    
+    /* MODAL OVERLAYS */
+    .modal-overlay { opacity: 0; pointer-events: none; transition: all 0.35s ease; }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    
+    /* DIAGNOSTIC PANEL */
+    #debug-panel { display: none; position: absolute; top: 0; left: 0; width: 100%; background: rgba(0,0,0,0.92); color: #00ff66; font-family: monospace; z-index: 999; padding: 12px; font-size: 11px; max-height: 50%; overflow-y: auto; border-bottom: 2px solid #00ff66; }
 
-    #loading-screen { display: flex; opacity: 1; }
+    /* 3D BOOK ANIMATION STYLES */
+    .perspective-container { perspective: 1600px; }
+    .book-3d-wrapper {
+      transform-style: preserve-3d;
+      transition: transform 1.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+    }
+    .book-3d-cover {
+      transform-origin: left center;
+      transform-style: preserve-3d;
+      transition: transform 1.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+    }
+    .book-3d-cover.open {
+      transform: rotateY(-180deg);
+    }
+    .book-spine {
+      box-shadow: inset -5px 0 10px rgba(0,0,0,0.5), inset 2px 0 3px rgba(255,255,255,0.2);
+    }
+    .polaroid-card {
+      background: white;
+      padding: 10px 10px 24px 10px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .polaroid-card:hover {
+      transform: scale(1.03) rotate(0deg) !important;
+      box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+      z-index: 30;
+    }
+    .tape-effect {
+      position: absolute; width: 60px; height: 20px;
+      background: rgba(243, 230, 216, 0.75);
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(230, 217, 204, 0.5);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      mix-blend-mode: multiply;
+      z-index: 25;
+    }
   </style>
 </head>
 <body>
   <div class="grain-overlay"></div>
+  
   <div id="app-container">
-    
-    <!-- Scene 0: Loading Screen -->
-    <div id="loading-screen" class="scene active bg-brand-cream items-center justify-center z-50">
-      <i data-lucide="heart" class="text-brand-pink animate-pulse" style="width: 40px; height: 40px; fill: currentColor;"></i>
-      <p class="mt-4 text-brand-pink text-sm font-medium opacity-80">Menyiapkan kenangan...</p>
+    <!-- Diagnostic Debug Panel -->
+    <div id="debug-panel"></div>
+
+    <!-- 0. Loading Screen -->
+    <div id="loading-screen" class="scene active bg-brand-cream items-center justify-center">
+      <i data-lucide="heart" class="text-brand-pink animate-pulse" style="width: 44px; height: 44px; fill: currentColor;"></i>
+      <p id="loading-text" class="mt-4 text-brand-pink text-sm font-medium opacity-80 tracking-wide">Menyiapkan kenangan indah...</p>
     </div>
 
-    <!-- Scene 1: Lockscreen -->
+    <!-- 1. Lockscreen Scene -->
     <div id="scene-lockscreen" class="scene bg-black text-white">
-      <div id="ls-bg" class="absolute inset-0 bg-cover bg-center transition-opacity duration-1000" style="opacity: 0.6"></div>
+      <div id="ls-bg" class="absolute inset-0 bg-cover bg-center transition-opacity duration-1000 opacity-60"></div>
       
       <!-- Admin Button -->
-      <button onclick="openAdmin()" class="absolute top-4 left-4 z-40 p-2 text-white/50 hover:text-white transition" aria-label="Settings">
+      <button onclick="window.openAdmin()" class="absolute top-6 left-6 z-40 p-2.5 text-white/60 hover:text-white bg-black/20 hover:bg-black/40 rounded-full backdrop-blur-md border border-white/10 transition cursor-pointer" aria-label="Settings">
         <i data-lucide="settings" class="w-5 h-5"></i>
       </button>
 
       <div class="relative z-10 flex flex-col items-center h-full pt-16 pb-8 px-6">
-        <div class="text-center w-full">
-          <p id="ls-date" class="text-lg font-medium tracking-wide drop-shadow-md">Senin, 14 Februari</p>
-          <h1 id="ls-time" class="text-[5.5rem] font-bold leading-none tracking-tight drop-shadow-lg mt-1">11:24</h1>
+        <!-- Date & Time (Click 5x for Debug) -->
+        <div class="text-center w-full select-none cursor-pointer" onclick="window.toggleDebug()">
+          <p id="ls-date" class="text-lg font-medium tracking-wide drop-shadow-md">Memuat Tanggal...</p>
+          <h1 id="ls-time" class="text-[5.5rem] font-bold leading-none tracking-tight drop-shadow-lg mt-1">00:00</h1>
         </div>
 
-        <!-- Notification -->
-        <div class="mt-8 w-full glass-panel rounded-2xl p-4 flex gap-3 shadow-lg">
-          <div class="bg-[#25D366] rounded-lg w-10 h-10 flex items-center justify-center flex-shrink-0">
-            <i data-lucide="message-circle" class="w-6 h-6 text-white fill-current"></i>
+        <!-- WhatsApp Notification Card -->
+        <div id="notif-card" class="mt-6 w-full glass-panel rounded-3xl p-4 flex gap-4 shadow-xl cursor-pointer hover:bg-white/20 transition" onclick="window.goToScene('scene-pin')">
+          <div class="bg-green-500 rounded-2xl w-12 h-12 flex items-center justify-center flex-shrink-0 shadow-md">
+            <i data-lucide="message-circle" class="w-7 h-7 text-white fill-current"></i>
           </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex justify-between items-center">
-              <span id="ls-notif-sender" class="font-semibold text-sm">WhatsApp - Sayang</span>
-              <span id="ls-notif-time" class="text-xs opacity-70">sekarang</span>
+          <div class="flex-1 min-w-0 flex flex-col justify-center">
+            <div class="flex justify-between items-center mb-1">
+              <span id="ls-notif-sender" class="font-bold text-sm tracking-wide">WhatsApp</span>
+              <span class="text-xs opacity-70">sekarang</span>
             </div>
-            <p id="ls-notif-msg" class="text-sm opacity-90 truncate">Sayang 😍</p>
+            <p id="ls-notif-msg" class="text-sm opacity-90 truncate font-medium">Sayang 😍</p>
           </div>
         </div>
 
-        <!-- Music Player -->
-        <div class="mt-4 w-full glass-panel rounded-3xl p-5 shadow-lg">
-          <div class="flex items-center gap-4">
-            <img id="ls-music-cover" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Cover" class="w-14 h-14 rounded-lg object-cover shadow-md">
+        <!-- Music Player Card -->
+        <div class="mt-4 w-full glass-panel rounded-3xl p-5 shadow-xl select-none">
+          <div class="flex items-center gap-4 mb-4">
+            <img id="ls-music-cover" src="https://placehold.co/100x100/333/fff?text=Cover" alt="Cover" class="w-16 h-16 rounded-xl object-cover shadow-md border border-white/20">
             <div class="flex-1 min-w-0">
-              <h3 id="ls-music-title" class="font-bold text-base truncate">Beautiful In White</h3>
-              <p id="ls-music-artist" class="text-sm opacity-70 truncate">Westlife</p>
+              <h3 id="ls-music-title" class="font-bold text-base truncate">Memuat Lagu...</h3>
+              <p id="ls-music-artist" class="text-sm opacity-70 truncate">Artis</p>
             </div>
           </div>
-          <div class="mt-4 flex items-center justify-between">
-            <div class="w-full bg-white/30 h-1.5 rounded-full overflow-hidden">
-              <div class="bg-white w-1/3 h-full rounded-full"></div>
-            </div>
+          <div class="w-full bg-white/20 h-1.5 rounded-full overflow-hidden mb-5">
+            <div id="ls-music-progress" class="bg-white w-0 h-full rounded-full transition-all duration-300"></div>
           </div>
-          <div class="mt-4 flex justify-center items-center gap-8">
-            <button class="opacity-70 hover:opacity-100"><i data-lucide="skip-back" class="fill-current w-6 h-6"></i></button>
-            <button id="ls-play-btn" onclick="togglePlay()" class="text-white hover:scale-110 transition-transform">
-              <i data-lucide="play" id="ls-play-icon" class="fill-current w-10 h-10"></i>
+          <div class="flex justify-center items-center gap-10">
+            <button class="opacity-70 hover:opacity-100 cursor-pointer transition active:scale-90"><i data-lucide="skip-back" class="fill-current w-6 h-6"></i></button>
+            <button onclick="window.togglePlay()" class="text-white hover:scale-110 transition cursor-pointer active:scale-95">
+              <i data-lucide="play" id="ls-play-icon" class="fill-current w-12 h-12"></i>
             </button>
-            <button class="opacity-70 hover:opacity-100"><i data-lucide="skip-forward" class="fill-current w-6 h-6"></i></button>
+            <button class="opacity-70 hover:opacity-100 cursor-pointer transition active:scale-90"><i data-lucide="skip-forward" class="fill-current w-6 h-6"></i></button>
           </div>
         </div>
 
-        <!-- Unlock Area -->
-        <div class="mt-auto flex justify-between w-full px-6 opacity-60">
-          <div class="glass-panel p-3 rounded-full"><i data-lucide="flashlight" class="w-6 h-6"></i></div>
-          <div class="glass-panel p-3 rounded-full"><i data-lucide="camera" class="w-6 h-6"></i></div>
+        <!-- Utility Buttons -->
+        <div class="mt-auto flex justify-between w-full px-8 opacity-70 mb-4 pointer-events-none">
+          <div class="glass-panel p-4 rounded-full"><i data-lucide="flashlight" class="w-6 h-6"></i></div>
+          <div class="glass-panel p-4 rounded-full"><i data-lucide="camera" class="w-6 h-6"></i></div>
         </div>
 
-        <div id="swipe-area" class="mt-6 text-center pb-2 cursor-pointer w-full touch-pan-y" style="height: 60px;">
-          <p class="text-xs font-semibold tracking-widest opacity-80 animate-pulse">GESER KE ATAS UNTUK MEMBUKA</p>
-          <div class="w-32 h-1 bg-white mx-auto mt-4 rounded-full opacity-50"></div>
+        <!-- Swipe unlock -->
+        <div id="swipe-area" class="w-full py-4 text-center cursor-pointer touch-pan-y" onclick="window.goToScene('scene-pin')">
+          <p class="text-[10px] font-bold tracking-[0.25em] opacity-80 animate-pulse mb-3 uppercase">GESER ATAU KETIK UNTUK MEMBUKA</p>
+          <div class="w-32 h-1.5 bg-white mx-auto rounded-full opacity-60"></div>
         </div>
       </div>
     </div>
 
-    <!-- Scene 2: PIN Screen -->
-    <div id="scene-pin" class="scene bg-brand-cream/90 backdrop-blur-xl text-brand-dark pt-20 px-6 items-center">
-      <i data-lucide="lock" class="w-8 h-8 opacity-50 mb-4"></i>
-      <h2 id="pin-hint" class="text-lg font-medium mb-8">Masukkan PIN</h2>
+    <!-- 2. PIN Screen Scene -->
+    <div id="scene-pin" class="scene bg-brand-cream/95 backdrop-blur-2xl text-brand-dark pt-16 px-6 items-center">
+      <i data-lucide="lock" class="w-8 h-8 opacity-40 mb-4 text-brand-pink"></i>
+      <h2 id="pin-hint-text" class="text-xl font-semibold mb-6 tracking-wide text-brand-dark">Masukkan PIN</h2>
       
-      <div id="pin-dots" class="flex gap-4 mb-12 h-4">
-        <!-- Dots injected here -->
-      </div>
-      
-      <div id="pin-message" class="h-6 mb-6 text-red-500 font-medium text-sm text-center"></div>
+      <div id="pin-dots" class="flex gap-4 mb-8 h-4"></div>
+      <div id="pin-message" class="h-6 mb-4 font-medium text-sm text-center"></div>
 
-      <div class="grid grid-cols-3 gap-x-8 gap-y-6 w-full max-w-[280px]">
-        <!-- Keypad -->
-        <button onclick="pressPin('1')" class="w-16 h-16 rounded-full bg-black/5 hover:bg-black/10 text-2xl font-light mx-auto">1</button>
-        <button onclick="pressPin('2')" class="w-16 h-16 rounded-full bg-black/5 hover:bg-black/10 text-2xl font-light mx-auto">2</button>
-        <button onclick="pressPin('3')" class="w-16 h-16 rounded-full bg-black/5 hover:bg-black/10 text-2xl font-light mx-auto">3</button>
-        <button onclick="pressPin('4')" class="w-16 h-16 rounded-full bg-black/5 hover:bg-black/10 text-2xl font-light mx-auto">4</button>
-        <button onclick="pressPin('5')" class="w-16 h-16 rounded-full bg-black/5 hover:bg-black/10 text-2xl font-light mx-auto">5</button>
-        <button onclick="pressPin('6')" class="w-16 h-16 rounded-full bg-black/5 hover:bg-black/10 text-2xl font-light mx-auto">6</button>
-        <button onclick="pressPin('7')" class="w-16 h-16 rounded-full bg-black/5 hover:bg-black/10 text-2xl font-light mx-auto">7</button>
-        <button onclick="pressPin('8')" class="w-16 h-16 rounded-full bg-black/5 hover:bg-black/10 text-2xl font-light mx-auto">8</button>
-        <button onclick="pressPin('9')" class="w-16 h-16 rounded-full bg-black/5 hover:bg-black/10 text-2xl font-light mx-auto">9</button>
+      <div class="grid grid-cols-3 gap-x-8 gap-y-4 w-full max-w-[280px]">
+        <button onclick="window.pressPin('1')" class="w-20 h-20 rounded-full bg-black/5 hover:bg-black/10 text-3xl font-light cursor-pointer active:scale-90 transition">1</button>
+        <button onclick="window.pressPin('2')" class="w-20 h-20 rounded-full bg-black/5 hover:bg-black/10 text-3xl font-light cursor-pointer active:scale-90 transition">2</button>
+        <button onclick="window.pressPin('3')" class="w-20 h-20 rounded-full bg-black/5 hover:bg-black/10 text-3xl font-light cursor-pointer active:scale-90 transition">3</button>
+        <button onclick="window.pressPin('4')" class="w-20 h-20 rounded-full bg-black/5 hover:bg-black/10 text-3xl font-light cursor-pointer active:scale-90 transition">4</button>
+        <button onclick="window.pressPin('5')" class="w-20 h-20 rounded-full bg-black/5 hover:bg-black/10 text-3xl font-light cursor-pointer active:scale-90 transition">5</button>
+        <button onclick="window.pressPin('6')" class="w-20 h-20 rounded-full bg-black/5 hover:bg-black/10 text-3xl font-light cursor-pointer active:scale-90 transition">6</button>
+        <button onclick="window.pressPin('7')" class="w-20 h-20 rounded-full bg-black/5 hover:bg-black/10 text-3xl font-light cursor-pointer active:scale-90 transition">7</button>
+        <button onclick="window.pressPin('8')" class="w-20 h-20 rounded-full bg-black/5 hover:bg-black/10 text-3xl font-light cursor-pointer active:scale-90 transition">8</button>
+        <button onclick="window.pressPin('9')" class="w-20 h-20 rounded-full bg-black/5 hover:bg-black/10 text-3xl font-light cursor-pointer active:scale-90 transition">9</button>
         <div></div>
-        <button onclick="pressPin('0')" class="w-16 h-16 rounded-full bg-black/5 hover:bg-black/10 text-2xl font-light mx-auto">0</button>
-        <button onclick="clearPin()" class="w-16 h-16 rounded-full flex items-center justify-center text-black/50 hover:bg-black/5 mx-auto">
-          <i data-lucide="delete" class="w-6 h-6"></i>
+        <button onclick="window.pressPin('0')" class="w-20 h-20 rounded-full bg-black/5 hover:bg-black/10 text-3xl font-light cursor-pointer active:scale-90 transition">0</button>
+        <button onclick="window.clearPin()" class="w-20 h-20 rounded-full flex items-center justify-center text-black/50 hover:bg-black/10 cursor-pointer active:scale-90 transition">
+          <i data-lucide="delete" class="w-7 h-7"></i>
         </button>
       </div>
+      
+      <button onclick="window.goToScene('scene-lockscreen')" class="mt-auto mb-8 text-sm opacity-50 hover:opacity-100 font-medium p-4 cursor-pointer">Kembali</button>
     </div>
 
-    <!-- Scene 3: Surat Cinta -->
-    <div id="scene-letter" class="scene bg-[#f5efe6] items-center justify-center relative overflow-hidden">
-      <!-- Envelope State -->
-      <div id="letter-envelope" class="absolute inset-0 flex flex-col items-center justify-center z-20 transition-opacity duration-1000">
-        <div class="w-64 h-48 bg-[#d8c3a5] rounded-lg shadow-xl relative cursor-pointer hover:scale-105 transition-transform" onclick="openLetter()">
-          <div class="absolute inset-0 border-4 border-white/20 rounded-lg"></div>
-          <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-red-400 p-3 rounded-full shadow-lg animate-bounce">
-            <i data-lucide="heart" class="w-8 h-8 text-white fill-current"></i>
+    <!-- 3. Surat Cinta Scene -->
+    <div id="scene-letter" class="scene bg-[#f5efe6] items-center justify-center relative">
+      <!-- Envelope Container -->
+      <div id="letter-envelope" class="absolute inset-0 flex flex-col items-center justify-center z-20 bg-[#f5efe6] transition-all duration-1000">
+        <div class="w-72 h-52 bg-[#d8c3a5] rounded-2xl shadow-2xl relative cursor-pointer hover:scale-105 transition-transform" onclick="window.openLetter()">
+          <div class="absolute inset-0 border-[6px] border-white/20 rounded-2xl pointer-events-none"></div>
+          <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-brand-pink p-5 rounded-full shadow-2xl animate-bounce">
+            <i data-lucide="heart" class="w-10 h-10 text-white fill-current"></i>
           </div>
-          <p class="absolute -bottom-12 w-full text-center text-brand-dark/70 font-serif">Klik love untuk membuka ❤️</p>
+          <p class="absolute -bottom-14 w-full text-center text-brand-dark/70 font-serif text-lg font-medium">Ketuk hatinya ❤️</p>
         </div>
       </div>
 
-      <!-- Open Letter State -->
-      <div id="letter-content" class="absolute inset-0 scrollable p-6 opacity-0 pointer-events-none transition-opacity duration-1000">
-        <div class="bg-[#fcf9f2] min-h-full p-8 rounded-sm shadow-[0_0_15px_rgba(0,0,0,0.1)] relative" style="background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');">
-          <h2 id="lt-title" class="font-script text-3xl text-center text-brand-pink mb-6">Happy Birthday</h2>
+      <!-- Letter Content -->
+      <div id="letter-content" class="absolute inset-0 scrollable p-5 opacity-0 pointer-events-none transition-opacity duration-1000 z-10">
+        <div class="bg-[#fcf9f2] min-h-full p-8 rounded-sm shadow-2xl border border-[#e8e0d5] flex flex-col paper-texture">
+          <h2 id="lt-title" class="font-script text-4xl text-center text-brand-pink mb-6 mt-2">Happy Birthday</h2>
           <div class="w-full flex justify-center mb-6">
-            <img id="lt-photo" src="" alt="Us" class="w-40 h-40 object-cover rounded shadow-md border-4 border-white rotate-2">
+            <img id="lt-photo" src="" alt="Foto" class="w-48 h-48 object-cover rounded shadow-lg border-4 border-white rotate-2 bg-gray-200">
           </div>
-          <p class="font-serif text-lg mb-4 text-brand-dark">Untuk <span id="lt-recipient" class="font-bold">Sayang</span>,</p>
-          <div id="lt-body" class="font-sans text-sm leading-relaxed text-gray-700 whitespace-pre-wrap mb-8"></div>
-          <div class="text-right font-script text-2xl text-brand-pink">
+          <p class="font-serif text-xl mb-4 text-brand-dark">Untuk <span id="lt-recipient" class="font-bold">Sayang</span>,</p>
+          <div id="lt-body" class="font-sans text-sm leading-[1.8] text-gray-700 whitespace-pre-wrap flex-1"></div>
+          <div class="text-right font-script text-3xl text-brand-pink mt-8">
             <p id="lt-sig">From yours truly,</p>
-            <p id="lt-date" class="text-sm text-gray-500 font-sans mt-2">14 Feb 2024</p>
+            <p id="lt-date" class="text-sm text-gray-400 font-sans mt-2">14 Feb</p>
           </div>
-          
-          <button onclick="goToScene('scene-game')" class="mt-12 w-full py-3 bg-brand-pink text-white rounded-full font-medium hover:bg-opacity-90 transition shadow-md">
-            Lanjutkan &rarr;
+          <button onclick="window.goToScene('scene-game')" class="mt-10 w-full py-4 bg-brand-pink text-white rounded-full font-bold tracking-wide hover:bg-opacity-90 transition shadow-lg cursor-pointer active:scale-95">
+            LANJUTKAN &rarr;
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Scene 4: Game -->
-    <div id="scene-game" class="scene bg-[#fcf9f2] p-6 scrollable text-center relative">
-      <h2 id="game-title" class="font-serif text-2xl font-bold text-brand-dark mt-8 mb-2">MANA YANG PALING AKU SUKA? ❤️</h2>
-      <p id="game-subtitle" class="text-sm text-gray-500 mb-8">Coba tebak dengan benar...</p>
+    <!-- 4. Dynamic Tebak Foto Game Scene -->
+    <div id="scene-game" class="scene bg-[#fcf9f2] p-6 scrollable text-center">
+      <h2 id="game-title" class="font-serif text-2xl font-bold text-brand-dark mt-6 mb-2 uppercase">TEBAK FOTO ❤️</h2>
+      <p id="game-subtitle" class="text-sm text-gray-500 mb-8 font-sans">Coba tebak dengan benar...</p>
 
       <div id="game-grid" class="grid grid-cols-2 gap-4 pb-20">
-        <!-- Generated by JS -->
+        <!-- Game Cards generated dynamically -->
       </div>
       
-      <!-- Overlay Plot Twist -->
-      <div id="game-overlay" class="absolute inset-0 bg-[#fcf9f2]/80 backdrop-blur-sm z-30 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500 px-6">
-        <div class="bg-white p-8 rounded-3xl shadow-2xl transform scale-90 transition-transform duration-500 text-center border border-pink-100">
-           <i data-lucide="heart" class="w-16 h-16 text-brand-pink fill-current mx-auto mb-4 animate-pulse"></i>
-           <p id="game-final" class="font-serif text-xl font-bold text-brand-dark leading-relaxed">
-             Gak ada di sini...<br>karena yang paling aku suka kan<br>KAMU ❤️
-           </p>
+      <!-- Plot Twist End Game Modal Overlay -->
+      <div id="game-overlay" class="modal-overlay absolute inset-0 bg-white/85 backdrop-blur-md z-30 flex items-center justify-center px-6">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl text-center border border-pink-100 max-w-sm w-full transform transition-transform duration-500 scale-95" id="game-modal-box">
+           <i data-lucide="heart" class="w-20 h-20 text-brand-pink fill-current mx-auto mb-6 animate-pulse"></i>
+           <p id="game-final" class="font-serif text-xl font-bold text-brand-dark leading-relaxed whitespace-pre-wrap"></p>
         </div>
       </div>
     </div>
 
-    <!-- Scene 5: Album -->
-    <div id="scene-album" class="scene bg-[#e8e4db] items-center justify-center relative overflow-hidden">
-      <!-- Cover -->
-      <div id="album-cover-container" class="cursor-pointer transition-transform duration-1000 hover:scale-105" onclick="openAlbum()">
-        <div class="w-64 h-80 bg-[#3a2e2b] rounded-r-xl rounded-l-sm shadow-2xl relative border-l-8 border-[#2a211f]">
-          <div class="absolute inset-4 border border-yellow-600/30 flex items-center justify-center text-center p-4">
-            <div>
-              <i data-lucide="camera" class="w-8 h-8 text-yellow-600/50 mx-auto mb-4"></i>
-              <h2 id="album-title" class="font-serif text-yellow-600/80 tracking-widest uppercase">Our Little<br>Memories</h2>
+    <!-- 5. 3D Scrapbook Album Scene -->
+    <div id="scene-album" class="scene bg-[#1a1412] items-center justify-center p-4">
+      <!-- 3D Closed Book Initial View -->
+      <div id="album-cover-wrapper" class="perspective-container flex flex-col items-center justify-center w-full h-full">
+        <div id="book-3d-element" class="book-3d-wrapper w-64 h-84 relative cursor-pointer" onclick="window.openAlbum3DBook()">
+          <!-- 3D Book Cover -->
+          <div id="book-cover-front" class="book-3d-cover w-64 h-84 bg-brand-leather rounded-r-2xl rounded-l-sm shadow-2xl relative border-l-[14px] border-[#221a18] book-spine overflow-hidden flex flex-col justify-between p-6">
+            <div class="absolute inset-3 border-2 border-brand-gold/40 rounded-r-xl rounded-l-xs pointer-events-none"></div>
+            <div class="absolute inset-4 border border-brand-gold/20 rounded-r-lg rounded-l-xs pointer-events-none"></div>
+            <div class="text-center my-auto relative z-10">
+              <i data-lucide="book-heart" class="w-12 h-12 text-brand-gold/80 mx-auto mb-4"></i>
+              <h2 id="album-title-cover" class="font-serif text-brand-gold tracking-widest uppercase text-lg leading-relaxed font-bold">OUR<br>MEMORIES</h2>
             </div>
+            <p id="album-subtitle-cover" class="text-xs text-brand-gold/60 text-center font-serif italic">Kenangan Manis</p>
           </div>
+          <!-- Fake thickness pages layer -->
+          <div class="absolute top-1 right-[-10px] w-3 h-[98%] bg-amber-50 rounded-r-xs shadow-inner border-y border-stone-300 pointer-events-none"></div>
         </div>
-        <p class="text-center mt-6 text-sm font-medium opacity-60">Ketuk untuk membuka</p>
+        <p class="text-center mt-10 text-stone-300 text-sm font-serif italic animate-pulse">Klik buku untuk membuka kenangan kita ❤️</p>
       </div>
 
-      <!-- Scrapbook Inside -->
-      <div id="album-inside" class="absolute inset-0 scrollable opacity-0 pointer-events-none transition-opacity duration-1000">
-        <div class="min-h-full py-12 px-4 flex flex-col items-center gap-8" style="background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');">
-           <h2 class="font-script text-4xl text-brand-dark mb-4">Our Memories</h2>
-           <div id="scrapbook-container" class="w-full flex flex-col gap-10 pb-8">
-             <!-- Photos injected here -->
+      <!-- Paginated Scrapbook View (Revealed after 3D animation) -->
+      <div id="album-inside-view" class="absolute inset-0 scrollable opacity-0 pointer-events-none transition-opacity duration-700 z-10 bg-[#f4f1ea]">
+        <div class="min-h-full py-8 px-4 flex flex-col items-center justify-between">
+           <!-- Album Header -->
+           <div class="text-center mb-6">
+             <h2 id="album-header-title" class="font-script text-4xl text-brand-dark mb-1">Our Scrapbook</h2>
+             <p id="album-page-indicator" class="text-xs font-semibold uppercase tracking-widest text-brand-pink">Halaman 1</p>
            </div>
            
-           <div class="mt-4 mb-12 w-full max-w-sm">
-             <button onclick="openMessageModal()" class="w-full py-4 bg-brand-sage text-white rounded-full font-medium shadow-lg hover:shadow-xl transition flex items-center justify-center gap-2">
-               <i data-lucide="send" class="w-5 h-5"></i> Kirim Pesan 💌
+           <!-- Dynamic Photo Spread Container -->
+           <div id="scrapbook-page-container" class="w-full max-w-md my-auto min-h-[380px] flex items-center justify-center">
+             <!-- Injected dynamically per page spread -->
+           </div>
+
+           <!-- Navigation Controls -->
+           <div class="w-full max-w-md flex justify-between items-center mt-8 px-2">
+             <button id="btn-album-prev" onclick="window.changeAlbumPage(-1)" class="px-5 py-2.5 bg-white/80 hover:bg-white text-brand-dark rounded-full font-bold shadow-md transition disabled:opacity-30 disabled:pointer-events-none flex items-center gap-1 cursor-pointer">
+               &larr; Prev
+             </button>
+             
+             <button id="btn-album-msg" onclick="window.openMessageModal()" class="hidden px-6 py-3 bg-brand-sage text-white rounded-full font-bold shadow-lg hover:shadow-xl transition flex items-center gap-2 cursor-pointer active:scale-95">
+               <i data-lucide="send" class="w-5 h-5"></i> KIRIM PESAN 💌
+             </button>
+
+             <button id="btn-album-next" onclick="window.changeAlbumPage(1)" class="px-5 py-2.5 bg-brand-pink text-white rounded-full font-bold shadow-md hover:bg-opacity-90 transition disabled:opacity-30 disabled:pointer-events-none flex items-center gap-1 cursor-pointer">
+               Next &rarr;
              </button>
            </div>
         </div>
       </div>
+    </div>
 
-      <!-- Message Modal -->
-      <div id="msg-modal" class="absolute inset-0 bg-black/60 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 px-4">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl transform scale-95 transition-transform duration-300 relative">
-           <button onclick="closeMessageModal()" class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-800">
-             <i data-lucide="x" class="w-6 h-6"></i>
-           </button>
-           <h3 class="font-serif text-xl font-bold mb-4">💌 Kirim Pesan</h3>
-           <textarea id="msg-input" rows="4" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-brand-sage resize-none" placeholder="Tulis pesan untukku..."></textarea>
-           <button onclick="sendWA()" class="mt-4 w-full bg-[#25D366] text-white py-3 rounded-xl font-medium shadow flex items-center justify-center gap-2">
-             <i data-lucide="message-circle" class="w-5 h-5"></i> Kirim ke WhatsApp
-           </button>
-        </div>
+    <!-- Modals (Global Level) -->
+    <!-- WhatsApp Message Reply Modal -->
+    <div id="msg-modal" class="modal-overlay absolute inset-0 bg-black/75 z-50 flex items-center justify-center px-4">
+      <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl relative transform transition-transform duration-300 scale-95" id="msg-modal-box">
+         <button onclick="window.closeMessageModal()" class="absolute top-4 right-4 p-2.5 text-gray-400 hover:text-gray-800 bg-gray-100 rounded-full cursor-pointer">
+           <i data-lucide="x" class="w-5 h-5"></i>
+         </button>
+         <div class="text-center mb-6 mt-2">
+           <div class="w-12 h-12 bg-brand-pink/20 rounded-full flex items-center justify-center mx-auto mb-3">
+             <i data-lucide="heart" class="text-brand-pink fill-current w-6 h-6"></i>
+           </div>
+           <h3 class="font-serif text-2xl font-bold text-gray-800">Kirim Pesan</h3>
+         </div>
+         <textarea id="msg-input" rows="4" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-brand-sage resize-none text-gray-700 text-sm" placeholder="Tulis balasan manismu di sini..."></textarea>
+         <button onclick="window.sendWA()" class="mt-4 w-full bg-[#25D366] text-white py-4 rounded-2xl font-bold shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-95 transition">
+           <i data-lucide="message-circle" class="w-6 h-6"></i> Kirim via WhatsApp
+         </button>
       </div>
     </div>
 
-    <!-- Admin Panel -->
-    <div id="admin-panel" class="absolute inset-0 bg-white z-[100] scrollable p-6 opacity-0 pointer-events-none transition-opacity">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-bold">Pengaturan Web</h2>
-        <button onclick="closeAdmin()" class="p-2 bg-gray-100 rounded-full"><i data-lucide="x" class="w-5 h-5"></i></button>
-      </div>
-
-      <div class="space-y-6 pb-20">
-        <!-- Lockscreen Config -->
-        <div class="p-4 bg-gray-50 rounded-xl border">
-          <h3 class="font-bold mb-3">📱 Lockscreen</h3>
-          <input type="text" id="cfg-ls-bg" placeholder="URL Background" class="w-full border p-2 rounded mb-2 text-sm">
-          <input type="text" id="cfg-ls-date" placeholder="Teks Tanggal" class="w-full border p-2 rounded mb-4 text-sm">
-          <h4 class="text-xs font-semibold mb-2">Notifikasi</h4>
-          <input type="text" id="cfg-ls-notif-app" placeholder="Nama Aplikasi (cth: WhatsApp)" class="w-full border p-2 rounded mb-2 text-sm">
-          <input type="text" id="cfg-ls-notif-sender" placeholder="Pengirim (cth: Sayang)" class="w-full border p-2 rounded mb-2 text-sm">
-          <input type="text" id="cfg-ls-notif-msg" placeholder="Isi Pesan" class="w-full border p-2 rounded mb-4 text-sm">
-          <h4 class="text-xs font-semibold mb-2">Musik</h4>
-          <input type="text" id="cfg-ls-music-title" placeholder="Judul Lagu" class="w-full border p-2 rounded mb-2 text-sm">
-          <input type="text" id="cfg-ls-music-artist" placeholder="Artis" class="w-full border p-2 rounded mb-2 text-sm">
-          <input type="text" id="cfg-ls-music-cover" placeholder="URL Cover Lagu" class="w-full border p-2 rounded mb-2 text-sm">
-          <input type="text" id="cfg-ls-music-url" placeholder="URL Audio (MP3)" class="w-full border p-2 rounded mb-2 text-sm">
-        </div>
-
-        <!-- PIN Config -->
-        <div class="p-4 bg-gray-50 rounded-xl border">
-          <h3 class="font-bold mb-3">🔢 Keamanan PIN</h3>
-          <input type="text" id="cfg-pin-code" placeholder="Kode PIN (Angka)" class="w-full border p-2 rounded mb-2 text-sm">
-        </div>
-
-        <!-- Letter Config -->
-        <div class="p-4 bg-gray-50 rounded-xl border">
-          <h3 class="font-bold mb-3">💌 Surat Cinta</h3>
-          <input type="text" id="cfg-lt-title" placeholder="Judul" class="w-full border p-2 rounded mb-2 text-sm">
-          <input type="text" id="cfg-lt-recipient" placeholder="Nama Pasangan" class="w-full border p-2 rounded mb-2 text-sm">
-          <textarea id="cfg-lt-body" placeholder="Isi Surat" class="w-full border p-2 rounded mb-2 text-sm h-32"></textarea>
-          <input type="text" id="cfg-lt-photo" placeholder="URL Foto Surat" class="w-full border p-2 rounded mb-2 text-sm">
-          <input type="text" id="cfg-lt-sig" placeholder="Tanda Tangan" class="w-full border p-2 rounded mb-2 text-sm">
-          <input type="text" id="cfg-lt-date" placeholder="Tanggal Surat" class="w-full border p-2 rounded text-sm">
-        </div>
-
-        <!-- Album & WA Config -->
-        <div class="p-4 bg-gray-50 rounded-xl border">
-          <h3 class="font-bold mb-3">📸 Pengaturan Akhir</h3>
-          <input type="text" id="cfg-al-title" placeholder="Judul Cover Album" class="w-full border p-2 rounded mb-4 text-sm">
-          <h4 class="text-xs font-semibold mb-2">WhatsApp</h4>
-          <input type="text" id="cfg-wa-phone" placeholder="Nomor WA (Awali 62)" class="w-full border p-2 rounded mb-2 text-sm">
-          <input type="text" id="cfg-wa-msg" placeholder="Pesan Template WA" class="w-full border p-2 rounded mb-2 text-sm">
-        </div>
-        
-        <button onclick="saveAdmin()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold shadow hover:bg-blue-700">Simpan Perubahan</button>
-      </div>
-    </div>
-    
-    <!-- Lightbox Modal -->
-    <div id="lightbox" class="absolute inset-0 bg-black/90 z-[120] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300" onclick="closeLightbox()">
-      <img id="lightbox-img" src="" class="max-w-[90%] max-h-[80%] rounded shadow-2xl object-contain">
-      <button class="absolute top-6 right-6 text-white bg-black/50 p-2 rounded-full"><i data-lucide="x" class="w-6 h-6"></i></button>
+    <!-- Lightbox Zoom Modal -->
+    <div id="lightbox" class="modal-overlay absolute inset-0 bg-black/95 z-[90] flex items-center justify-center" onclick="window.closeLightbox()">
+      <img id="lightbox-img" src="" class="max-w-[95%] max-h-[85%] rounded-lg shadow-2xl object-contain">
+      <p id="lightbox-caption" class="absolute bottom-8 text-center text-white/90 font-serif text-sm bg-black/50 px-4 py-2 rounded-full backdrop-blur-md"></p>
+      <button class="absolute top-6 right-6 text-white bg-black/50 p-3 rounded-full cursor-pointer hover:bg-white/20"><i data-lucide="x" class="w-6 h-6"></i></button>
     </div>
 
-  </div> <!-- End App Container -->
+    <!-- Comprehensive Admin Panel Modal -->
+    <div id="admin-panel" class="modal-overlay absolute inset-0 bg-white z-[100] scrollable p-6">
+      <div class="flex justify-between items-center mb-6 sticky top-0 bg-white py-3 z-20 border-b">
+        <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2"><i data-lucide="settings" class="w-6 h-6 text-brand-pink"></i> Admin Panel</h2>
+        <button onclick="window.closeAdmin()" class="p-2.5 bg-gray-100 hover:bg-gray-200 rounded-full cursor-pointer"><i data-lucide="x" class="w-6 h-6"></i></button>
+      </div>
 
-  <!-- Audio Element -->
-  <audio id="bg-audio" loop></audio>
+      <!-- Admin Tabs Navigation -->
+      <div class="flex overflow-x-auto gap-2 mb-6 pb-2 border-b text-xs font-bold hide-scrollbar">
+        <button onclick="window.switchAdminTab('ls')" id="tab-btn-ls" class="px-4 py-2 rounded-full bg-brand-pink text-white whitespace-nowrap">Lockscreen</button>
+        <button onclick="window.switchAdminTab('pin')" id="tab-btn-pin" class="px-4 py-2 rounded-full bg-gray-100 text-gray-600 whitespace-nowrap">PIN</button>
+        <button onclick="window.switchAdminTab('letter')" id="tab-btn-letter" class="px-4 py-2 rounded-full bg-gray-100 text-gray-600 whitespace-nowrap">Surat</button>
+        <button onclick="window.switchAdminTab('game')" id="tab-btn-game" class="px-4 py-2 rounded-full bg-gray-100 text-gray-600 whitespace-nowrap">Game</button>
+        <button onclick="window.switchAdminTab('album')" id="tab-btn-album" class="px-4 py-2 rounded-full bg-gray-100 text-gray-600 whitespace-nowrap">Album</button>
+        <button onclick="window.switchAdminTab('wa')" id="tab-btn-wa" class="px-4 py-2 rounded-full bg-gray-100 text-gray-600 whitespace-nowrap">WhatsApp</button>
+      </div>
 
-  <!-- Firebase Scripts (ES Module CDN) -->
+      <div class="space-y-6 pb-24 max-w-md mx-auto">
+        <!-- Tab 1: Lockscreen -->
+        <div id="admin-tab-ls" class="admin-tab-content space-y-4">
+          <h3 class="font-bold text-base border-b pb-2 text-gray-700">Display Lockscreen</h3>
+          <label class="block text-xs font-semibold text-gray-500">URL Background Image</label>
+          <input type="text" id="cfg-ls-bg" class="w-full border p-3 rounded-xl text-sm">
+          <label class="block text-xs font-semibold text-gray-500">Teks Tanggal</label>
+          <input type="text" id="cfg-ls-date" class="w-full border p-3 rounded-xl text-sm">
+          
+          <h4 class="text-xs font-bold text-gray-700 pt-3 border-t">Notifikasi WhatsApp</h4>
+          <input type="text" id="cfg-ls-notif-app" placeholder="Nama App" class="w-full border p-3 rounded-xl text-sm mb-2">
+          <input type="text" id="cfg-ls-notif-sender" placeholder="Pengirim" class="w-full border p-3 rounded-xl text-sm mb-2">
+          <input type="text" id="cfg-ls-notif-msg" placeholder="Isi Notif" class="w-full border p-3 rounded-xl text-sm">
+
+          <h4 class="text-xs font-bold text-gray-700 pt-3 border-t">Audio Player</h4>
+          <input type="text" id="cfg-ls-music-title" placeholder="Judul Lagu" class="w-full border p-3 rounded-xl text-sm mb-2">
+          <input type="text" id="cfg-ls-music-artist" placeholder="Artis" class="w-full border p-3 rounded-xl text-sm mb-2">
+          <input type="text" id="cfg-ls-music-cover" placeholder="URL Cover" class="w-full border p-3 rounded-xl text-sm mb-2">
+          <input type="text" id="cfg-ls-music-url" placeholder="URL Audio MP3" class="w-full border p-3 rounded-xl text-sm">
+        </div>
+
+        <!-- Tab 2: PIN -->
+        <div id="admin-tab-pin" class="admin-tab-content hidden space-y-4">
+          <h3 class="font-bold text-base border-b pb-2 text-gray-700">Konfigurasi PIN</h3>
+          <label class="block text-xs font-semibold text-gray-500">Kode PIN (Bebas Angka)</label>
+          <input type="text" id="cfg-pin-code" class="w-full border p-3 rounded-xl text-sm font-bold text-center tracking-widest">
+        </div>
+
+        <!-- Tab 3: Surat -->
+        <div id="admin-tab-letter" class="admin-tab-content hidden space-y-4">
+          <h3 class="font-bold text-base border-b pb-2 text-gray-700">Surat Cinta</h3>
+          <input type="text" id="cfg-lt-title" placeholder="Judul Surat" class="w-full border p-3 rounded-xl text-sm">
+          <input type="text" id="cfg-lt-recipient" placeholder="Nama Penerima" class="w-full border p-3 rounded-xl text-sm">
+          <textarea id="cfg-lt-body" placeholder="Isi Surat..." class="w-full border p-3 rounded-xl text-sm h-36"></textarea>
+          <input type="text" id="cfg-lt-photo" placeholder="URL Foto Utama" class="w-full border p-3 rounded-xl text-sm">
+          <input type="text" id="cfg-lt-sig" placeholder="Tanda Tangan" class="w-full border p-3 rounded-xl text-sm">
+          <input type="text" id="cfg-lt-date" placeholder="Tanggal TTD" class="w-full border p-3 rounded-xl text-sm">
+        </div>
+
+        <!-- Tab 4: Custom Game -->
+        <div id="admin-tab-game" class="admin-tab-content hidden space-y-4">
+          <h3 class="font-bold text-base border-b pb-2 text-gray-700">Pengaturan Game Tebak Foto</h3>
+          <label class="block text-xs font-semibold text-gray-500">Judul Game</label>
+          <input type="text" id="cfg-game-title" class="w-full border p-3 rounded-xl text-sm">
+          <label class="block text-xs font-semibold text-gray-500">Subtitle</label>
+          <input type="text" id="cfg-game-sub" class="w-full border p-3 rounded-xl text-sm">
+          <label class="block text-xs font-semibold text-gray-500">Teks Respons Klick (Default Salah)</label>
+          <input type="text" id="cfg-game-wrong" class="w-full border p-3 rounded-xl text-sm">
+          <label class="block text-xs font-semibold text-gray-500">Teks Hasil Akhir (Plot Twist)</label>
+          <textarea id="cfg-game-final" class="w-full border p-3 rounded-xl text-sm h-24"></textarea>
+          <label class="block text-xs font-semibold text-gray-500">Durasi Animasi Hasil Akhir (milidetik)</label>
+          <input type="number" id="cfg-game-duration" class="w-full border p-3 rounded-xl text-sm" placeholder="5000">
+
+          <div class="flex justify-between items-center pt-4 border-t">
+            <h4 class="font-bold text-sm text-gray-800">Daftar Foto Game</h4>
+            <button onclick="window.addGamePhotoSlot()" class="px-3 py-1.5 bg-brand-pink text-white text-xs rounded-full font-bold cursor-pointer">+ Tambah Foto</button>
+          </div>
+          <div id="admin-game-photos-list" class="space-y-3"></div>
+        </div>
+
+        <!-- Tab 5: Dynamic Album -->
+        <div id="admin-tab-album" class="admin-tab-content hidden space-y-4">
+          <h3 class="font-bold text-base border-b pb-2 text-gray-700">Pengaturan Album Scrapbook</h3>
+          <label class="block text-xs font-semibold text-gray-500">Judul Cover Album</label>
+          <input type="text" id="cfg-album-title" class="w-full border p-3 rounded-xl text-sm">
+          <label class="block text-xs font-semibold text-gray-500">Jumlah Foto Per Halaman</label>
+          <select id="cfg-album-ppp" class="w-full border p-3 rounded-xl text-sm bg-white">
+            <option value="2">2 Foto per Halaman</option>
+            <option value="4" selected>4 Foto per Halaman</option>
+            <option value="6">6 Foto per Halaman</option>
+            <option value="8">8 Foto per Halaman</option>
+          </select>
+
+          <div class="flex justify-between items-center pt-4 border-t">
+            <h4 class="font-bold text-sm text-gray-800">Daftar Foto Album</h4>
+            <div class="flex gap-2">
+              <label class="px-3 py-1.5 bg-brand-sage text-white text-xs rounded-full font-bold cursor-pointer inline-flex items-center">
+                📁 Batch Upload
+                <input type="file" multiple accept="image/*" class="hidden" onchange="window.handleBatchAlbumUpload(event)">
+              </label>
+              <button onclick="window.addAlbumPhotoSlot()" class="px-3 py-1.5 bg-brand-pink text-white text-xs rounded-full font-bold cursor-pointer">+ Tambah Slot</button>
+            </div>
+          </div>
+          <div id="admin-album-photos-list" class="space-y-3"></div>
+        </div>
+
+        <!-- Tab 6: WhatsApp -->
+        <div id="admin-tab-wa" class="admin-tab-content hidden space-y-4">
+          <h3 class="font-bold text-base border-b pb-2 text-gray-700">Pesan WhatsApp</h3>
+          <label class="block text-xs font-semibold text-gray-500">Nomor Telepon WA (Awal 62...)</label>
+          <input type="text" id="cfg-wa-phone" class="w-full border p-3 rounded-xl text-sm">
+          <label class="block text-xs font-semibold text-gray-500">Template Pesan WA</label>
+          <input type="text" id="cfg-wa-msg" class="w-full border p-3 rounded-xl text-sm">
+        </div>
+
+        <!-- Save Button -->
+        <button id="btn-save-admin" onclick="window.saveAdmin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-bold shadow-lg transition active:scale-95 flex justify-center items-center cursor-pointer">
+          <i data-lucide="save" class="w-5 h-5 mr-2"></i> Simpan ke Database
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <audio id="bg-audio" loop preload="auto"></audio>
+
+  <!-- JAVASCRIPT LOGIC & FIREBASE ESM -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
     import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-    // --- FIREBASE CONFIGURATION ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyDJQScAnz5VulSrHB94NKnGY918CZjmrTE",
-      authDomain: "okta-cantikkk.firebaseapp.com",
-      projectId: "okta-cantikkk",
-      storageBucket: "okta-cantikkk.firebasestorage.app",
-      messagingSenderId: "869280662214",
-      appId: "1:869280662214:web:387fc33a81724111cf8dc7",
+    // 1. GLOBAL STATE & DEFAULT CONFIG (Failsafe)
+    window.APP_STATE = { 
+      debugMode: false, debugClickCount: 0, initialized: false, 
+      activeScene: 'scene-lockscreen', pinInput: '', gameClickedSet: new Set(), 
+      isPlaying: false, currentAlbumPage: 0, albumBookOpened: false
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const docRef = doc(db, "websiteData", "config");
-
-    // Default Configuration Fallback
-    let siteConfig = {
+    const defaultConfig = {
       lockscreen: {
         bg: "https://images.unsplash.com/photo-1518599904199-0ca897819ddb?auto=format&fit=crop&q=80&w=600",
-        date: "Senin, 14 Februari",
-        notifApp: "WhatsApp",
-        notifSender: "Sayang",
-        notifMsg: "Kamu dimana?",
-        musicTitle: "Beautiful In White",
-        musicArtist: "Westlife",
+        date: "Senin, 14 Februari", notifApp: "WhatsApp", notifSender: "Sayang", notifMsg: "Kamu dimana?",
+        musicTitle: "Beautiful In White", musicArtist: "Westlife",
         musicCover: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=200",
         musicUrl: "https://cdn.pixabay.com/download/audio/2022/05/16/audio_db6591201e.mp3"
       },
       pin: { code: "1402" },
       letter: {
-        title: "Happy Birthday",
-        recipient: "Cintaku",
+        title: "Happy Birthday", recipient: "Cintaku",
         body: "Selamat ulang tahun untuk orang paling spesial.\n\nSemoga semua mimpimu terwujud. I love you more than words can say. ❤️",
         photo: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=400",
-        sig: "From yours truly,",
-        date: "14 Februari 2024"
+        sig: "From yours truly,", date: "14 Feb 2024"
       },
       game: {
+        title: "MANA YANG PALING AKU SUKA? ❤️", subtitle: "Coba tebak dengan benar...",
+        wrongText: "HUUUU SALAH 😭😂",
+        finalText: "Gak ada di sini...\nkarena yang paling aku suka kan\nKAMU ❤️",
+        duration: 5000,
         images: [
-          "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=400",
-          "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&q=80&w=400",
-          "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=400",
-          "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400",
-          "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=400",
-          "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400"
+          { url: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=400", msg: "HUUUU SALAH 😭😂" },
+          { url: "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&q=80&w=400", msg: "HUUUU SALAH 😭😂" },
+          { url: "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?auto=format&fit=crop&q=80&w=400", msg: "HUUUU SALAH 😭😂" },
+          { url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400", msg: "HUUUU SALAH 😭😂" },
+          { url: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&q=80&w=400", msg: "HUUUU SALAH 😭😂" },
+          { url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400", msg: "HUUUU SALAH 😭😂" }
         ]
       },
       album: {
         title: "OUR LITTLE MEMORIES",
+        photosPerPage: 4,
         photos: [
-          "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&q=80&w=600",
-          "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=600",
-          "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&q=80&w=600",
-          "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=600"
+          { url: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&q=80&w=600", caption: "Sweet moments" },
+          { url: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=600", caption: "Together forever" },
+          { url: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&q=80&w=600", caption: "Smile & joy" },
+          { url: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=600", caption: "Precious memory" }
         ]
       },
       whatsapp: { phone: "6289529889634", msg: "Halo sayang, makasih kejutannya! ❤️" }
     };
+    
+    // Deep Merge Utility
+    function deepMerge(target, source) {
+      if (typeof target !== 'object' || target === null) return source;
+      if (typeof source !== 'object' || source === null) return source;
+      const result = { ...target };
+      for (const key of Object.keys(source)) {
+        if (source[key] instanceof Array) {
+          result[key] = source[key];
+        } else if (source[key] instanceof Object) {
+          result[key] = deepMerge(target[key], source[key]);
+        } else {
+          result[key] = source[key];
+        }
+      }
+      return result;
+    }
 
-    // Make functions global for inline HTML onclick handlers
-    window.siteConfig = siteConfig;
-    window.dbSetDoc = async (data) => {
+    window.siteConfig = JSON.parse(JSON.stringify(defaultConfig));
+
+    // 2. DOM UPDATE RENDERER
+    function updateDOM() {
       try {
-        await setDoc(docRef, data);
-        alert("Berhasil disimpan!");
-      } catch (e) {
-        console.error("Save Error:", e);
-        alert("Gagal simpan! Pastikan Firestore Rules sudah 'if true'");
+        const cfg = window.siteConfig;
+        
+        const safeSetText = (id, text) => { const el = document.getElementById(id); if(el) el.innerText = text; };
+        const safeSetHTML = (id, html) => { const el = document.getElementById(id); if(el) el.innerHTML = html; };
+        const safeSetSrc = (id, src) => { const el = document.getElementById(id); if(el) el.src = src; };
+        const safeSetBg = (id, url) => { const el = document.getElementById(id); if(el) el.style.backgroundImage = `url('${url}')`; };
+
+        // Lockscreen
+        safeSetBg('ls-bg', cfg.lockscreen.bg);
+        safeSetText('ls-date', cfg.lockscreen.date);
+        safeSetText('ls-notif-sender', `${cfg.lockscreen.notifApp} - ${cfg.lockscreen.notifSender}`);
+        safeSetText('ls-notif-msg', cfg.lockscreen.notifMsg);
+        safeSetText('ls-music-title', cfg.lockscreen.musicTitle);
+        safeSetText('ls-music-artist', cfg.lockscreen.musicArtist);
+        safeSetSrc('ls-music-cover', cfg.lockscreen.musicCover);
+        
+        const audio = document.getElementById('bg-audio');
+        if (audio && audio.src !== cfg.lockscreen.musicUrl) audio.src = cfg.lockscreen.musicUrl;
+
+        // PIN Dots
+        const dotsContainer = document.getElementById('pin-dots');
+        if (dotsContainer) {
+          dotsContainer.innerHTML = '';
+          for(let i=0; i<cfg.pin.code.length; i++) {
+            dotsContainer.innerHTML += `<div class="w-3.5 h-3.5 rounded-full border-2 border-brand-dark/30 transition-all duration-200" id="dot-${i}"></div>`;
+          }
+        }
+
+        // Letter
+        safeSetText('lt-title', cfg.letter.title);
+        safeSetText('lt-recipient', cfg.letter.recipient);
+        safeSetText('lt-body', cfg.letter.body);
+        safeSetSrc('lt-photo', cfg.letter.photo);
+        safeSetText('lt-sig', cfg.letter.sig);
+        safeSetText('lt-date', cfg.letter.date);
+
+        // Game Render
+        safeSetText('game-title', cfg.game.title);
+        safeSetText('game-subtitle', cfg.game.subtitle);
+        safeSetText('game-final', cfg.game.finalText);
+
+        const gameGrid = document.getElementById('game-grid');
+        if (gameGrid) {
+          gameGrid.innerHTML = '';
+          cfg.game.images.forEach((imgObj, i) => {
+            const url = typeof imgObj === 'string' ? imgObj : imgObj.url;
+            const wrongMsg = (typeof imgObj === 'object' && imgObj.msg) ? imgObj.msg : (cfg.game.wrongText || "HUUUU SALAH 😭😂");
+            gameGrid.innerHTML += `
+              <div id="gm-img-${i}" class="relative bg-white p-2.5 rounded-2xl shadow-md cursor-pointer transform transition-all duration-300 hover:scale-105 active:scale-95" onclick="window.clickGameImg(${i})">
+                <img src="${url}" class="w-full h-36 object-cover rounded-xl bg-gray-100" onerror="this.src='https://placehold.co/400x400?text=Foto'">
+                <div id="gm-wrong-${i}" class="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity pointer-events-none rounded-2xl p-2 text-center">
+                  <span class="text-red-500 font-bold bg-white px-3 py-1.5 rounded-full shadow-md text-xs border border-red-100">${wrongMsg}</span>
+                </div>
+              </div>
+            `;
+          });
+        }
+        
+        // Album Title Cover
+        safeSetHTML('album-title-cover', cfg.album.title.replace(/\n/g, '<br>'));
+        
+        // Render Album Pages if already in Album view
+        if (window.APP_STATE.albumBookOpened) {
+          window.renderAlbumPage();
+        }
+
+        lucide.createIcons();
+        logDebug("DOM updated successfully.");
+      } catch (error) {
+        console.error("DOM Update Error:", error);
+        logDebug("DOM Update ERROR: " + error.message);
+      }
+    }
+
+    // 3. NAVIGATION & SCENE HANDLERS
+    window.goToScene = function(sceneId) {
+      document.querySelectorAll('.scene').forEach(el => el.classList.remove('active'));
+      const next = document.getElementById(sceneId);
+      if(next) {
+        next.classList.add('active');
+        window.APP_STATE.activeScene = sceneId;
+        logDebug("Navigated to: " + sceneId);
       }
     };
 
-    // Listen for Realtime Changes
-    let hasLoaded = false;
-    onSnapshot(docRef, (snap) => {
-      if (snap.exists()) {
-        window.siteConfig = { ...siteConfig, ...snap.data() };
-      }
-      if (!hasLoaded) {
-        hasLoaded = true;
-        renderApp();
+    window.togglePlay = function() {
+      const audio = document.getElementById('bg-audio');
+      const icon = document.getElementById('ls-play-icon');
+      if(window.APP_STATE.isPlaying) {
+        audio.pause();
+        window.APP_STATE.isPlaying = false;
+        icon.setAttribute('data-lucide', 'play');
       } else {
-        updateDOM();
+        audio.play().then(() => {
+          window.APP_STATE.isPlaying = true;
+          icon.setAttribute('data-lucide', 'pause');
+        }).catch(e => {
+          alert("Klik di mana saja pada layar terlebih dahulu untuk memutar audio.");
+        });
       }
-    }, (err) => {
-      console.warn("Realtime error, using local config.");
-      if (!hasLoaded) { hasLoaded = true; renderApp(); }
-    });
+      lucide.createIcons();
+    };
 
-    // Failsafe timeout to hide loading if DB takes too long
-    setTimeout(() => {
-      if (!hasLoaded) { hasLoaded = true; renderApp(); }
-    }, 2000);
-
-  </script>
-
-  <!-- Interaction Logic -->
-  <script>
-    lucide.createIcons();
-
-    const audio = document.getElementById('bg-audio');
-    let isPlaying = false;
-    let pinInput = "";
-    let gameClicked = 0;
-
-    function renderApp() {
-      const loadScreen = document.getElementById('loading-screen');
-      if (loadScreen) {
-          loadScreen.style.opacity = '0';
-          setTimeout(() => loadScreen.classList.remove('active'), 500);
+    window.pressPin = function(num) {
+      const cfg = window.siteConfig;
+      if (window.APP_STATE.pinInput.length < cfg.pin.code.length) {
+        window.APP_STATE.pinInput += num;
+        const dot = document.getElementById(`dot-${window.APP_STATE.pinInput.length-1}`);
+        if(dot) dot.classList.add('bg-brand-pink');
       }
+      if (window.APP_STATE.pinInput.length === cfg.pin.code.length) {
+        if (window.APP_STATE.pinInput === cfg.pin.code) {
+          document.getElementById('pin-message').innerText = "Benar! ❤️";
+          document.getElementById('pin-message').className = "h-6 mb-4 text-green-600 font-bold text-sm text-center";
+          setTimeout(() => window.goToScene('scene-letter'), 700);
+        } else {
+          document.getElementById('pin-message').innerText = "Salah sayang 😜";
+          document.getElementById('pin-message').className = "h-6 mb-4 text-red-500 font-bold text-sm text-center";
+          const keypad = document.getElementById('scene-pin').querySelector('.grid');
+          keypad.classList.add('animate-pulse');
+          setTimeout(() => {
+            keypad.classList.remove('animate-pulse');
+            window.clearPin();
+          }, 600);
+        }
+      }
+    };
+
+    window.clearPin = function() {
+      window.APP_STATE.pinInput = "";
+      document.getElementById('pin-message').innerText = "";
+      document.querySelectorAll('#pin-dots div').forEach(d => d.classList.remove('bg-brand-pink'));
+    };
+
+    window.openLetter = function() {
+      document.getElementById('letter-envelope').style.opacity = '0';
+      setTimeout(() => {
+        document.getElementById('letter-envelope').style.display = 'none';
+        const content = document.getElementById('letter-content');
+        content.classList.add('active');
+        content.style.opacity = '1';
+        content.style.pointerEvents = 'auto';
+      }, 750);
+    };
+
+    window.clickGameImg = function(idx) {
+      const wrong = document.getElementById(`gm-wrong-${idx}`);
+      if(!wrong || wrong.style.opacity === '1') return;
+      
+      wrong.style.opacity = '1';
+      window.APP_STATE.gameClickedSet.add(idx);
+      
+      const totalImages = window.siteConfig.game.images.length;
+      if(window.APP_STATE.gameClickedSet.size >= totalImages) {
+        setTimeout(() => {
+          const overlay = document.getElementById('game-overlay');
+          overlay.classList.add('active');
+          document.getElementById('game-modal-box').classList.remove('scale-95');
+          document.getElementById('game-modal-box').classList.add('scale-100');
+          
+          const duration = window.siteConfig.game.duration || 5000;
+          setTimeout(() => window.goToScene('scene-album'), duration);
+        }, 600);
+      }
+    };
+
+    // 4. 3D BOOK & ALBUM PAGINATION LOGIC
+    window.openAlbum3DBook = function() {
+      if (window.APP_STATE.albumBookOpened) return;
+      
+      const cover = document.getElementById('book-cover-front');
+      cover.classList.add('open');
+      
+      setTimeout(() => {
+        document.getElementById('album-cover-wrapper').style.opacity = '0';
+        setTimeout(() => {
+          document.getElementById('album-cover-wrapper').style.display = 'none';
+          const inside = document.getElementById('album-inside-view');
+          inside.style.opacity = '1';
+          inside.style.pointerEvents = 'auto';
+          window.APP_STATE.albumBookOpened = true;
+          window.renderAlbumPage();
+        }, 600);
+      }, 900);
+    };
+
+    window.renderAlbumPage = function() {
+      const cfg = window.siteConfig;
+      const photos = cfg.album.photos || [];
+      const ppp = parseInt(cfg.album.photosPerPage) || 4;
+      const totalPages = Math.max(1, Math.ceil(photos.length / ppp));
+      
+      if (window.APP_STATE.currentAlbumPage >= totalPages) {
+        window.APP_STATE.currentAlbumPage = totalPages - 1;
+      }
+      if (window.APP_STATE.currentAlbumPage < 0) window.APP_STATE.currentAlbumPage = 0;
+      
+      const pageIdx = window.APP_STATE.currentAlbumPage;
+      document.getElementById('album-page-indicator').innerText = `Halaman ${pageIdx + 1} dari ${totalPages}`;
+      
+      const start = pageIdx * ppp;
+      const pagePhotos = photos.slice(start, start + ppp);
+      
+      const container = document.getElementById('scrapbook-page-container');
+      container.innerHTML = '';
+      
+      let gridColsClass = 'grid-cols-2';
+      if (ppp === 2) gridColsClass = 'grid-cols-1';
+      
+      const grid = document.createElement('div');
+      grid.className = `grid ${gridColsClass} gap-4 w-full`;
+      
+      pagePhotos.forEach((photoObj, i) => {
+        const url = typeof photoObj === 'string' ? photoObj : photoObj.url;
+        const caption = typeof photoObj === 'object' ? photoObj.caption : '';
+        const rotate = (i % 2 === 0) ? '-rotate-2' : 'rotate-2';
+        
+        grid.innerHTML += `
+          <div class="polaroid-card relative rounded-sm ${rotate} cursor-pointer" onclick="window.openLightbox('${url}', '${caption}')">
+            <div class="tape-effect -top-3 left-1/2 -translate-x-1/2"></div>
+            <img src="${url}" class="w-full h-36 object-cover rounded-xs bg-stone-100" onerror="this.src='https://placehold.co/400x300?text=Foto'">
+            ${caption ? `<p class="font-serif text-xs text-center text-stone-700 mt-2 truncate font-medium">${caption}</p>` : ''}
+          </div>
+        `;
+      });
+      
+      container.appendChild(grid);
+      
+      // Control Buttons
+      document.getElementById('btn-album-prev').disabled = (pageIdx === 0);
+      document.getElementById('btn-album-next').disabled = (pageIdx === totalPages - 1);
+      
+      const msgBtn = document.getElementById('btn-album-msg');
+      if (pageIdx === totalPages - 1) {
+        msgBtn.classList.remove('hidden');
+      } else {
+        msgBtn.classList.add('hidden');
+      }
+    };
+
+    window.changeAlbumPage = function(delta) {
+      window.APP_STATE.currentAlbumPage += delta;
+      window.renderAlbumPage();
+    };
+
+    // 5. LIGHTBOX & MODALS
+    window.openLightbox = function(src, caption = '') {
+      document.getElementById('lightbox-img').src = src;
+      document.getElementById('lightbox-caption').innerText = caption;
+      document.getElementById('lightbox').classList.add('active');
+    };
+    window.closeLightbox = function() {
+      document.getElementById('lightbox').classList.remove('active');
+    };
+
+    window.openMessageModal = function() {
+      document.getElementById('msg-modal').classList.add('active');
+      document.getElementById('msg-modal-box').classList.remove('scale-95');
+      document.getElementById('msg-modal-box').classList.add('scale-100');
+    };
+    window.closeMessageModal = function() {
+      document.getElementById('msg-modal').classList.remove('active');
+      document.getElementById('msg-modal-box').classList.add('scale-95');
+    };
+
+    window.sendWA = function() {
+      const cfg = window.siteConfig;
+      let text = cfg.whatsapp.msg + "\n\n" + document.getElementById('msg-input').value;
+      window.open(`https://wa.me/${cfg.whatsapp.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(text)}`, '_blank');
+    };
+
+    // 6. ADMIN SYSTEM & TAB MANAGEMENT
+    window.switchAdminTab = function(tabName) {
+      document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('[id^="tab-btn-"]').forEach(btn => {
+        btn.classList.remove('bg-brand-pink', 'text-white');
+        btn.classList.add('bg-gray-100', 'text-gray-600');
+      });
+      
+      document.getElementById(`admin-tab-${tabName}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+      activeBtn.classList.remove('bg-gray-100', 'text-gray-600');
+      activeBtn.classList.add('bg-brand-pink', 'text-white');
+    };
+
+    window.openAdmin = function() {
+      const cfg = window.siteConfig;
+      const safeSet = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+      
+      safeSet('cfg-ls-bg', cfg.lockscreen.bg);
+      safeSet('cfg-ls-date', cfg.lockscreen.date);
+      safeSet('cfg-ls-notif-app', cfg.lockscreen.notifApp);
+      safeSet('cfg-ls-notif-sender', cfg.lockscreen.notifSender);
+      safeSet('cfg-ls-notif-msg', cfg.lockscreen.notifMsg);
+      safeSet('cfg-ls-music-title', cfg.lockscreen.musicTitle);
+      safeSet('cfg-ls-music-artist', cfg.lockscreen.musicArtist);
+      safeSet('cfg-ls-music-cover', cfg.lockscreen.musicCover);
+      safeSet('cfg-ls-music-url', cfg.lockscreen.musicUrl);
+      
+      safeSet('cfg-pin-code', cfg.pin.code);
+      
+      safeSet('cfg-lt-title', cfg.letter.title);
+      safeSet('cfg-lt-recipient', cfg.letter.recipient);
+      safeSet('cfg-lt-body', cfg.letter.body);
+      safeSet('cfg-lt-photo', cfg.letter.photo);
+      safeSet('cfg-lt-sig', cfg.letter.sig);
+      safeSet('cfg-lt-date', cfg.letter.date);
+      
+      safeSet('cfg-game-title', cfg.game.title);
+      safeSet('cfg-game-sub', cfg.game.subtitle);
+      safeSet('cfg-game-wrong', cfg.game.wrongText);
+      safeSet('cfg-game-final', cfg.game.finalText);
+      safeSet('cfg-game-duration', cfg.game.duration || 5000);
+      
+      safeSet('cfg-album-title', cfg.album.title);
+      safeSet('cfg-album-ppp', cfg.album.photosPerPage || 4);
+      
+      safeSet('cfg-wa-phone', cfg.whatsapp.phone);
+      safeSet('cfg-wa-msg', cfg.whatsapp.msg);
+
+      window.renderAdminGameList();
+      window.renderAdminAlbumList();
+
+      document.getElementById('admin-panel').classList.add('active');
+    };
+
+    window.closeAdmin = function() {
+      document.getElementById('admin-panel').classList.remove('active');
+    };
+
+    // Render Admin Game Photo Inputs
+    window.renderAdminGameList = function() {
+      const container = document.getElementById('admin-game-photos-list');
+      if(!container) return;
+      container.innerHTML = '';
+      const imgs = window.siteConfig.game.images || [];
+      
+      imgs.forEach((imgObj, idx) => {
+        const url = typeof imgObj === 'string' ? imgObj : imgObj.url;
+        const msg = typeof imgObj === 'object' ? (imgObj.msg || '') : '';
+        
+        container.innerHTML += `
+          <div class="p-3 bg-gray-50 rounded-xl border flex flex-col gap-2">
+            <div class="flex justify-between items-center text-xs font-bold text-gray-500">
+              <span>FOTO GAME ${idx + 1}</span>
+              <button onclick="window.removeGamePhoto(${idx})" class="text-red-500 hover:text-red-700 cursor-pointer">Hapus</button>
+            </div>
+            <input type="text" value="${url}" placeholder="URL Foto" onchange="window.updateGamePhotoUrl(${idx}, this.value)" class="w-full border p-2 rounded text-xs">
+            <input type="text" value="${msg}" placeholder="Pesan Khusus (Opsional)" onchange="window.updateGamePhotoMsg(${idx}, this.value)" class="w-full border p-2 rounded text-xs">
+          </div>
+        `;
+      });
+    };
+
+    window.addGamePhotoSlot = function() {
+      window.siteConfig.game.images.push({ url: "https://placehold.co/400x400?text=Foto", msg: "HUUUU SALAH 😭😂" });
+      window.renderAdminGameList();
+    };
+    window.removeGamePhoto = function(idx) {
+      window.siteConfig.game.images.splice(idx, 1);
+      window.renderAdminGameList();
+    };
+    window.updateGamePhotoUrl = function(idx, val) {
+      if(typeof window.siteConfig.game.images[idx] === 'string') {
+        window.siteConfig.game.images[idx] = { url: val, msg: "" };
+      } else {
+        window.siteConfig.game.images[idx].url = val;
+      }
+    };
+    window.updateGamePhotoMsg = function(idx, val) {
+      if(typeof window.siteConfig.game.images[idx] === 'string') {
+        window.siteConfig.game.images[idx] = { url: window.siteConfig.game.images[idx], msg: val };
+      } else {
+        window.siteConfig.game.images[idx].msg = val;
+      }
+    };
+
+    // Render Admin Album Photo Inputs
+    window.renderAdminAlbumList = function() {
+      const container = document.getElementById('admin-album-photos-list');
+      if(!container) return;
+      container.innerHTML = '';
+      const photos = window.siteConfig.album.photos || [];
+      
+      photos.forEach((photoObj, idx) => {
+        const url = typeof photoObj === 'string' ? photoObj : photoObj.url;
+        const caption = typeof photoObj === 'object' ? (photoObj.caption || '') : '';
+        
+        container.innerHTML += `
+          <div class="p-3 bg-gray-50 rounded-xl border flex flex-col gap-2">
+            <div class="flex justify-between items-center text-xs font-bold text-gray-500">
+              <span>FOTO ALBUM ${idx + 1}</span>
+              <button onclick="window.removeAlbumPhoto(${idx})" class="text-red-500 hover:text-red-700 cursor-pointer">Hapus</button>
+            </div>
+            <input type="text" value="${url}" placeholder="URL Foto" onchange="window.updateAlbumPhotoUrl(${idx}, this.value)" class="w-full border p-2 rounded text-xs">
+            <input type="text" value="${caption}" placeholder="Caption Foto" onchange="window.updateAlbumPhotoCaption(${idx}, this.value)" class="w-full border p-2 rounded text-xs">
+          </div>
+        `;
+      });
+    };
+
+    window.addAlbumPhotoSlot = function() {
+      window.siteConfig.album.photos.push({ url: "https://placehold.co/600x600?text=Memori", caption: "Caption" });
+      window.renderAdminAlbumList();
+    };
+    window.removeAlbumPhoto = function(idx) {
+      window.siteConfig.album.photos.splice(idx, 1);
+      window.renderAdminAlbumList();
+    };
+    window.updateAlbumPhotoUrl = function(idx, val) {
+      if(typeof window.siteConfig.album.photos[idx] === 'string') {
+        window.siteConfig.album.photos[idx] = { url: val, caption: "" };
+      } else {
+        window.siteConfig.album.photos[idx].url = val;
+      }
+    };
+    window.updateAlbumPhotoCaption = function(idx, val) {
+      if(typeof window.siteConfig.album.photos[idx] === 'string') {
+        window.siteConfig.album.photos[idx] = { url: window.siteConfig.album.photos[idx], caption: val };
+      } else {
+        window.siteConfig.album.photos[idx].caption = val;
+      }
+    };
+
+    // Batch File Upload Reader for Album
+    window.handleBatchAlbumUpload = function(event) {
+      const files = event.target.files;
+      if (!files || files.length === 0) return;
+      
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          window.siteConfig.album.photos.push({ url: e.target.result, caption: file.name.split('.')[0] });
+          window.renderAdminAlbumList();
+        };
+        reader.readAsDataURL(file);
+      });
+    };
+
+    // Save Admin Data to Firestore
+    window.saveAdmin = async function() {
+      const btn = document.getElementById('btn-save-admin');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = `<i data-lucide="loader" class="w-5 h-5 mr-2 animate-spin"></i> Menyimpan...`;
+      btn.disabled = true;
+      lucide.createIcons();
+
+      try {
+        const safeGet = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
+        
+        const newData = {
+          lockscreen: {
+            bg: safeGet('cfg-ls-bg'), date: safeGet('cfg-ls-date'),
+            notifApp: safeGet('cfg-ls-notif-app'), notifSender: safeGet('cfg-ls-notif-sender'), notifMsg: safeGet('cfg-ls-notif-msg'),
+            musicTitle: safeGet('cfg-ls-music-title'), musicArtist: safeGet('cfg-ls-music-artist'),
+            musicCover: safeGet('cfg-ls-music-cover'), musicUrl: safeGet('cfg-ls-music-url')
+          },
+          pin: { code: safeGet('cfg-pin-code') || "1402" },
+          letter: {
+            title: safeGet('cfg-lt-title'), recipient: safeGet('cfg-lt-recipient'), body: safeGet('cfg-lt-body'),
+            photo: safeGet('cfg-lt-photo'), sig: safeGet('cfg-lt-sig'), date: safeGet('cfg-lt-date')
+          },
+          game: {
+            title: safeGet('cfg-game-title'), subtitle: safeGet('cfg-game-sub'),
+            wrongText: safeGet('cfg-game-wrong'), finalText: safeGet('cfg-game-final'),
+            duration: parseInt(safeGet('cfg-game-duration')) || 5000,
+            images: window.siteConfig.game.images
+          },
+          album: {
+            title: safeGet('cfg-album-title'),
+            photosPerPage: parseInt(safeGet('cfg-album-ppp')) || 4,
+            photos: window.siteConfig.album.photos
+          },
+          whatsapp: { phone: safeGet('cfg-wa-phone'), msg: safeGet('cfg-wa-msg') }
+        };
+
+        const finalDataToSave = deepMerge(window.siteConfig, newData);
+
+        if (window.dbSetDocRef) {
+          await setDoc(window.dbSetDocRef, finalDataToSave);
+          alert("Perubahan berhasil disimpan dan sudah Live di Firestore!");
+        } else {
+          window.siteConfig = finalDataToSave;
+          updateDOM();
+          alert("Tersimpan secara lokal (Firestore tidak terhubung).");
+        }
+      } catch (error) {
+        console.error("Save failed:", error);
+        alert("Gagal menyimpan: " + error.message);
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        lucide.createIcons();
+      }
+    };
+
+    // 7. DIAGNOSTICS & SYSTEM START
+    function logDebug(msg) {
+      const panel = document.getElementById('debug-panel');
+      if(panel) {
+        const time = new Date().toLocaleTimeString();
+        panel.innerHTML += `<div>[${time}] ${msg}</div>`;
+        panel.scrollTop = panel.scrollHeight;
+      }
+    }
+
+    window.toggleDebug = function() {
+      window.APP_STATE.debugClickCount++;
+      if(window.APP_STATE.debugClickCount >= 5) {
+        const p = document.getElementById('debug-panel');
+        p.style.display = p.style.display === 'block' ? 'none' : 'block';
+        window.APP_STATE.debugClickCount = 0;
+      }
+    };
+
+    function startAppLogic() {
+      document.getElementById('loading-screen').classList.remove('active');
+      setTimeout(() => document.getElementById('loading-screen').style.display = 'none', 500);
       document.getElementById('scene-lockscreen').classList.add('active');
       
       updateDOM();
-      startClock();
-      setupSwipe();
       
-      // Auto-play music setup on first interaction
-      document.body.addEventListener('click', () => {
-        if (!isPlaying && audio.src) { 
-            audio.play().then(()=>{ 
-                isPlaying = true; 
-                updatePlayIcon(); 
-            }).catch(e => console.log("Autoplay blocked by browser.")); 
-        }
-      }, { once: true });
-    }
-
-    function updateDOM() {
-      const cfg = window.siteConfig;
-      if (!cfg) return;
-
-      // Lockscreen
-      document.getElementById('ls-bg').style.backgroundImage = `url('${cfg.lockscreen.bg}')`;
-      document.getElementById('ls-date').innerText = cfg.lockscreen.date;
-      document.getElementById('ls-notif-sender').innerText = `${cfg.lockscreen.notifApp} - ${cfg.lockscreen.notifSender}`;
-      document.getElementById('ls-notif-msg').innerText = cfg.lockscreen.notifMsg;
-      document.getElementById('ls-music-title').innerText = cfg.lockscreen.musicTitle;
-      document.getElementById('ls-music-artist').innerText = cfg.lockscreen.musicArtist;
-      document.getElementById('ls-music-cover').src = cfg.lockscreen.musicCover;
-      if (audio.src !== cfg.lockscreen.musicUrl) audio.src = cfg.lockscreen.musicUrl;
-
-      // PIN Dots Update
-      const dotsContainer = document.getElementById('pin-dots');
-      dotsContainer.innerHTML = '';
-      for(let i = 0; i < cfg.pin.code.length; i++) {
-        dotsContainer.innerHTML += `<div class="w-3 h-3 rounded-full border-2 border-black/30 transition-colors" id="dot-${i}"></div>`;
-      }
-
-      // Letter
-      document.getElementById('lt-title').innerText = cfg.letter.title;
-      document.getElementById('lt-recipient').innerText = cfg.letter.recipient;
-      document.getElementById('lt-body').innerText = cfg.letter.body;
-      document.getElementById('lt-photo').src = cfg.letter.photo;
-      document.getElementById('lt-sig').innerText = cfg.letter.sig;
-      document.getElementById('lt-date').innerText = cfg.letter.date;
-
-      // Game
-      const grid = document.getElementById('game-grid');
-      grid.innerHTML = '';
-      cfg.game.images.forEach((img, i) => {
-        grid.innerHTML += `
-          <div id="gm-img-${i}" class="relative bg-white p-2 rounded shadow-md cursor-pointer transform transition-transform" onclick="clickGameImg(${i})">
-            <img src="${img}" class="w-full h-32 object-cover rounded">
-            <div id="gm-wrong-${i}" class="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center opacity-0 transition-opacity">
-              <span class="text-red-500 font-bold bg-white px-3 py-1 rounded-full shadow">Salah 😜</span>
-            </div>
-          </div>
-        `;
-      });
-      gameClicked = 0;
-
-      // Album
-      document.getElementById('album-title').innerHTML = cfg.album.title.replace('\n', '<br>');
-      const scrap = document.getElementById('scrapbook-container');
-      scrap.innerHTML = '';
-      cfg.album.photos.forEach((img, i) => {
-        const rotate = i % 2 === 0 ? '-rotate-2' : 'rotate-3';
-        scrap.innerHTML += `
-          <div class="bg-white p-3 shadow-md border-b-4 border-r-4 border-gray-200 cursor-pointer ${rotate} hover:scale-105 transition-transform" onclick="openLightbox('${img}')">
-            <img src="${img}" class="w-full h-48 object-cover">
-          </div>
-        `;
-      });
-    }
-
-    // --- NAVIGATION UTILS ---
-    function goToScene(id) {
-      document.querySelectorAll('.scene').forEach(el => {
-        el.style.opacity = '0';
-        setTimeout(() => el.classList.remove('active'), 500);
-      });
-      const next = document.getElementById(id);
-      next.classList.add('active');
-      setTimeout(() => { next.style.opacity = '1'; }, 50);
-    }
-
-    // --- LOCKSCREEN FUNCTIONS ---
-    function startClock() {
       setInterval(() => {
         const d = new Date();
         document.getElementById('ls-time').innerText = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
       }, 1000);
-    }
 
-    function togglePlay() {
-      if(isPlaying) { audio.pause(); isPlaying=false; }
-      else { audio.play(); isPlaying=true; }
-      updatePlayIcon();
-    }
-    
-    function updatePlayIcon() {
-      document.getElementById('ls-play-btn').innerHTML = `<i data-lucide="${isPlaying ? 'pause' : 'play'}" class="fill-current w-10 h-10"></i>`;
-      lucide.createIcons();
-    }
-
-    function setupSwipe() {
-      let startY = 0;
-      const el = document.getElementById('swipe-area');
-      el.addEventListener('touchstart', e => startY = e.touches[0].clientY);
-      el.addEventListener('touchend', e => {
-        if(startY - e.changedTouches[0].clientY > 50) goToScene('scene-pin');
-      });
-      el.addEventListener('click', () => goToScene('scene-pin'));
-    }
-
-    // --- PIN FUNCTIONS ---
-    function pressPin(num) {
-      const cfg = window.siteConfig;
-      if (pinInput.length < cfg.pin.code.length) {
-        pinInput += num;
-        document.getElementById(`dot-${pinInput.length-1}`).classList.add('bg-black/60');
-      }
-      if (pinInput.length === cfg.pin.code.length) {
-        if (pinInput === cfg.pin.code) {
-          document.getElementById('pin-message').innerText = "Benar! ❤️";
-          document.getElementById('pin-message').className = "h-6 mb-6 text-green-500 font-bold text-sm text-center";
-          setTimeout(() => goToScene('scene-letter'), 800);
-        } else {
-          document.getElementById('pin-message').innerText = "Salah sayang 😜";
-          const keypad = document.getElementById('scene-pin').querySelector('.grid');
-          keypad.classList.add('animate-bounce');
-          setTimeout(() => {
-            keypad.classList.remove('animate-bounce');
-            clearPin();
-          }, 600);
+      const enableAudio = () => {
+        const audio = document.getElementById('bg-audio');
+        if (!window.APP_STATE.isPlaying && audio.src) { 
+          audio.play().then(() => {
+            window.APP_STATE.isPlaying = true;
+            document.getElementById('ls-play-icon').setAttribute('data-lucide', 'pause');
+            lucide.createIcons();
+          }).catch(e => logDebug("Autoplay waiting...")); 
         }
-      }
-    }
-    
-    function clearPin() {
-      pinInput = "";
-      document.getElementById('pin-message').innerText = "";
-      document.querySelectorAll('#pin-dots div').forEach(d => d.classList.remove('bg-black/60'));
-    }
-
-    // --- LETTER FUNCTIONS ---
-    function openLetter() {
-      document.getElementById('letter-envelope').style.opacity = '0';
-      setTimeout(() => {
-        document.getElementById('letter-envelope').style.display = 'none';
-        document.getElementById('letter-content').style.opacity = '1';
-        document.getElementById('letter-content').style.pointerEvents = 'auto';
-      }, 1000);
-    }
-
-    // --- GAME FUNCTIONS ---
-    function clickGameImg(idx) {
-      const el = document.getElementById(`gm-img-${idx}`);
-      const wrong = document.getElementById(`gm-wrong-${idx}`);
-      if(wrong.style.opacity === '1') return;
-      
-      wrong.style.opacity = '1';
-      el.style.transform = 'scale(0.95)';
-      setTimeout(() => el.style.transform = 'scale(1)', 200);
-      
-      gameClicked++;
-      if(gameClicked >= window.siteConfig.game.images.length) {
-        setTimeout(() => {
-          const overlay = document.getElementById('game-overlay');
-          overlay.style.opacity = '1';
-          overlay.style.pointerEvents = 'auto';
-          overlay.querySelector('div').style.transform = 'scale(1)';
-          setTimeout(() => goToScene('scene-album'), 4000);
-        }, 800);
-      }
-    }
-
-    // --- ALBUM FUNCTIONS ---
-    function openAlbum() {
-      document.getElementById('album-cover-container').style.opacity = '0';
-      setTimeout(() => {
-        document.getElementById('album-cover-container').style.display = 'none';
-        document.getElementById('album-inside').style.opacity = '1';
-        document.getElementById('album-inside').style.pointerEvents = 'auto';
-      }, 1000);
-    }
-
-    // Lightbox handling
-    function openLightbox(src) {
-      document.getElementById('lightbox-img').src = src;
-      document.getElementById('lightbox').style.opacity = '1';
-      document.getElementById('lightbox').style.pointerEvents = 'auto';
-    }
-    function closeLightbox() {
-      document.getElementById('lightbox').style.opacity = '0';
-      document.getElementById('lightbox').style.pointerEvents = 'none';
-    }
-
-    // --- WHATSAPP FUNCTIONS ---
-    function openMessageModal() {
-      const m = document.getElementById('msg-modal');
-      m.style.opacity = '1';
-      m.style.pointerEvents = 'auto';
-      m.querySelector('div').style.transform = 'scale(1)';
-    }
-    function closeMessageModal() {
-      const m = document.getElementById('msg-modal');
-      m.style.opacity = '0';
-      m.style.pointerEvents = 'none';
-      m.querySelector('div').style.transform = 'scale(0.95)';
-    }
-    function sendWA() {
-      const cfg = window.siteConfig;
-      let text = cfg.whatsapp.msg + "\n\n" + document.getElementById('msg-input').value;
-      window.open(`https://wa.me/${cfg.whatsapp.phone}?text=${encodeURIComponent(text)}`, '_blank');
-    }
-
-    // --- ADMIN PANEL FUNCTIONS ---
-    function openAdmin() {
-      const cfg = window.siteConfig;
-      
-      // Load current configs to inputs securely
-      document.getElementById('cfg-ls-bg').value = cfg.lockscreen.bg || "";
-      document.getElementById('cfg-ls-date').value = cfg.lockscreen.date || "";
-      document.getElementById('cfg-ls-notif-app').value = cfg.lockscreen.notifApp || "";
-      document.getElementById('cfg-ls-notif-sender').value = cfg.lockscreen.notifSender || "";
-      document.getElementById('cfg-ls-notif-msg').value = cfg.lockscreen.notifMsg || "";
-      document.getElementById('cfg-ls-music-title').value = cfg.lockscreen.musicTitle || "";
-      document.getElementById('cfg-ls-music-artist').value = cfg.lockscreen.musicArtist || "";
-      document.getElementById('cfg-ls-music-cover').value = cfg.lockscreen.musicCover || "";
-      document.getElementById('cfg-ls-music-url').value = cfg.lockscreen.musicUrl || "";
-      
-      document.getElementById('cfg-pin-code').value = cfg.pin.code || "";
-      
-      document.getElementById('cfg-lt-title').value = cfg.letter.title || "";
-      document.getElementById('cfg-lt-recipient').value = cfg.letter.recipient || "";
-      document.getElementById('cfg-lt-body').value = cfg.letter.body || "";
-      document.getElementById('cfg-lt-photo').value = cfg.letter.photo || "";
-      document.getElementById('cfg-lt-sig').value = cfg.letter.sig || "";
-      document.getElementById('cfg-lt-date').value = cfg.letter.date || "";
-      
-      document.getElementById('cfg-al-title').value = cfg.album.title || "";
-      document.getElementById('cfg-wa-phone').value = cfg.whatsapp.phone || "";
-      document.getElementById('cfg-wa-msg').value = cfg.whatsapp.msg || "";
-
-      const p = document.getElementById('admin-panel');
-      p.style.opacity = '1';
-      p.style.pointerEvents = 'auto';
-    }
-
-    function closeAdmin() {
-      const p = document.getElementById('admin-panel');
-      p.style.opacity = '0';
-      p.style.pointerEvents = 'none';
-    }
-
-    function saveAdmin() {
-      const cfg = window.siteConfig;
-      
-      // Create fresh payload matching precisely what's in the form
-      const newData = {
-        lockscreen: {
-          bg: document.getElementById('cfg-ls-bg').value,
-          date: document.getElementById('cfg-ls-date').value,
-          notifApp: document.getElementById('cfg-ls-notif-app').value,
-          notifSender: document.getElementById('cfg-ls-notif-sender').value,
-          notifMsg: document.getElementById('cfg-ls-notif-msg').value,
-          musicTitle: document.getElementById('cfg-ls-music-title').value,
-          musicArtist: document.getElementById('cfg-ls-music-artist').value,
-          musicCover: document.getElementById('cfg-ls-music-cover').value,
-          musicUrl: document.getElementById('cfg-ls-music-url').value
-        },
-        pin: { code: document.getElementById('cfg-pin-code').value },
-        letter: {
-          title: document.getElementById('cfg-lt-title').value,
-          recipient: document.getElementById('cfg-lt-recipient').value,
-          body: document.getElementById('cfg-lt-body').value,
-          photo: document.getElementById('cfg-lt-photo').value,
-          sig: document.getElementById('cfg-lt-sig').value,
-          date: document.getElementById('cfg-lt-date').value
-        },
-        album: {
-          title: document.getElementById('cfg-al-title').value,
-          photos: cfg.album.photos // Preserve array
-        },
-        whatsapp: {
-          phone: document.getElementById('cfg-wa-phone').value,
-          msg: document.getElementById('cfg-wa-msg').value
-        },
-        game: cfg.game // Preserve array
       };
-      
-      // Pass securely to module function
-      if(typeof window.dbSetDoc === 'function') {
-        window.dbSetDoc(newData);
-        closeAdmin();
-      } else {
-        alert("Sistem belum siap. Coba lagi dalam beberapa detik.");
-      }
+      document.body.addEventListener('click', enableAudio, { once: true });
+      logDebug("App initialized successfully.");
     }
+
+    // 8. FIREBASE INITIALIZATION & REALTIME LISTENER
+    try {
+      const firebaseConfig = {
+        apiKey: "AIzaSyDJQScAnz5VulSrHB94NKnGY918CZjmrTE",
+        authDomain: "okta-cantikkk.firebaseapp.com",
+        projectId: "okta-cantikkk",
+        storageBucket: "okta-cantikkk.firebasestorage.app",
+        messagingSenderId: "869280662214",
+        appId: "1:869280662214:web:387fc33a81724111cf8dc7",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const docRef = doc(db, "websiteData", "config");
+      window.dbSetDocRef = docRef;
+
+      logDebug("Firebase initialized. Syncing Firestore...");
+
+      onSnapshot(docRef, (snap) => {
+        if (snap.exists()) {
+          logDebug("Received remote config update.");
+          window.siteConfig = deepMerge(window.siteConfig, snap.data());
+        }
+        
+        if (!window.APP_STATE.initialized) {
+          window.APP_STATE.initialized = true;
+          startAppLogic();
+        } else {
+          updateDOM();
+        }
+      }, (error) => {
+        console.error("Firebase Listener Error:", error);
+        logDebug("Firebase Error: " + error.code);
+        if (!window.APP_STATE.initialized) {
+          window.APP_STATE.initialized = true;
+          startAppLogic();
+        }
+      });
+
+    } catch (e) {
+      console.error("Firebase Setup Error:", e);
+      logDebug("Firebase setup error fallback: " + e.message);
+    }
+
+    setTimeout(() => {
+      if (!window.APP_STATE.initialized) {
+        logDebug("Failsafe triggered. Starting app.");
+        window.APP_STATE.initialized = true;
+        startAppLogic();
+      }
+    }, 1200);
+
   </script>
 </body>
 </html>
